@@ -11,7 +11,7 @@ namespace noisepp { namespace interpolation {
 	// Cubic ===================================================================================================
 	
 	template<typename T>
-	inline T InterpolateCubic(T n0, T n1, T n2, T n3, T a)
+	inline T InterpolateCubic(const T& n0, const T& n1, const T& n2, const T& n3, const T& a)
 	{
 		T n0_n1 = n0 - n1;
 
@@ -27,7 +27,7 @@ namespace noisepp { namespace interpolation {
 	}	
 
 	template<>
-	inline double InterpolateCubic(double n0, double n1, double n2, double n3, double a)
+	inline double InterpolateCubic(const double& n0, const double& n1, const double& n2, const double& n3, const double& a)
 	{
 		double p = (n3 - n2) - (n0 - n1);
 		double q = (n0 - n1) - p;
@@ -39,53 +39,32 @@ namespace noisepp { namespace interpolation {
 	// Linear ==================================================================================================
 	
 	template<typename T>
-	inline T InterpolateLinear(T n0, T n1, T a)
+	inline T InterpolateLinear(const T& n0, const T& n1, const T& a)
 	{
-		constexpr T one = ld1<T>(1.0);
-
-		return (one - a) * n0 + a * n1;
-	}
-
-	template<>
-	inline double InterpolateLinear(double n0, double n1, double a)
-	{
-		return ((1.0 - a) * n0) + (a * n1);
+		return (1.0 - a) * n0 + a * n1;
 	}
 	// SCurve3 =================================================================================================
 
 	template<typename T> 
-	inline T SCurve3(T a)
+	inline T SCurve3(const T& a)
 	{
-		constexpr T two		= ld1<T>(2.0);
-		constexpr T three	= ld1<T>(3.0);
-
-		return (a * a * (three - two * a));
-	}
-
-	template<>
-	inline double SCurve3(double a)
-	{
-		return (a * a * (3.0 - 2.0 * a));
+		return (a * a * (3 - 2 * a));
 	}
 
 	// SCurve5 =================================================================================================
 	
 	template<typename T>
-	inline T SCurve5(T a)
+	inline T SCurve5(const T& a)
 	{
-		constexpr T six		= ld1<T>(6);
-		constexpr T ten		= ld1<T>(10);
-		constexpr T fifteen = ld1<T>(15);
-
 		T a3 = a * a * a;
 		T a4 = a3 * a;
 		T a5 = a4 * a;
 
-		return (six * a5) - (fifteen * a4) + (ten * a3);
+		return (T(6) * a5) - (T(15) * a4) + (T(10) * a3);
 	}
 
 	template<>
-	inline double SCurve5(double a)
+	inline double SCurve5(const double& a)
 	{
 		double a3 = a * a * a;
 		double a4 = a3 * a;

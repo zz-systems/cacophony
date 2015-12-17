@@ -4,6 +4,8 @@
 
 #include "interpolation.h"
 #include "vectortable.h"
+#include <iostream>
+#include <functional>
 
 #define NOISE_VERSION 2
 
@@ -15,6 +17,13 @@ namespace noisepp {	namespace generators {
 		Standard,
 		Best
 	};
+
+	template<typename T>
+	std::function<
+		typename std::enable_if<std::is_function<T>::value, T>::type
+	> make_function(T *t) {
+		return{ t };
+	}
 
 	// These constants control certain parameters that all coherent-noise
 	// functions require.
@@ -36,238 +45,172 @@ namespace noisepp {	namespace generators {
 	const int SEED_NOISE_GEN = 1013;
 	const int SHIFT_NOISE_GEN = 8;
 #endif
+		
+	// Create a unit-length cube aligned along an integer boundary.  This cube
+	// surrounds the input point.
+	template<typename FLOAT, typename INT>
+	inline void construct_cube(const Vector3D<FLOAT>& c, Cube3D<INT> &cube)
+	{		
+		// Assuming that x > 0 yields either 0 or (+-)1, the result is ANDed with 1
+		// => equivalent to (x > 0.0? (int)x: (int)x - 1)
+		cube._0.x = INT(c.x) - INT((c.x > 0) & 1);
+		cube._0.y = INT(c.y) - INT((c.y > 0) & 1);
+		cube._0.z = INT(c.z) - INT((c.z > 0) & 1);
 
-	template<typename SIMD_FLOAT, typename SIMD_INT>
-	SIMD_FLOAT GradientNoise3D(SIMD_FLOAT fx, SIMD_FLOAT fy, SIMD_FLOAT fz, SIMD_INT ix, SIMD_INT iy, SIMD_INT iz, SIMD_INT seed)
+		cube._1.x = cube._0.x + 1;
+		cube._1.y = cube._0.y + 1;
+		cube._1.z = cube._0.z + 1;
+	}
+
+	template<typename FLOAT, typename INT>
+	inline void map_coord_diff(	const Vector3D<FLOAT>& c,
+								const Cube3D<INT> &cube,
+								Quality quality,
+								Vector3D<FLOAT>& s)
 	{
-		constexpr SIMD_INT x_noise = ld1<SIMD_INT>(X_NOISE_GEN);
-		constexpr SIMD_INT y_noise = ld1<SIMD_INT>(Y_NOISE_GEN);
-		constexpr SIMD_INT z_noise = ld1<SIMD_INT>(Z_NOISE_GEN);
-		constexpr SIMD_INT s_noise = ld1<SIMD_INT>(SEED_NOISE_GEN);
+		// Map the difference between the coordinates of the input value and the
+		// coordinates of the cube's outer-lower-left vertex onto an S-curve.
+		s.x = c.x - FLOAT(cube._0.x);
+		s.y = c.y - FLOAT(cube._0.y);
+		s.z = c.z - FLOAT(cube._0.z);
 
-		constexpr SIMD_INT min_one	= ld1<SIMD_INT>(0xffffffff);
-		constexpr SIMD_INT FF		= ld1<SIMD_INT>(0xFF);
+		switch (quality) {
+		case Quality::Fast:
+			break;
+		case Quality::Standard:
+			s.x = SCurve3(s.x);
+			s.y = SCurve3(s.y);
+			s.z = SCurve3(s.z);
+			break;
+		case Quality::Best:
+			s.x = SCurve5(s.x);
+			s.y = SCurve5(s.y);
+			s.z = SCurve5(s.z);
+			break;
+		}
+	}
 
-		constexpr SIMD_FLOAT scale	= ld1<SIMD_FLOAT>(2.12);
+	// Now calculate the noise values at each vertex of the cube.  To generate
+	// the coherent-noise value at the input point, interpolate these eight
+	// noise values using the S-curve value as the interpolant (trilinear
+	// interpolation.)
+	template<typename FLOAT, typename INT>
+	inline FLOAT calc_noise(const Cube3D<INT> &cube,
+							const Vector3D<FLOAT>& s,
+							const INT& seed, 
+		std::function<FLOAT(const Vector3D<INT>& c, const INT& seed)> noisegen)
+	{		
+		FLOAT n0, n1, ix0, ix1, iy0, iy1;
 
-		SIMD_INT vectorIndices = (x_noise * ix + y_noise * iy + z_noise * iz + s_noise * seed) & min_one;
+		n0 = noisegen(Vector3D<INT>(cube._0.x, cube._0.y, cube._0.z), seed);
+		n1 = noisegen(Vector3D<INT>(cube._1.x, cube._0.y, cube._0.z), seed);
 
-		vectorIndices = ((vectorIndices ^ (vectorIndices >> SHIFT_NOISE_GEN)) & FF) << 2;
+		ix0 = InterpolateLinear(n0, n1, s.x);
 
-		SIMD_FLOAT xvGradient, yvGradient, zvGradient;
+		n0 = noisegen(Vector3D<INT>(cube._0.x, cube._1.y, cube._0.z), seed);
+		n1 = noisegen(Vector3D<INT>(cube._1.x, cube._1.y, cube._0.z), seed);
 
-		int _vi = (int32*)vectorIndices;
+		ix1 = InterpolateLinear(n0, n1, s.x);
+		iy0 = InterpolateLinear(ix0, ix1, s.y);
 
-		auto	_xvGradient = (double*)xvGradient,
-				_yvGradient = (double*)yvGradient,
-				_zvGradient = (double*)zvGradient;
+		n0 = noisegen(Vector3D<INT>(cube._0.x, cube._0.y, cube._1.z), seed);
+		n1 = noisegen(Vector3D<INT>(cube._1.x, cube._0.y, cube._1.z), seed);
 
-		for (int i = 0; i < sizeof(SIMD_INT) / sizeof(int32); i++)
+		ix0 = InterpolateLinear(n0, n1, s.x);
+
+		n0 = noisegen(Vector3D<INT>(cube._0.x, cube._1.y, cube._1.z), seed);
+		n1 = noisegen(Vector3D<INT>(cube._1.x, cube._1.y, cube._1.z), seed);
+
+		ix1 = InterpolateLinear(n0, n1, s.y);
+		iy1 = InterpolateLinear(ix0, ix1, s.y);
+
+		return InterpolateLinear(iy0, iy1, s.z);
+	}
+
+	template<typename FLOAT, typename INT>
+	FLOAT GradientNoise3D(	const Vector3D<FLOAT>& input,
+							const Vector3D<INT>& nearby, 
+							const INT& seed)
+	{
+		auto vectorIndices = (X_NOISE_GEN * nearby.x + Y_NOISE_GEN * nearby.y + Z_NOISE_GEN * nearby.z + SEED_NOISE_GEN * seed);
+	
+		if(std::is_integral<INT>::value)
+			vectorIndices = vectorIndices & 0xffffffff;
+		vectorIndices = vectorIndices ^ (vectorIndices >> SHIFT_NOISE_GEN);
+
+		vectorIndices = (vectorIndices & 0xFF);
+
+		vectorIndices = vectorIndices << 2;
+
+		FLOAT xvGradient, yvGradient, zvGradient;
+		auto	_xvGradient = extract(xvGradient),
+				_yvGradient = extract(yvGradient),
+				_zvGradient = extract(zvGradient);
+
+		auto _vi = extract(vectorIndices);
+
+		for (int i = 0; i < elem_count(xvGradient); i++)
 		{
 			_xvGradient[i] = RandomVectors[_vi[i]];
 			_yvGradient[i] = RandomVectors[_vi[i] + 1];
 			_zvGradient[i] = RandomVectors[_vi[i] + 2];
 		}
+		
+		FLOAT	xvPoint = input.x - FLOAT(nearby.x),
+				yvPoint = input.y - FLOAT(nearby.y),
+				zvPoint = input.z - FLOAT(nearby.z);
 
-		SIMD_FLOAT	xvPoint = fx - cast<SIMD_FLOAT>(ix),
-			yvPoint = fy - cast<SIMD_FLOAT>(iy),
-			zvPoint = fz - cast<SIMD_FLOAT>(iz);
-
-		return ((xvGradient * xvPoint)
-			+ (yvGradient * yvPoint)
-			+ (zvGradient * zvPoint)) * scale;
-	}
-
-	template<>
-	double GradientNoise3D(double fx, double fy, double fz, int ix, int iy, int iz, int seed)
-	{
-		// Randomly generate a gradient vector given the integer coordinates of the
-		// input value.  This implementation generates a random number and uses it
-		// as an index into a normalized-vector lookup table.
-		int vectorIndex = (
-			X_NOISE_GEN    * ix
-			+ Y_NOISE_GEN    * iy
-			+ Z_NOISE_GEN    * iz
-			+ SEED_NOISE_GEN * seed)
-			& 0xffffffff;
-		vectorIndex ^= (vectorIndex >> SHIFT_NOISE_GEN);
-		vectorIndex &= 0xff;
-
-		double xvGradient = RandomVectors[(vectorIndex << 2)];
-		double yvGradient = RandomVectors[(vectorIndex << 2) + 1];
-		double zvGradient = RandomVectors[(vectorIndex << 2) + 2];
-
-		// Set up us another vector equal to the distance between the two vectors
-		// passed to this function.
-		double xvPoint = (fx - (double)ix);
-		double yvPoint = (fy - (double)iy);
-		double zvPoint = (fz - (double)iz);
-
-		// Now compute the dot product of the gradient vector with the distance
-		// vector.  The resulting value is gradient noise.  Apply a scaling value
-		// so that this noise value ranges from -1.0 to 1.0.
 		return ((xvGradient * xvPoint)
 			+ (yvGradient * yvPoint)
 			+ (zvGradient * zvPoint)) * 2.12;
 	}
 
-	template<typename SIMD_FLOAT, typename SIMD_INT>
-	SIMD_FLOAT GradientCoherentNoise3D(SIMD_FLOAT x, SIMD_FLOAT y, SIMD_FLOAT z, SIMD_INT seed, Quality noiseQuality)
-	{
-		/*constexpr*/ SIMD_FLOAT zero	= ld1<SIMD_FLOAT>(0.0);
-		/*constexpr*/ SIMD_INT one		= ld1<SIMD_INT>(1.0);
+	template<typename FLOAT, typename INT>
+	FLOAT GradientCoherentNoise3D(	const Vector3D<FLOAT>& c,
+									const INT& seed, 
+									Quality noiseQuality)
+	{		
+		Cube3D<INT> cube;
+		construct_cube<FLOAT, INT>(c, cube);
 
-		// TODO: template
-		SIMD_INT x0 = cast<SIMD_INT>(x) + cast<SIMD_INT>(x > zero);
-		SIMD_INT y0 = cast<SIMD_INT>(y) + cast<SIMD_INT>(y > zero);
-		SIMD_INT z0 = cast<SIMD_INT>(z) + cast<SIMD_INT>(z > zero);
+		Vector3D<FLOAT> s;
+		map_coord_diff<FLOAT, INT>(c, cube, noiseQuality, s);
 		
-		SIMD_INT x1 = x0 + one;
-		SIMD_INT y1 = y0 + one;
-		SIMD_INT z1 = z0 + one;
+		return calc_noise<FLOAT, INT>(cube, s, seed,
+			[&](const Vector3D<INT>& s, const INT& seed) { return GradientNoise3D(c, s, seed); });
+	}	
 
-		SIMD_FLOAT xs, ys, zs;
+	template<typename INT>
+	INT IntValueNoise3D(const Vector3D<INT>& c, const INT& seed)
+	{
+		INT n = (
+			X_NOISE_GEN		 * c.x
+			+ Y_NOISE_GEN    * c.y
+			+ Z_NOISE_GEN    * c.z
+			+ SEED_NOISE_GEN * seed)
+			& 0x7fffffff;
 
-		switch (noiseQuality) {
-		case Quality::Fast:
-			xs = x - cast<SIMD_FLOAT>(x0);
-			ys = y - cast<SIMD_FLOAT>(y0);
-			zs = z - cast<SIMD_FLOAT>(z0);
-			break;
-		case Quality::Standard:
-			xs = SCurve3(x - cast<SIMD_FLOAT>(x0));
-			ys = SCurve3(y - cast<SIMD_FLOAT>(y0));
-			zs = SCurve3(z - cast<SIMD_FLOAT>(z0));
-			break;
-		case Quality::Best:
-			xs = SCurve5(x - cast<SIMD_FLOAT>(x0));
-			ys = SCurve5(y - cast<SIMD_FLOAT>(y0));
-			zs = SCurve5(z - cast<SIMD_FLOAT>(z0));
-			break;
-		}
+		n = (n >> 13) ^ n;
 
-		// Now calculate the noise values at each vertex of the cube.  To generate
-		// the coherent-noise value at the input point, interpolate these eight
-		// noise values using the S-curve value as the interpolant (trilinear
-		// interpolation.)
-		SIMD_FLOAT n0, n1, ix0, ix1, iy0, iy1;
-
-		n0 = GradientNoise3D(x, y, z, x0, y0, z0, seed);
-		n1 = GradientNoise3D(x, y, z, x1, y0, z0, seed);
-		ix0 = InterpolateLinear(n0, n1, xs);
-		n0 = GradientNoise3D(x, y, z, x0, y1, z0, seed);
-		n1 = GradientNoise3D(x, y, z, x1, y1, z0, seed);
-		ix1 = InterpolateLinear(n0, n1, xs);
-		iy0 = InterpolateLinear(ix0, ix1, ys);
-		n0 = GradientNoise3D(x, y, z, x0, y0, z1, seed);
-		n1 = GradientNoise3D(x, y, z, x1, y0, z1, seed);
-		ix0 = InterpolateLinear(n0, n1, xs);
-		n0 = GradientNoise3D(x, y, z, x0, y1, z1, seed);
-		n1 = GradientNoise3D(x, y, z, x1, y1, z1, seed);
-		ix1 = InterpolateLinear(n0, n1, xs);
-		iy1 = InterpolateLinear(ix0, ix1, ys);
-
-		return InterpolateLinear(iy0, iy1, zs);
+		return (n * (n * n * 60493 + 19990303) + 1376312589) & 0x7fffffff;
 	}
 
-	template<>
-	double GradientCoherentNoise3D(double x, double y, double z, int seed, Quality noiseQuality)
+	template<typename FLOAT, typename INT>
+	FLOAT ValueNoise3D(const Vector3D<INT>& c, const INT& seed)
 	{
-		// Create a unit-length cube aligned along an integer boundary.  This cube
-		// surrounds the input point.
-		int x0 = (x > 0.0 ? (int)x : (int)x - 1);
-		int x1 = x0 + 1;
-		int y0 = (y > 0.0 ? (int)y : (int)y - 1);
-		int y1 = y0 + 1;
-		int z0 = (z > 0.0 ? (int)z : (int)z - 1);
-		int z1 = z0 + 1;
-
-		// Map the difference between the coordinates of the input value and the
-		// coordinates of the cube's outer-lower-left vertex onto an S-curve.
-		double xs = 0, ys = 0, zs = 0;
-		switch (noiseQuality) {
-		case Quality::Fast:
-			xs = (x - (double)x0);
-			ys = (y - (double)y0);
-			zs = (z - (double)z0);
-			break;
-		case Quality::Standard:
-			xs = SCurve3(x - (double)x0);
-			ys = SCurve3(y - (double)y0);
-			zs = SCurve3(z - (double)z0);
-			break;
-		case Quality::Best:
-			xs = SCurve5(x - (double)x0);
-			ys = SCurve5(y - (double)y0);
-			zs = SCurve5(z - (double)z0);
-			break;
-		}
-
-		// Now calculate the noise values at each vertex of the cube.  To generate
-		// the coherent-noise value at the input point, interpolate these eight
-		// noise values using the S-curve value as the interpolant (trilinear
-		// interpolation.)
-		double n0, n1, ix0, ix1, iy0, iy1;
-		n0 = GradientNoise3D(x, y, z, x0, y0, z0, seed);
-		n1 = GradientNoise3D(x, y, z, x1, y0, z0, seed);
-		ix0 = InterpolateLinear(n0, n1, xs);
-		n0 = GradientNoise3D(x, y, z, x0, y1, z0, seed);
-		n1 = GradientNoise3D(x, y, z, x1, y1, z0, seed);
-		ix1 = InterpolateLinear(n0, n1, xs);
-		iy0 = InterpolateLinear(ix0, ix1, ys);
-		n0 = GradientNoise3D(x, y, z, x0, y0, z1, seed);
-		n1 = GradientNoise3D(x, y, z, x1, y0, z1, seed);
-		ix0 = InterpolateLinear(n0, n1, xs);
-		n0 = GradientNoise3D(x, y, z, x0, y1, z1, seed);
-		n1 = GradientNoise3D(x, y, z, x1, y1, z1, seed);
-		ix1 = InterpolateLinear(n0, n1, xs);
-		iy1 = InterpolateLinear(ix0, ix1, ys);
-
-		return InterpolateLinear(iy0, iy1, zs);
+		return 1.0 - (FLOAT(IntValueNoise3D(c, seed)) / 1073741824.0);
 	}
 
-	
-
-	template<typename SIMD_INT>
-	SIMD_INT IntValueNoise3D(SIMD_INT x, SIMD_INT y, SIMD_INT z, SIMD_INT seed)
+	template<typename FLOAT, typename INT>
+	FLOAT ValueCoherentNoise3D(const Vector3D<FLOAT>& c, const INT& seed, Quality noiseQuality)
 	{
+		Cube3D<INT> cube;
+		construct_cube<FLOAT, INT>(c, cube);
+		
+		Vector3D<FLOAT> s;
+		map_coord_diff<FLOAT, INT>(c, cube, noiseQuality, s);
 
-	}
-
-	template<>
-	int IntValueNoise3D(int x, int y, int z, int seed)
-	{
-
-	}
-
-	template<typename SIMD_FLOAT, typename SIMD_INT>
-	SIMD_FLOAT ValueCoherentNoise3D(SIMD_FLOAT x, SIMD_FLOAT y, SIMD_FLOAT z, SIMD_INT seed, Quality noiseQuality)
-	{
-
-	}
-
-	template<>
-	double ValueCoherentNoise3D(double x, double y, double z, int seed, Quality noiseQuality)
-	{
-
-	}
-
-	template<typename SIMD_INT>
-	SIMD_INT ValueNoise3D(SIMD_INT x, SIMD_INT y, SIMD_INT z, SIMD_INT seed)
-	{
-
-	}
-
-	template<>
-	int ValueNoise3D(int x, int y, int z, int seed)
-	{
-
-	}
-
-	template<typename SIMD_FLOAT>
-	SIMD_FLOAT AdjustToInt32(SIMD_FLOAT n)
-	{
-
+		return calc_noise<FLOAT, INT>(cube, s, seed, make_function(ValueNoise3D<FLOAT, INT>));
 	}
 }}
 
