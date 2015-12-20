@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
+
 #include "../libnoise++/basetypes.h"
 #include "../libnoise++/noisegenerators.h"
 #include <iostream>
@@ -19,11 +20,11 @@ namespace UnitTest
 		{
 			for (auto q = 0; q <= 2; q++)
 			{
-				auto d_reference = GradientCoherentNoise3D<double>(Vector3D<double>(5.0, 2.5, 4.0), 1010, Quality(q));
-				auto f_reference = (float)d_reference;
+				auto d_reference	= GradientCoherentNoise3D<double>(Vector3<double>(5.0, 2.5, 4.0), 1010, Quality(q));
+				auto f_reference	= (float)d_reference;
 
 				//m128	sse_floats = InterpolateCubic(ld1<m128>(1.0), ld1<m128>(2.0), ld1<m128>(4.0), ld1<m128>(5.0), ld1<m128>(1.0));
-				m128d sse_doubles = GradientCoherentNoise3D(Vector3D<m128d>(5.0, 2.5, 4.0), m128i(1010), Quality(q));
+				m128d sse_doubles = GradientCoherentNoise3D(Vector3<m128d>(5.0, 2.5, 4.0), m128i(1010), Quality(q));
 
 				//m256 avx_floats = InterpolateCubic(ld1<m256>(1.0), ld1<m256>(2.0), ld1<m256>(4.0), ld1<m256>(5.0), ld1<m256>(1.0));
 				//m256d avx_doubles = GradientCoherentNoise3D(ld1<m256d>(1.0), ld1<m256d>(2.0), ld1<m256d>(4.0), ld1<m256i>(1000), Quality::Fast);	
@@ -36,11 +37,11 @@ namespace UnitTest
 
 		TEST_METHOD(Test_GradientNoise3D)
 		{
-			auto d_reference = GradientNoise3D<double, int32>(Vector3D<double>(5.0, 2.5, 4.0), Vector3D<int32>(1, 2, 4), 1010);
+			auto d_reference = GradientNoise3D<double, int32>(Vector3<double>(5.0, 2.5, 4.0), Vector3<int32>(1, 2, 4), 1010);
 			auto f_reference = (float)d_reference;
 
 			//m128	sse_floats = InterpolateCubic(ld1<m128>(1.0), ld1<m128>(2.0), ld1<m128>(4.0), ld1<m128>(5.0), ld1<m128>(1.0));
-			m128d sse_doubles = GradientNoise3D(Vector3D<m128d>(5.0, 2.5, 4.0), Vector3D<m128i>(1, 2, 4), m128i(1010));
+			m128d sse_doubles = GradientNoise3D(Vector3<m128d>(5.0, 2.5, 4.0), Vector3<m128i>(1, 2, 4), m128i(1010));
 
 			//m256 avx_floats = InterpolateCubic(ld1<m256>(1.0), ld1<m256>(2.0), ld1<m256>(4.0), ld1<m256>(5.0), ld1<m256>(1.0));
 			//m256d avx_doubles = GradientCoherentNoise3D(ld1<m256d>(1.0), ld1<m256d>(2.0), ld1<m256d>(4.0), ld1<m256i>(1000), Quality::Fast);
@@ -55,11 +56,11 @@ namespace UnitTest
 		{
 			for (auto q = 0; q <= 2; q++)
 			{
-				auto d_reference = ValueCoherentNoise3D<double>(Vector3D<double>(5.0, 2.5, 4.0), 1010, Quality(q));
+				auto d_reference = ValueCoherentNoise3D<double>(Vector3<double>(5.0, 2.5, 4.0), 1010, Quality(q));
 				auto f_reference = (float)d_reference;
 
 				//m128	sse_floats = InterpolateCubic(ld1<m128>(1.0), ld1<m128>(2.0), ld1<m128>(4.0), ld1<m128>(5.0), ld1<m128>(1.0));
-				m128d sse_doubles = ValueCoherentNoise3D(Vector3D<m128d>(5.0, 2.5, 4.0), m128i(1010), Quality(q));
+				m128d sse_doubles = ValueCoherentNoise3D(Vector3<m128d>(5.0, 2.5, 4.0), m128i(1010), Quality(q));
 
 				//m256 avx_floats = InterpolateCubic(ld1<m256>(1.0), ld1<m256>(2.0), ld1<m256>(4.0), ld1<m256>(5.0), ld1<m256>(1.0));
 				//m256d avx_doubles = GradientCoherentNoise3D(ld1<m256d>(1.0), ld1<m256d>(2.0), ld1<m256d>(4.0), ld1<m256i>(1000), Quality::Fast);	
@@ -72,11 +73,11 @@ namespace UnitTest
 
 		TEST_METHOD(Test_ValueNoise3D)
 		{			
-			auto d_reference = ValueNoise3D<double, int32>(Vector3D<int32>(1, 2, 4), 1010);
+			auto d_reference = ValueNoise3D<double, int32>(Vector3<int32>(1, 2, 4), 1010);
 			auto f_reference = (float)d_reference;
 
 			//m128	sse_floats = InterpolateCubic(ld1<m128>(1.0), ld1<m128>(2.0), ld1<m128>(4.0), ld1<m128>(5.0), ld1<m128>(1.0));
-			m128d sse_doubles = ValueNoise3D<m128d>(Vector3D<m128i>(1, 2, 4), m128i(1010));
+			m128d sse_doubles = ValueNoise3D<m128d>(Vector3<m128i>(1, 2, 4), m128i(1010));
 
 			//m256 avx_floats = InterpolateCubic(ld1<m256>(1.0), ld1<m256>(2.0), ld1<m256>(4.0), ld1<m256>(5.0), ld1<m256>(1.0));
 			//m256d avx_doubles = GradientCoherentNoise3D(ld1<m256d>(1.0), ld1<m256d>(2.0), ld1<m256d>(4.0), ld1<m256i>(1000), Quality::Fast);
@@ -123,13 +124,13 @@ namespace UnitTest
 			auto y1 = y0 + 1;
 			auto z1 = z0 + 1;
 
-			Assert::AreEqual(x0.ints32[0], 2 - 1);
-			Assert::AreEqual(y0.ints32[0], 0 - 0);
-			Assert::AreEqual(z0.ints32[0], 1 - 1);
+			Assert::AreEqual(x0.i32[0], 2 - 1);
+			Assert::AreEqual(y0.i32[0], 0 - 0);
+			Assert::AreEqual(z0.i32[0], 1 - 1);
 
-			Assert::AreEqual(x1.ints32[0], 2 - 1 + 1);
-			Assert::AreEqual(y1.ints32[0], 0 - 0 + 1);
-			Assert::AreEqual(z1.ints32[0], 1 - 1 + 1);
+			Assert::AreEqual(x1.i32[0], 2 - 1 + 1);
+			Assert::AreEqual(y1.i32[0], 0 - 0 + 1);
+			Assert::AreEqual(z1.i32[0], 1 - 1 + 1);
 		}
 	};
 }

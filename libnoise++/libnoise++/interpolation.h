@@ -10,65 +10,46 @@ namespace noisepp { namespace interpolation {
 
 	// Cubic ===================================================================================================
 	
-	template<typename T>
-	inline T InterpolateCubic(const T& n0, const T& n1, const T& n2, const T& n3, const T& a)
+	SIMD_ENABLE_F(TFloat)
+	inline TFloat InterpolateCubic(const TFloat& n0, const TFloat& n1, const TFloat& n2, const TFloat& n3, const TFloat& a)
 	{
-		T n0_n1 = n0 - n1;
+		auto n0_n1 = n0 - n1;
 
-		T p = (n3 - n2) - n0_n1;
-		T q = n0_n1 - p;
-		T r = n2 - n0;
+		auto p = (n3 - n2) - n0_n1;
+		auto q = n0_n1 - p;
+		auto r = n2 - n0;
 
 
-		T a² = a * a;
-		T a³ = a² * a;
+		auto a² = a * a;
+		auto a³ = a² * a;
 
 		return (p * a³) + (q * a²) + (r * a) + n1;
 	}	
 
-	template<>
-	inline double InterpolateCubic(const double& n0, const double& n1, const double& n2, const double& n3, const double& a)
-	{
-		double p = (n3 - n2) - (n0 - n1);
-		double q = (n0 - n1) - p;
-		double r = n2 - n0;
-		double s = n1;
-		return p * a * a * a + q * a * a + r * a + s;
-	}
-
 	// Linear ==================================================================================================
 	
-	template<typename T>
-	inline T InterpolateLinear(const T& n0, const T& n1, const T& a)
+	SIMD_ENABLE_F(TFloat)
+	inline TFloat InterpolateLinear(const TFloat& n0, const TFloat& n1, const TFloat& a)
 	{
 		return (1.0 - a) * n0 + a * n1;
 	}
 	// SCurve3 =================================================================================================
 
-	template<typename T> 
-	inline T SCurve3(const T& a)
+	SIMD_ENABLE_F(TFloat)
+	inline TFloat SCurve3(const TFloat& a)
 	{
 		return (a * a * (3 - 2 * a));
 	}
 
 	// SCurve5 =================================================================================================
 	
-	template<typename T>
-	inline T SCurve5(const T& a)
+	SIMD_ENABLE_F(TFloat)
+	inline TFloat SCurve5(const TFloat& a)
 	{
-		T a3 = a * a * a;
-		T a4 = a3 * a;
-		T a5 = a4 * a;
+		auto a3 = a * a * a;
+		auto a4 = a3 * a;
+		auto a5 = a4 * a;
 
-		return (T(6) * a5) - (T(15) * a4) + (T(10) * a3);
-	}
-
-	template<>
-	inline double SCurve5(const double& a)
-	{
-		double a3 = a * a * a;
-		double a4 = a3 * a;
-		double a5 = a4 * a;
 		return (6.0 * a5) - (15.0 * a4) + (10.0 * a3);
 	}
 }};

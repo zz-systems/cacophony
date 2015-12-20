@@ -121,7 +121,24 @@
     <ClInclude Include="basetypes.h" />
     <ClInclude Include="interpolation.h" />
     <ClInclude Include="intrinsic.h" />
+    <ClInclude Include="intrinsic\base.h" />
+    <ClInclude Include="intrinsic\m128d.h" />
+    <ClInclude Include="intrinsic\m256d.h" />
+    <ClInclude Include="intrinsic\m128f.h" />
+    <ClInclude Include="intrinsic\m128i.h" />
+    <ClInclude Include="intrinsic\m256f.h" />
+    <ClInclude Include="intrinsic\m256i.h" />
+    <ClInclude Include="modules\billow.h" />
+    <ClInclude Include="modules\modulebase.h" />
+    <ClInclude Include="modules\modules.h" />
+    <ClInclude Include="modules\perlin.h" />
+    <ClInclude Include="modules\ridgedmultifrac.h" />
+    <ClInclude Include="modules\rotate.h" />
+    <ClInclude Include="modules\select.h" />
+    <ClInclude Include="modules\terrace.h" />
+    <ClInclude Include="modules\voronoi.h" />
     <ClInclude Include="noisegenerators.h" />
+    <ClInclude Include="vector.h" />
     <ClInclude Include="vectortable.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

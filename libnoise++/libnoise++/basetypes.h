@@ -2,6 +2,9 @@
 #ifndef BASETYPES_H
 #define BASETYPES_H
 
+#include <functional>
+#include "vector.h"
+
 namespace noisepp {
 	typedef unsigned	int		uint;
 
@@ -11,33 +14,37 @@ namespace noisepp {
 	typedef unsigned	char	uint8;
 
 	typedef signed		long long	int64;
-	typedef signed		int		int32;	
+	typedef signed		int		int32;
 	typedef signed		short	int16;
 	typedef signed		char	int8;
+	
 
-	template<typename T>	
-	union Vector3D
-	{
-		T v[3];
-		struct {
-			T x;
-			T y;
-			T z;
-		};
+// define checked floating and integral type to use on SIMD-enabled functions/types. 
+#define SIMD_ENABLE(floatType, intType) \
+	template<	typename floatType	= std::enable_if<std::is_floating_point<floatType>::value, floatType>::type, \
+				typename intType	= std::enable_if<std::is_integral<intType>::value, intType>::type>
 
-		Vector3D() = default;
-		Vector3D(const T& x, const T& y, const T& z) : x(x), y(y), z(z) { };
-	};	
+// define checked floating type to use on SIMD-enabled functions/types. 
+#define SIMD_ENABLE_F(floatType) \
+	template<typename floatType = std::enable_if<std::is_floating_point<floatType>::value, floatType>::type>
 
-	template<typename T>
-	union Cube3D
-	{
-		Vector3D<T> v[2];
-		struct {
-			Vector3D<T> _0;
-			Vector3D<T> _1;
-		};
-	};
+// define checked integral type to use on SIMD-enabled functions/types. 
+#define SIMD_ENABLE_I(intType) \
+	template<typename intType = std::enable_if<std::is_integral<intType>::value, intType>::type>
+
+//#define SIMD_ENABLE() SIMD_ENABLE(TFloat, TInt)
+	
+
+SIMD_ENABLE_F(TFloat)
+using Module = std::function<TFloat(Vector3<TFloat>)>;
+
+
+template<typename T>
+std::function<
+	typename std::enable_if<std::is_function<T>::value, T>::type
+> make_function(T *t) {
+	return{ t };
+}
 };
 
 #endif
