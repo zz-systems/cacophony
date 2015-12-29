@@ -14,9 +14,13 @@ union Vector3
 
 	Vector3() = default;
 	//Vector3(const T* rhs) { v = rhs; };
+		
 	Vector3(const Vector3<T>& rhs) { v = rhs.v; };
 	Vector3(const T& all) : x(all), y(all), z(all) { };
 	Vector3(const T& x, const T& y, const T& z) : x(x), y(y), z(z) { };
+
+	template<typename U>
+	Vector3(const Vector3<U>& rhs) : x((T)rhs.x), y((T)rhs.y), z((T)rhs.z) { }
 };
 
 template<typename T>

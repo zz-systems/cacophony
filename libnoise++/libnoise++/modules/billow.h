@@ -15,16 +15,16 @@ namespace noisepp { namespace module {
 		int octaves = 6;
 	};
 
-	SIMD_ENABLE(TFloat, TInt)
-	inline TFloat billow(Vector3<TFloat>& coords, const billow_settings& settings)
+	SIMD_ENABLE(TReal, TInt)
+	inline TReal billow(Vector3<TReal>& coords, const billow_settings& settings)
 	{
-		TFloat value = 0.0;
-		TFloat signal = 0.0;
-		TFloat curPersistence = 1.0;
-		Vector3<TFloat> n;
+		TReal value = 0.0;
+		TReal signal = 0.0;
+		TReal curPersistence = 1.0;
+		Vector3<TReal> n;
 		TInt seed;
 
-		coords = coords * Vector3<TFloat>(settings.lacunarity);
+		coords = coords * Vector3<TReal>(settings.lacunarity);
 
 		for (int currentOctave = 0; currentOctave < settings.octaves; currentOctave++) {
 
@@ -45,7 +45,7 @@ namespace noisepp { namespace module {
 			value = value + signal * curPersistence;
 
 			// Prepare the next octave.
-			coords = coords * Vector3<TFloat>(settings.lacunarity);
+			coords = coords * Vector3<TReal>(settings.lacunarity);
 
 			curPersistence = curPersistence * settings.persistence;
 		}

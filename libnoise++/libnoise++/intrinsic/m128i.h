@@ -18,7 +18,7 @@ namespace noisepp {	namespace intrinsic {
 		int8  i8[16];
 
 		m128i() = default;
-		m128i(const int& rhs) { val = _mm_set1_epi32(rhs); }
+		m128i(const int& rhs)		{ val = _mm_set1_epi32(rhs); }
 
 		m128i(const __m128& rhs)	{ val = _mm_cvtps_epi32(rhs); }
 		m128i(const __m128i& rhs)	{ val = rhs; }
@@ -34,11 +34,11 @@ namespace noisepp {	namespace intrinsic {
 		explicit operator int8*()	{ return i8; }
 	};
 
-	inline m128i	operator +(const m128i& a, const m128i& b) { return _mm_add_epi32(a.val, b.val); }
-	inline m128i	operator -(const m128i& a, const m128i& b) { return _mm_sub_epi32(a.val, b.val); }
+	inline m128i operator +(const m128i& a, const m128i& b) { return _mm_add_epi32		(a.val, b.val); }
+	inline m128i operator -(const m128i& a, const m128i& b) { return _mm_sub_epi32		(a.val, b.val); }
 
 #ifdef __SSE4_1__  // modern CPU - use SSE 4.1
-	inline m128i	operator *(const m128i& a, const m128i& b) { return _mm_mullo_epi32(a.val, b.val); }
+	inline m128i operator *(const m128i& a, const m128i& b) { return _mm_mullo_epi32	(a.val, b.val); }
 #else               // old CPU - use SSE 2
 	inline m128i	operator *(const m128i& a, const m128i& b) 
 	{
@@ -51,16 +51,22 @@ namespace noisepp {	namespace intrinsic {
 	//inline m128i	operator /(const m128i& a, const m128i& b)		{ return _mm_di	(a.val, b.val); }
 
 
-	inline m128i	operator >(const m128i& a, const m128i& b)	{ return _mm_cmpgt_epi32(a.val, b.val); }
-	inline m128i	operator <(const m128i& a, const m128i& b)	{ return _mm_cmplt_epi32(a.val, b.val); }
+	inline m128i operator >(const m128i& a, const m128i& b)	{ return _mm_cmpgt_epi32	(a.val, b.val); }
+	inline m128i operator <(const m128i& a, const m128i& b)	{ return _mm_cmplt_epi32	(a.val, b.val); }
 
-	inline m128i	operator |(const m128i& a, const m128i& b)	{ return _mm_or_si128(a.val, b.val); }
-	inline m128i	operator &(const m128i& a, const m128i& b)	{ return _mm_and_si128(a.val, b.val); }
-	inline m128i	operator ^(const m128i& a, const m128i& b)	{ return _mm_xor_si128(a.val, b.val); }
-	inline m128i	operator ~(const m128i& a)					{ return _mm_andnot_si128(a.val, a.val); }
+	inline m128i operator |(const m128i& a, const m128i& b)	{ return _mm_or_si128		(a.val, b.val); }
+	inline m128i operator &(const m128i& a, const m128i& b)	{ return _mm_and_si128		(a.val, b.val); }
+	inline m128i operator ^(const m128i& a, const m128i& b)	{ return _mm_xor_si128		(a.val, b.val); }
+	inline m128i operator ~(const m128i& a)					{ return _mm_andnot_si128	(a.val, a.val); }
 
-	inline m128i	operator >>(const m128i& a, int amount)		{ return _mm_srli_epi32(a.val, amount); }
-	inline m128i	operator <<(const m128i& a, int amount)		{ return _mm_slli_epi32(a.val, amount); }
+	inline m128i operator >>(const m128i& a, int amount)	{ return _mm_srli_epi32		(a.val, amount); }
+	inline m128i operator <<(const m128i& a, int amount)	{ return _mm_slli_epi32		(a.val, amount); }
+
+
+	inline m128i min(const m128i& a, const m128i& b)		{ return _mm_min_epi32		(a.val, b.val); }
+	inline m128i max(const m128i& a, const m128i& b)		{ return _mm_max_epi32		(a.val, b.val); }	
+
+	inline m128i sqrt(const m128i& a)						{ return _mm_sqrt_ps		(m128f(a).val); }
 }}
 
 #endif

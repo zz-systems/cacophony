@@ -87,5 +87,11 @@
     <ClInclude Include="vector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="intrinsic\scalarcompat.h">
+      <Filter>Header Files\intrinsics</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\curve.h">
+      <Filter>Header Files\modules</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

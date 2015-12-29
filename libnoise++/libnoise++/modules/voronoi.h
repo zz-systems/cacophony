@@ -17,21 +17,21 @@ namespace noisepp { namespace module {
 	};
 
 	
-	SIMD_ENABLE(TFloat, TInt)
-	inline TFloat voronoi(const Vector3<TFloat>& coords, const voronoi_settings& settings)
+	SIMD_ENABLE(TReal, TInt)
+	inline TReal voronoi(const Vector3<TReal>& coords, const voronoi_settings& settings)
 	{
 		// This method could be more efficient by caching the seed values.  Fix
 		// later.
 
-		auto _coords = coords * Vector3<TFloat>(settings.lacunarity);
+		auto _coords = coords * Vector3<TReal>(settings.lacunarity);
 
 		auto cube = Vector3<TInt>;
 		cube.x = TInt(c.x) - TInt((c.x > 0) & 1);
 		cube.y = TInt(c.y) - TInt((c.y > 0) & 1);
 		cube.z = TInt(c.z) - TInt((c.z > 0) & 1);
 
-		TFloat minDist = std::numeric_limits<int>::min();
-		TFloat candidate;
+		TReal minDist = std::numeric_limits<int>::min();
+		TReal candidate;
 
 		// Inside each unit cube, there is a seed point at a random position.  Go
 		// through each of the nearby cubes until we find a cube with a seed point
@@ -57,7 +57,7 @@ namespace noisepp { namespace module {
 			candidate	= pos  & mdmask | candidate & ~mdmask;
 		}
 
-		TFloat value = 0;
+		TReal value = 0;
 		if (settings.enableDistance)
 		{
 			auto diff = candidate - _coords;

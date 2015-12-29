@@ -34,18 +34,24 @@ namespace noisepp {	namespace intrinsic {
 		explicit operator int8*()	{ return i8; }
 	};
 
-	inline m256i		operator +(const m256i& a, const m256i& b) { return _mm256_add_epi32(a.val, b.val); }
-	inline m256i		operator -(const m256i& a, const m256i& b) { return _mm256_sub_epi32(a.val, b.val); }
-	inline m256i		operator *(const m256i& a, const m256i& b) { return _mm256_mul_epi32(a.val, b.val); }
-	//inline m256i		operator /(const m256i& a, const m256i& b) { return _mm256_div_epi32(a.val, b.val); }
+	inline m256i operator +(const m256i& a, const m256i& b) { return _mm256_add_epi32	(a.val, b.val); }
+	inline m256i operator -(const m256i& a, const m256i& b) { return _mm256_sub_epi32	(a.val, b.val); }
+	inline m256i operator *(const m256i& a, const m256i& b) { return _mm256_mul_epi32	(a.val, b.val); }
+	//inline m256i operator /(const m256i& a, const m256i& b) { return _mm256_div_epi32(a.val, b.val); }
 
-	inline m256i		operator >(const m256i& a, const m256i& b) { return _mm256_cmpgt_epi32(a.val, b.val); }
-	inline m256i		operator <(const m256i& a, const m256i& b) { return _mm256_cmpgt_epi32(a.val, b.val); }
+	inline m256i operator >(const m256i& a, const m256i& b) { return _mm256_cmpgt_epi32	(a.val, b.val); }
+	inline m256i operator <(const m256i& a, const m256i& b) { return _mm256_cmpgt_epi32	(a.val, b.val); }
 
-	inline m256i		operator |(const m256i& a, const m256i& b) { return _mm256_or_si256(a.val, b.val); }
-	inline m256i		operator &(const m256i& a, const m256i& b) { return _mm256_and_si256(a.val, b.val); }
-	inline m256i		operator ^(const m256i& a, const m256i& b) { return _mm256_xor_si256(a.val, b.val); }
-	inline m256i		operator ~(const m256i& a)				   { return _mm256_andnot_si256(a.val, a.val); }
+	inline m256i operator |(const m256i& a, const m256i& b) { return _mm256_or_si256	(a.val, b.val); }
+	inline m256i operator &(const m256i& a, const m256i& b) { return _mm256_and_si256	(a.val, b.val); }
+	inline m256i operator ^(const m256i& a, const m256i& b) { return _mm256_xor_si256	(a.val, b.val); }
+	inline m256i operator ~(const m256i& a)				    { return _mm256_andnot_si256(a.val, a.val); }
+
+	
+	inline m256i min(const m256i& a, const m256i& b)		{ return _mm256_min_epi32	(a.val, b.val); }
+	inline m256i max(const m256i& a, const m256i& b)		{ return _mm256_max_epi32	(a.val, b.val); }
+
+	inline m256i sqrt(const m256i& a)						{ return _mm256_sqrt_ps		(m256f(a).val); }
 }}
 
 #endif

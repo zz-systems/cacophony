@@ -16,24 +16,24 @@ namespace noisepp { namespace module {
 		int octaves = 6;
 	};
 
-	SIMD_ENABLE(TFloat, TInt)
-	inline TFloat perlin(Vector3<TFloat>& coords, const perlin_settings& settings)
+	SIMD_ENABLE(TReal, TInt)
+	inline TReal perlin(const Vector3<TReal>& coords, const perlin_settings& settings)
 	{
-		TFloat	value				= 0, 
+		TReal	value				= 0, 
 				signal				= 0, 
 				currentPersistence	= 0;
-		Vector3<TFloat> n;
+		Vector3<TReal> n;
 		TInt seed;
 
-		coords = coords * Vector3<TFloat>(settings.frequency);
+		auto _coords = coords * Vector3<TReal>(settings.frequency);
 
 		for (int curOctave = 0; curOctave < settings.octaves; curOctave++)
 		{
 			// Make sure that these floating-point values have the same range as a 32-
 			// bit integer so that we can pass them to the coherent-noise functions.
-			n.x = TInt(coords.x);
-			n.y = TInt(coords.y);
-			n.z = TInt(coords.z);
+			n.x = TInt(_coords.x);
+			n.y = TInt(_coords.y);
+			n.z = TInt(_coords.z);
 
 			// Get the coherent-noise value from the input value and add it to the
 			// final result.
@@ -43,7 +43,7 @@ namespace noisepp { namespace module {
 			value = value + signal * currentPersistence;
 
 			// Prepare the next octave.
-			coords = coords * Vector3<TFloat>(settings.lacunarity);
+			_coords = _coords * Vector3<TReal>(settings.lacunarity);
 			currentPersistence = currentPersistence * settings.persistence;
 		}
 

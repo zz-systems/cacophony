@@ -10,8 +10,8 @@ namespace noisepp { namespace interpolation {
 
 	// Cubic ===================================================================================================
 	
-	SIMD_ENABLE_F(TFloat)
-	inline TFloat InterpolateCubic(const TFloat& n0, const TFloat& n1, const TFloat& n2, const TFloat& n3, const TFloat& a)
+	SIMD_ENABLE_F(TReal)
+	inline TReal InterpolateCubic(const TReal& n0, const TReal& n1, const TReal& n2, const TReal& n3, const TReal& a)
 	{
 		auto n0_n1 = n0 - n1;
 
@@ -28,23 +28,23 @@ namespace noisepp { namespace interpolation {
 
 	// Linear ==================================================================================================
 	
-	SIMD_ENABLE_F(TFloat)
-	inline TFloat InterpolateLinear(const TFloat& n0, const TFloat& n1, const TFloat& a)
+	SIMD_ENABLE_F(TReal)
+	inline TReal InterpolateLinear(const TReal& n0, const TReal& n1, const TReal& a)
 	{
 		return (1.0 - a) * n0 + a * n1;
 	}
 	// SCurve3 =================================================================================================
 
-	SIMD_ENABLE_F(TFloat)
-	inline TFloat SCurve3(const TFloat& a)
+	SIMD_ENABLE_F(TReal)
+	inline TReal SCurve3(const TReal& a)
 	{
 		return (a * a * (3 - 2 * a));
 	}
 
 	// SCurve5 =================================================================================================
 	
-	SIMD_ENABLE_F(TFloat)
-	inline TFloat SCurve5(const TFloat& a)
+	SIMD_ENABLE_F(TReal)
+	inline TReal SCurve5(const TReal& a)
 	{
 		auto a3 = a * a * a;
 		auto a4 = a3 * a;

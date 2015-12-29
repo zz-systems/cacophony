@@ -128,7 +128,9 @@
     <ClInclude Include="intrinsic\m128i.h" />
     <ClInclude Include="intrinsic\m256f.h" />
     <ClInclude Include="intrinsic\m256i.h" />
+    <ClInclude Include="intrinsic\scalarcompat.h" />
     <ClInclude Include="modules\billow.h" />
+    <ClInclude Include="modules\curve.h" />
     <ClInclude Include="modules\modulebase.h" />
     <ClInclude Include="modules\modules.h" />
     <ClInclude Include="modules\perlin.h" />

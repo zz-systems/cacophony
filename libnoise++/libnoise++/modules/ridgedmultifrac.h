@@ -31,25 +31,25 @@ namespace noisepp { namespace module {
 
 	// Multifractal code originally written by F. Kenton "Doc Mojo" Musgrave,
 	// 1998.  Modified by jas for use with libnoise.
-	SIMD_ENABLE(TFloat, TInt)
-	inline TFloat ridged(Vector3<TFloat>& coords, const ridged_settings& settings)
+	SIMD_ENABLE(TReal, TInt)
+	inline TReal ridged(Vector3<TReal>& coords, const ridged_settings& settings)
 	{
-		coords = coords * Vector3<TFloat>(settings.frequency);
+		coords = coords * Vector3<TReal>(settings.frequency);
 
-		TFloat signal = 0.0;
-		TFloat value = 0.0;
-		TFloat weight = 1.0;
+		TReal signal = 0.0;
+		TReal value = 0.0;
+		TReal weight = 1.0;
 
 		// These parameters should be user-defined; they may be exposed in a
 		// future version of libnoise.
-		TFloat offset = 1.0;
-		TFloat gain = 2.0;
+		TReal offset = 1.0;
+		TReal gain = 2.0;
 
 		for (int currentOctave = 0; currentOctave < settings.octaves; currentOctave++) {
 
 			// Make sure that these floating-point values have the same range as a 32-
 			// bit integer so that we can pass them to the coherent-noise functions.
-			Vector3<TFloat> n;
+			Vector3<TReal> n;
 			n.x = TInt(coords.x);
 			n.y = TInt(coords.y);
 			n.z = TInt(coords.z);
@@ -73,13 +73,13 @@ namespace noisepp { namespace module {
 
 			// Weight successive contributions by the previous signal.
 			weight = signal * gain;
-			weight = clamp<TFloat>(weight, 0.0, 1.0);
+			weight = clamp<TReal>(weight, 0.0, 1.0);
 
 			// Add the signal to the output value.
 			value = value + (signal * settings.spectralWeights[currentOctave]);
 
 			// Go to the next octave.
-			coords = coords * Vector3<TFloat>(settings.lacunarity);
+			coords = coords * Vector3<TReal>(settings.lacunarity);
 		}
 
 		return (value * 1.25) - 1.0;

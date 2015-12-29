@@ -32,19 +32,20 @@ namespace noisepp {
 #define SIMD_ENABLE_I(intType) \
 	template<typename intType = std::enable_if<std::is_integral<intType>::value, intType>::type>
 
-//#define SIMD_ENABLE() SIMD_ENABLE(TFloat, TInt)
+//#define SIMD_ENABLE() SIMD_ENABLE(TReal, TInt)
 	
 
-SIMD_ENABLE_F(TFloat)
-using Module = std::function<TFloat(Vector3<TFloat>)>;
+SIMD_ENABLE_F(TReal)
+using Module = std::function<TReal(const Vector3<TReal>&)>;
 
+SIMD_ENABLE(TReal, TInt)
+using SeededModule = std::function<TReal(const Vector3<TReal>&, const TInt& seed)>;
 
-template<typename T>
-std::function<
-	typename std::enable_if<std::is_function<T>::value, T>::type
-> make_function(T *t) {
-	return{ t };
-}
+	template<typename T>
+	std::function<typename std::enable_if<std::is_function<T>::value, T>::type> make_function(T *t) 
+	{
+		return{ t };
+	}
 };
 
 #endif

@@ -19,16 +19,16 @@ namespace noisepp { namespace module {
 			auto sin = Vector3<double>( ::sin(angles.x), ::sin(angles.y), ::sin(angles.z) );
 
 			rot = {
-				{ sin.x * sin.y * sin.z + cos.y * cos.z,	cos.x * sin.z,		sin.y * cos.z - cos.y * sin.x * sin.z  },
-				{ sin.y * sin.x * cos.z - cos.y * sin.z,	cos.x * cos.z,		-cos.y * sin.x * cos.z - sin.y * sin.z },
-				{-sin.y * cos.x,							sin.x,				cos.y * cos.x						   } 
+				Vector3<double>{ sin.x * sin.y * sin.z + cos.y * cos.z,	cos.x * sin.z,		sin.y * cos.z - cos.y * sin.x * sin.z  },
+				Vector3<double>{ sin.y * sin.x * cos.z - cos.y * sin.z,	cos.x * cos.z,		-cos.y * sin.x * cos.z - sin.y * sin.z },
+				Vector3<double>{-sin.y * cos.x,							sin.x,				cos.y * cos.x						   }
 			};			
 		}
 	};
 
-	SIMD_ENABLE(TFloat, TInt)
-	inline TFloat rotate(	const Module<TFloat>& source,
-							const Vector3<TFloat>& coords,
+	SIMD_ENABLE(TReal, TInt)
+	inline TReal rotate(	const Module<TReal>& source,
+							const Vector3<TReal>& coords,
 							const rotate_settings& settings)
 	{
 		return source(settings.rot * coords);
