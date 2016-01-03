@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
 
-#include "../libnoise++/basetypes.h"
-#include "../libnoise++/noisegenerators.h"
+#include "../paranoise/basetypes.h"
+#include "../paranoise/noisegenerators.h"
 #include <iostream>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;

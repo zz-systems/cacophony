@@ -3,11 +3,14 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "paranoise", "libnoise++\libnoise++.vcxproj", "{5B8F1E63-2A30-460E-B8A7-D2315691C8B7}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "paranoise", "paranoise\paranoise.vcxproj", "{5B8F1E63-2A30-460E-B8A7-D2315691C8B7}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UnitTest", "UnitTest\UnitTest.vcxproj", "{B7B92591-F2B4-486E-9CC1-670FBCC3FBCD}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libnoisecompat", "libnoisecompat\libnoisecompat.vcxproj", "{25A28441-DB6B-401E-BA67-0E6D4E5603D0}"
+	ProjectSection(ProjectDependencies) = postProject
+		{5B8F1E63-2A30-460E-B8A7-D2315691C8B7} = {5B8F1E63-2A30-460E-B8A7-D2315691C8B7}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "compat", "compat", "{BE38167C-B3A2-48A6-A214-33DD14C7AA4D}"
 EndProject
