@@ -5,8 +5,8 @@
 
 #define TEST_USE_THREADS
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
-using namespace noisepp::interpolation;
-using namespace noisepp::intrinsic;
+using namespace paranoise::interpolation;
+using namespace paranoise::intrinsic;
 
 #ifdef TEST_USE_THREADS
 #include <ppl.h>

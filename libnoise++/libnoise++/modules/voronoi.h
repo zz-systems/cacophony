@@ -1,12 +1,12 @@
 #pragma once
-#ifndef NOISEPP_MODULES_VORONOI
-#define NOISEPP_MODULES_VORONOI
+#ifndef PARANOISE_MODULES_VORONOI
+#define PARANOISE_MODULES_VORONOI
 
 #include <limits>
 #include "../noisegenerators.h"
 
-namespace noisepp { namespace module {
-	using namespace noisepp::generators;
+namespace paranoise { namespace module {
+	using namespace paranoise::generators;
 	
 	struct voronoi_settings
 	{

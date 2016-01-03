@@ -36,9 +36,6 @@
     <ClInclude Include="noisegenerators.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="modules\modulebase.h">
-      <Filter>Header Files\modules</Filter>
-    </ClInclude>
     <ClInclude Include="modules\modules.h">
       <Filter>Header Files\modules</Filter>
     </ClInclude>

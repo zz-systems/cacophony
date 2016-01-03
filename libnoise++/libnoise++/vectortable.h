@@ -1,8 +1,8 @@
 #pragma once
-#ifndef NOISEPP_VECTORTABLE
-#define NOISEPP_VECTORTABLE
+#ifndef PARANOISE_VECTORTABLE
+#define PARANOISE_VECTORTABLE
 
-namespace noisepp
+namespace paranoise
 {
 	// A table of 256 random normalized vectors.  Each row is an (x, y, z, 0)
 	// coordinate.  The 0 is used as padding so we can use bit shifts to index

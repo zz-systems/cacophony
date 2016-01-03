@@ -5,7 +5,7 @@
 #include <functional>
 #include "vector.h"
 
-namespace noisepp {
+namespace paranoise {
 	typedef unsigned	int		uint;
 
 	typedef unsigned	long long	uint64;

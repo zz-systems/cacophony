@@ -6,9 +6,9 @@
 #include <iostream>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
-using namespace noisepp;
-using namespace noisepp::generators;
-using namespace noisepp::intrinsic;
+using namespace paranoise;
+using namespace paranoise::generators;
+using namespace paranoise::intrinsic;
 
 namespace UnitTest
 {

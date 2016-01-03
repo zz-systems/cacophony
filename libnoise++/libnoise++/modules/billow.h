@@ -1,11 +1,11 @@
 #pragma once
-#ifndef NOISEPP_MODULES_BILLOW
-#define NOISEPP_MODULES_BILLOW
+#ifndef PARANOISE_MODULES_BILLOW
+#define PARANOISE_MODULES_BILLOW
 
 #include "../noisegenerators.h"
 
-namespace noisepp { namespace module {
-	using namespace noisepp::generators;
+namespace paranoise { namespace module {
+	using namespace paranoise::generators;
 
 	struct billow_settings
 	{

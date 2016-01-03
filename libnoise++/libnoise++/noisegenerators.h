@@ -1,6 +1,6 @@
 #pragma once
-#ifndef NOISEPP_NOISE_GENERATORS
-#define NOISEPP_NOISE_GENERATORS
+#ifndef PARANOISE_NOISE_GENERATORS
+#define PARANOISE_NOISE_GENERATORS
 
 #include "interpolation.h"
 #include "vectortable.h"
@@ -9,7 +9,7 @@
 
 #define NOISE_VERSION 2
 
-namespace noisepp {	namespace generators {
+namespace paranoise {	namespace generators {
 	using namespace interpolation;
 
 	enum Quality {

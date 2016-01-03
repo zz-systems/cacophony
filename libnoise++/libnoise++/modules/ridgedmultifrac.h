@@ -1,11 +1,11 @@
 #pragma once
-#ifndef NOISEPP_MODULES_RIDGED
-#define NOISEPP_MODULES_RIDGED
+#ifndef PARANOISE_MODULES_RIDGED
+#define PARANOISE_MODULES_RIDGED
 
 #include "../noisegenerators.h"
 
-namespace noisepp { namespace module {
-	using namespace noisepp::generators;
+namespace paranoise { namespace module {
+	using namespace paranoise::generators;
 
 	struct ridged_settings
 	{
@@ -17,13 +17,14 @@ namespace noisepp { namespace module {
 		double spectralWeights[30];
 		ridged_settings()
 		{
-			double h = 1.0;
+			double	h		= 1.0, 
+					freq	= 1.0;
 
-			double frequency = 1.0;
-			for (int i = 0; i < 30; i++) {
+			for (int i = 0; i < 30; i++) 
+			{
 				// Compute weight for each frequency.
-				spectralWeights[i] = pow(frequency, -h);
-				frequency = frequency * lacunarity;
+				spectralWeights[i] = pow(freq, -h);
+				freq = freq * lacunarity;
 			}
 		}
 	};

@@ -1,11 +1,11 @@
 #pragma once
-#ifndef NOISEPP_MODULES_SELECT
-#define NOISEPP_MODULES_SELECT
+#ifndef PARANOISE_MODULES_SELECT
+#define PARANOISE_MODULES_SELECT
 
 #include "../noisegenerators.h"
 
-namespace noisepp { namespace module {
-	using namespace noisepp::generators;
+namespace paranoise { namespace module {
+	using namespace paranoise::generators;
 
 	struct rotate_settings
 	{

@@ -1,10 +1,10 @@
 #pragma once
-#ifndef NOISEPP_INTRINSIC_M128I_H
-#define NOISEPP_INTRINSIC_M128I_H
+#ifndef PARANOISE_INTRINSIC_M128I_H
+#define PARANOISE_INTRINSIC_M128I_H
 
 #include "base.h"
 
-namespace noisepp {	namespace intrinsic {
+namespace paranoise {	namespace intrinsic {
 
 	union m128f;
 	union m128d;
@@ -16,6 +16,8 @@ namespace noisepp {	namespace intrinsic {
 		int32 i32[4];
 		int16 i16[8];
 		int8  i8[16];
+
+		int32 values[4];
 
 		m128i() = default;
 		m128i(const int& rhs)		{ val = _mm_set1_epi32(rhs); }
@@ -32,6 +34,10 @@ namespace noisepp {	namespace intrinsic {
 		explicit operator int32*()	{ return i32; }
 		explicit operator int16*()	{ return i16; }
 		explicit operator int8*()	{ return i8; }
+
+		/*m128i &operator =(const m128i &rhs);
+		m128i &operator =(const m128f &rhs);
+		m128i &operator =(const m128d &rhs);*/
 	};
 
 	inline m128i operator +(const m128i& a, const m128i& b) { return _mm_add_epi32		(a.val, b.val); }
@@ -52,7 +58,8 @@ namespace noisepp {	namespace intrinsic {
 
 
 	inline m128i operator >(const m128i& a, const m128i& b)	{ return _mm_cmpgt_epi32	(a.val, b.val); }
-	inline m128i operator <(const m128i& a, const m128i& b)	{ return _mm_cmplt_epi32	(a.val, b.val); }
+	inline m128i operator <(const m128i& a, const m128i& b)	{ return _mm_cmplt_epi32	(a.val, b.val); }	
+	inline m128i operator==(const m128i& a, const m128i& b) { return _mm_cmpeq_epi32	(a.val, b.val); }
 
 	inline m128i operator |(const m128i& a, const m128i& b)	{ return _mm_or_si128		(a.val, b.val); }
 	inline m128i operator &(const m128i& a, const m128i& b)	{ return _mm_and_si128		(a.val, b.val); }
@@ -64,9 +71,7 @@ namespace noisepp {	namespace intrinsic {
 
 
 	inline m128i min(const m128i& a, const m128i& b)		{ return _mm_min_epi32		(a.val, b.val); }
-	inline m128i max(const m128i& a, const m128i& b)		{ return _mm_max_epi32		(a.val, b.val); }	
-
-	inline m128i sqrt(const m128i& a)						{ return _mm_sqrt_ps		(m128f(a).val); }
+	inline m128i max(const m128i& a, const m128i& b)		{ return _mm_max_epi32		(a.val, b.val); }		
 }}
 
 #endif

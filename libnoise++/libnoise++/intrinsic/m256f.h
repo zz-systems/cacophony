@@ -1,10 +1,10 @@
 #pragma once
-#ifndef NOISEPP_INTRINSIC_M256F_H
-#define NOISEPP_INTRINSIC_M256F_H
+#ifndef PARANOISE_INTRINSIC_M256F_H
+#define PARANOISE_INTRINSIC_M256F_H
 
 #include "base.h"
 
-namespace noisepp {	namespace intrinsic {
+namespace paranoise {	namespace intrinsic {
 
 	union m256i;
 	union m256d;
@@ -24,27 +24,32 @@ namespace noisepp {	namespace intrinsic {
 		m256f(const m256i&	rhs);
 		m256f(const m256d&	rhs);
 
+		/*m256f &operator =(const m256i &rhs);
+		m256f &operator =(const m256f &rhs);
+		m256f &operator =(const m256d &rhs);*/
+
 		explicit operator float*() { return values; }
 	};
 
-	inline m256f		operator +(const m256f& a, const m256f& b) { return _mm256_add_ps	(a.val, b.val); }
-	inline m256f		operator -(const m256f& a, const m256f& b) { return _mm256_sub_ps	(a.val, b.val); }
-	inline m256f		operator *(const m256f& a, const m256f& b) { return _mm256_mul_ps	(a.val, b.val); }
-	inline m256f		operator /(const m256f& a, const m256f& b) { return _mm256_div_ps	(a.val, b.val); }
+	inline m256f operator +(const m256f& a, const m256f& b) { return _mm256_add_ps		(a.val, b.val); }
+	inline m256f operator -(const m256f& a, const m256f& b) { return _mm256_sub_ps		(a.val, b.val); }
+	inline m256f operator *(const m256f& a, const m256f& b) { return _mm256_mul_ps		(a.val, b.val); }
+	inline m256f operator /(const m256f& a, const m256f& b) { return _mm256_div_ps		(a.val, b.val); }
 
-	inline m256f		operator >(const m256f& a, const m256f& b) { return _mm256_cmp_ps	(a.val, b.val, _CMP_GT_OQ); }
-	inline m256f		operator <(const m256f& a, const m256f& b) { return _mm256_cmp_ps	(a.val, b.val, _CMP_LT_OQ); }
+	inline m256f operator >(const m256f& a, const m256f& b) { return _mm256_cmp_ps		(a.val, b.val, _CMP_GT_OQ); }
+	inline m256f operator <(const m256f& a, const m256f& b) { return _mm256_cmp_ps		(a.val, b.val, _CMP_LT_OQ); }
+	inline m256f operator==(const m256f& a, const m256f& b) { return _mm256_cmp_ps		(a.val, b.val, _CMP_EQ_OQ); }
 
-	inline m256f		operator |(const m256f& a, const m256f& b) { return _mm256_or_ps	(a.val, b.val); }
-	inline m256f		operator &(const m256f& a, const m256f& b) { return _mm256_and_ps	(a.val, b.val); }
-	inline m256f		operator ^(const m256f& a, const m256f& b) { return _mm256_xor_ps	(a.val, b.val); }
-	inline m256f		operator ~(const m256f& a)				   { return _mm256_andnot_ps(a.val, a.val); }
+	inline m256f operator |(const m256f& a, const m256f& b) { return _mm256_or_ps		(a.val, b.val); }
+	inline m256f operator &(const m256f& a, const m256f& b) { return _mm256_and_ps		(a.val, b.val); }
+	inline m256f operator ^(const m256f& a, const m256f& b) { return _mm256_xor_ps		(a.val, b.val); }
+	inline m256f operator ~(const m256f& a)					{ return _mm256_andnot_ps	(a.val, a.val); }
 
 	
-	inline m256f min(const m256f& a, const m256f& b)				{ return _mm256_min_ps	(a.val, b.val); }
-	inline m256f max(const m256f& a, const m256f& b)				{ return _mm256_max_ps	(a.val, b.val); }	
+	inline m256f min(const m256f& a, const m256f& b)		{ return _mm256_min_ps		(a.val, b.val); }
+	inline m256f max(const m256f& a, const m256f& b)		{ return _mm256_max_ps		(a.val, b.val); }	
 
-	inline m256f sqrt(const m256f& a)								{ return _mm256_sqrt_ps	(a.val); }
+	inline m256f sqrt(const m256f& a)						{ return _mm256_sqrt_ps		(a.val); }
 }}
 
 #endif

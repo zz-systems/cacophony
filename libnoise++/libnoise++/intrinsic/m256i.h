@@ -1,10 +1,10 @@
 #pragma once
-#ifndef NOISEPP_INTRINSIC_M256I_H
-#define NOISEPP_INTRINSIC_M256I_H
+#ifndef PARANOISE_INTRINSIC_M256I_H
+#define PARANOISE_INTRINSIC_M256I_H
 
 #include "base.h"
 
-namespace noisepp {	namespace intrinsic {
+namespace paranoise {	namespace intrinsic {
 
 	union m256f;
 	union m256d;
@@ -12,7 +12,7 @@ namespace noisepp {	namespace intrinsic {
 	ALIGN(32) union m256i {
 		__m256i val;
 
-		int64 i64[8];
+		int64 i64[4];
 		int32 i32[8];
 		int16 i16[16];
 		int8  i8[32];
@@ -28,6 +28,10 @@ namespace noisepp {	namespace intrinsic {
 		m256i(const m256i&	rhs);
 		m256i(const m256d&	rhs);
 
+		/*m256i &operator =(const m256i &rhs);
+		m256i &operator =(const m256f &rhs);
+		m256i &operator =(const m256d &rhs);*/
+
 		explicit operator int64*()	{ return i64; }
 		explicit operator int32*()	{ return i32; }
 		explicit operator int16*()	{ return i16; }
@@ -40,7 +44,8 @@ namespace noisepp {	namespace intrinsic {
 	//inline m256i operator /(const m256i& a, const m256i& b) { return _mm256_div_epi32(a.val, b.val); }
 
 	inline m256i operator >(const m256i& a, const m256i& b) { return _mm256_cmpgt_epi32	(a.val, b.val); }
-	inline m256i operator <(const m256i& a, const m256i& b) { return _mm256_cmpgt_epi32	(a.val, b.val); }
+	inline m256i operator <(const m256i& a, const m256i& b) { return _mm256_cmpgt_epi32	(b.val, a.val); }
+	inline m256i operator==(const m256i& a, const m256i& b) { return _mm256_cmpeq_epi32 (a.val, b.val); }
 
 	inline m256i operator |(const m256i& a, const m256i& b) { return _mm256_or_si256	(a.val, b.val); }
 	inline m256i operator &(const m256i& a, const m256i& b) { return _mm256_and_si256	(a.val, b.val); }
@@ -49,9 +54,7 @@ namespace noisepp {	namespace intrinsic {
 
 	
 	inline m256i min(const m256i& a, const m256i& b)		{ return _mm256_min_epi32	(a.val, b.val); }
-	inline m256i max(const m256i& a, const m256i& b)		{ return _mm256_max_epi32	(a.val, b.val); }
-
-	inline m256i sqrt(const m256i& a)						{ return _mm256_sqrt_ps		(m256f(a).val); }
+	inline m256i max(const m256i& a, const m256i& b)		{ return _mm256_max_epi32	(a.val, b.val); }	
 }}
 
 #endif

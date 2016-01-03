@@ -1,6 +1,6 @@
 #pragma once
-#ifndef NOISEPP_UTIL_H
-#define NOISEPP_UTIL_H
+#ifndef PARANOISE_UTIL_H
+#define PARANOISE_UTIL_H
 
 #include "CppUnitTest.h"
 #include <iostream>

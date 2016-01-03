@@ -1,14 +1,14 @@
 #pragma once
-#ifndef NOISEPP_MODULE_MODULES_H
-#define NOISEPP_MODULE_MODULES_H
+#ifndef PARANOISE_MODULE_MODULES_H
+#define PARANOISE_MODULE_MODULES_H
 
 #include <assert.h>
 #include "../basetypes.h"
 #include "../intrinsic.h"
 #include "../noisegenerators.h"
 
-namespace noisepp { namespace module {
-	using namespace noisepp::generators;
+namespace paranoise { namespace module {
+	using namespace paranoise::generators;
 
 	SIMD_ENABLE_F(TReal)
 	inline TReal blend(TReal v0, TReal v1, TReal alpha)
@@ -16,6 +16,7 @@ namespace noisepp { namespace module {
 		return InterpolateLinear(v0, v1, (alpha + 1.0) / 2.0);
 	}
 
+	// blend input values according to blend factor alpha
 	SIMD_ENABLE_F(TReal)
 	inline TReal blend(	Module<TReal> v0,
 						Module<TReal> v1,
@@ -67,6 +68,7 @@ namespace noisepp { namespace module {
 		return source(coords) * scale + bias;
 	}
 
+	// generate points on concentric spheres
 	SIMD_ENABLE_F(TReal)
 	inline TReal concentric_spheres(const TReal& frequency, 
 									const Vector3<TReal>& coords)
@@ -74,6 +76,23 @@ namespace noisepp { namespace module {
 		auto _coords = coords * frequency;
 
 		auto distFromCenter			= sqrt(dot(_coords, _coords));
+		auto distFromSmallerSphere	= distFromCenter - floor(distFromCenter);
+		auto distFromLargerSphere	= 1.0 - distFromSmallerSphere;
+		auto nearestDist			= min(distFromSmallerSphere, distFromLargerSphere);
+
+		return 1.0 - (nearestDist * 4.0); // Puts it in the -1.0 to +1.0 range.
+	}
+
+	// generate points on concentric cylinders
+	SIMD_ENABLE_F(TReal)
+	inline TReal concentric_cylinders(const TReal& frequency,
+									  const Vector3<TReal>& coords)
+	{
+		auto _coords = coords;
+		_coords.x *= frequency;
+		_coords.z *= frequency;
+		
+		auto distFromCenter			= sqrt(_coords.x * _coords.x + _coords.z * _coords.z);
 		auto distFromSmallerSphere	= distFromCenter - floor(distFromCenter);
 		auto distFromLargerSphere	= 1.0 - distFromSmallerSphere;
 		auto nearestDist			= min(distFromSmallerSphere, distFromLargerSphere);

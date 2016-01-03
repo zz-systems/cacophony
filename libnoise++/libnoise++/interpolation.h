@@ -5,7 +5,7 @@
 #include "basetypes.h"
 #include "intrinsic.h"
 
-namespace noisepp { namespace interpolation {
+namespace paranoise { namespace interpolation {
 	using namespace intrinsic;
 
 	// Cubic ===================================================================================================

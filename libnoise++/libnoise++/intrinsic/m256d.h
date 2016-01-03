@@ -1,10 +1,10 @@
 #pragma once
-#ifndef NOISEPP_INTRINSIC_M256D_H
-#define NOISEPP_INTRINSIC_M256D_H
+#ifndef PARANOISE_INTRINSIC_M256D_H
+#define PARANOISE_INTRINSIC_M256D_H
 
 #include "base.h"
 
-namespace noisepp {	namespace intrinsic {
+namespace paranoise {	namespace intrinsic {
 
 	union m256f;
 	union m256i;
@@ -24,6 +24,10 @@ namespace noisepp {	namespace intrinsic {
 		m256d(const m256i&	rhs);
 		m256d(const m256d&	rhs);
 
+		/*m256d &operator =(const m256i &rhs);
+		m256d &operator =(const m256f &rhs);
+		m256d &operator =(const m256d &rhs);*/
+
 		explicit operator double*() { return values; }
 	};
 
@@ -33,7 +37,8 @@ namespace noisepp {	namespace intrinsic {
 	inline m256d operator /(const m256d& a, const m256d& b) { return _mm256_div_pd		(a.val, b.val); }
 
 	inline m256d operator >(const m256d& a, const m256d& b) { return _mm256_cmp_pd		(a.val, b.val, _CMP_GT_OQ); }
-	inline m256d operator <(const m256d& a, const m256d& b) { return _mm256_cmp_pd		(a.val, b.val, _CMP_LT_OQ); }
+	inline m256d operator <(const m256d& a, const m256d& b) { return _mm256_cmp_pd		(a.val, b.val, _CMP_LT_OQ); }	
+	inline m256d operator==(const m256d& a, const m256d& b) { return _mm256_cmp_pd		(a.val, b.val, _CMP_EQ_OQ); }
 
 	inline m256d operator |(const m256d& a, const m256d& b) { return _mm256_or_pd		(a.val, b.val); }
 	inline m256d operator &(const m256d& a, const m256d& b) { return _mm256_and_pd		(a.val, b.val); }

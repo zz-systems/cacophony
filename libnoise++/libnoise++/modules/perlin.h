@@ -1,11 +1,11 @@
 #pragma once
-#ifndef NOISEPP_MODULES_PERLIN
-#define NOISEPP_MODULES_PERLIN
+#ifndef PARANOISE_MODULES_PERLIN
+#define PARANOISE_MODULES_PERLIN
 
 #include "../noisegenerators.h"
 
-namespace noisepp { namespace module {
-	using namespace noisepp::generators;
+namespace paranoise { namespace module {
+	using namespace paranoise::generators;
 
 	
 	struct perlin_settings
@@ -37,7 +37,7 @@ namespace noisepp { namespace module {
 
 			// Get the coherent-noise value from the input value and add it to the
 			// final result.
-			seed = (settings.seed + curOctave) & 0xffffffff;
+			seed = (settings.seed + curOctave) & (int)0xffffffff;
 
 			signal = GradientCoherentNoise3D(n, seed, settings.quality);
 			value = value + signal * currentPersistence;

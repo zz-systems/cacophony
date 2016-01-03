@@ -1,6 +1,6 @@
 #pragma once
-#ifndef NOISEPP_VECTOR_H
-#define NOISEPP_VECTOR_H
+#ifndef PARANOISE_VECTOR_H
+#define PARANOISE_VECTOR_H
 
 template<typename T>
 union Vector3

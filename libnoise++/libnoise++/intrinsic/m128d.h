@@ -1,10 +1,10 @@
 #pragma once
-#ifndef NOISEPP_INTRINSIC_M128D_H
-#define NOISEPP_INTRINSIC_M128D_H
+#ifndef PARANOISE_INTRINSIC_M128D_H
+#define PARANOISE_INTRINSIC_M128D_H
 
 #include "base.h"
 
-namespace noisepp {	namespace intrinsic {
+namespace paranoise {	namespace intrinsic {
 	union m128f;
 	union m128i;
 
@@ -23,6 +23,10 @@ namespace noisepp {	namespace intrinsic {
 		m128d(const m128i& rhs);
 		m128d(const m128d& rhs);
 
+		/*m128d &operator =(const m128i &rhs);
+		m128d &operator =(const m128f &rhs);
+		m128d &operator =(const m128d &rhs);*/
+
 		explicit operator double*() { return values; }
 	};
 
@@ -32,6 +36,8 @@ namespace noisepp {	namespace intrinsic {
 	inline m128d operator /(const m128d& a, const m128d& b) { return _mm_div_pd		(a.val, b.val); }
 
 	inline m128d operator >(const m128d& a, const m128d& b) { return _mm_cmpgt_pd	(a.val, b.val); }
+	inline m128d operator <(const m128d& a, const m128d& b) { return _mm_cmplt_pd	(a.val, b.val); }
+	inline m128d operator==(const m128d& a, const m128d& b) { return _mm_cmpeq_pd	(a.val, b.val); }
 
 	inline m128d operator &(const m128d& a, const m128d& b) { return _mm_and_pd		(a.val, b.val); }	
 	inline m128d operator ~(const m128d& a)					{ return _mm_andnot_pd	(a.val, a.val); }
