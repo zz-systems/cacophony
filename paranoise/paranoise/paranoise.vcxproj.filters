@@ -30,21 +30,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="basetypes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="interpolation.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="vectortable.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="noisegenerators.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="vector.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="scheduler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -125,6 +110,21 @@
     </ClInclude>
     <ClInclude Include="modules\all.h">
       <Filter>Header Files\modules</Filter>
+    </ClInclude>
+    <ClInclude Include="basetypes.h">
+      <Filter>Header Files\noise</Filter>
+    </ClInclude>
+    <ClInclude Include="interpolation.h">
+      <Filter>Header Files\noise</Filter>
+    </ClInclude>
+    <ClInclude Include="noisegenerators.h">
+      <Filter>Header Files\noise</Filter>
+    </ClInclude>
+    <ClInclude Include="vector.h">
+      <Filter>Header Files\noise</Filter>
+    </ClInclude>
+    <ClInclude Include="vectortable.h">
+      <Filter>Header Files\noise</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
