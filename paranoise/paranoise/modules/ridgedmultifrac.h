@@ -25,7 +25,7 @@ namespace paranoise { namespace module {
 			for (int i = 0; i < 30; i++) 
 			{
 				// Compute weight for each frequency.
-				spectralWeights[i] = pow(freq, -h);
+				spectralWeights[i] = std::pow(freq, -h);
 				freq = freq * lacunarity;
 			}
 		}
@@ -63,7 +63,7 @@ namespace paranoise { namespace module {
 			signal = GradientCoherentNoise3D(n, seed, settings.quality);
 
 			// Make the ridges.
-			signal = abs(signal);
+			signal = paranoise::parallel::abs(signal);
 			signal = offset - signal;
 
 			// Square the signal to increase the sharpness of the ridges.

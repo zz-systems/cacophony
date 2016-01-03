@@ -4,7 +4,7 @@
 
 #include <assert.h>
 #include "../basetypes.h"
-#include "../intrinsic.h"
+//#include "../parallel/all.h"
 #include "../noisegenerators.h"
 #include "../parallel/x87compat.h"
 

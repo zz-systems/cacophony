@@ -121,7 +121,7 @@
   <ItemGroup>
     <ClInclude Include="basetypes.h" />
     <ClInclude Include="interpolation.h" />
-    <ClInclude Include="intrinsic.h" />
+    <ClInclude Include="modules\all.h" />
     <ClInclude Include="modules\billow.h" />
     <ClInclude Include="modules\curve.h" />
     <ClInclude Include="modules\modules.h" />
@@ -132,6 +132,8 @@
     <ClInclude Include="modules\terrace.h" />
     <ClInclude Include="modules\voronoi.h" />
     <ClInclude Include="noisegenerators.h" />
+    <ClInclude Include="parallel\all.h" />
+    <ClInclude Include="parallel\avx.h" />
     <ClInclude Include="parallel\base.h" />
     <ClInclude Include="parallel\clDouble.h" />
     <ClInclude Include="parallel\clFloat.h" />
@@ -142,6 +144,9 @@
     <ClInclude Include="parallel\m256d.h" />
     <ClInclude Include="parallel\m256f.h" />
     <ClInclude Include="parallel\m256i.h" />
+    <ClInclude Include="parallel\opencl.h" />
+    <ClInclude Include="parallel\SISD.h" />
+    <ClInclude Include="parallel\sse.h" />
     <ClInclude Include="parallel\x87compat.h" />
     <ClInclude Include="scheduler.h" />
     <ClInclude Include="vector.h" />

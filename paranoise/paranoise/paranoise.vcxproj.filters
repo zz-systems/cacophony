@@ -22,6 +22,12 @@
     <Filter Include="Header Files\parallel">
       <UniqueIdentifier>{5285bbc2-9e06-4154-9750-2e000ef9ed87}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\parallel\impl">
+      <UniqueIdentifier>{662496fa-7b8a-47fa-b0c8-9be442a7d612}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\modules\impl">
+      <UniqueIdentifier>{1de57c7b-6312-4626-9f36-4748d51b75ef}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="basetypes.h">
@@ -30,80 +36,95 @@
     <ClInclude Include="interpolation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="intrinsic.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="vectortable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="noisegenerators.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="modules\modules.h">
-      <Filter>Header Files\modules</Filter>
-    </ClInclude>
-    <ClInclude Include="modules\perlin.h">
-      <Filter>Header Files\modules</Filter>
-    </ClInclude>
-    <ClInclude Include="modules\ridgedmultifrac.h">
-      <Filter>Header Files\modules</Filter>
-    </ClInclude>
-    <ClInclude Include="modules\billow.h">
-      <Filter>Header Files\modules</Filter>
-    </ClInclude>
-    <ClInclude Include="modules\voronoi.h">
-      <Filter>Header Files\modules</Filter>
-    </ClInclude>
-    <ClInclude Include="modules\select.h">
-      <Filter>Header Files\modules</Filter>
-    </ClInclude>
-    <ClInclude Include="modules\rotate.h">
-      <Filter>Header Files\modules</Filter>
-    </ClInclude>
     <ClInclude Include="vector.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="modules\curve.h">
-      <Filter>Header Files\modules</Filter>
     </ClInclude>
     <ClInclude Include="scheduler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="modules\terrace.h">
-      <Filter>Header Files\modules</Filter>
-    </ClInclude>
     <ClInclude Include="parallel\base.h">
-      <Filter>Header Files\parallel</Filter>
+      <Filter>Header Files\parallel\impl</Filter>
     </ClInclude>
     <ClInclude Include="parallel\clDouble.h">
-      <Filter>Header Files\parallel</Filter>
+      <Filter>Header Files\parallel\impl</Filter>
     </ClInclude>
     <ClInclude Include="parallel\clFloat.h">
-      <Filter>Header Files\parallel</Filter>
+      <Filter>Header Files\parallel\impl</Filter>
     </ClInclude>
     <ClInclude Include="parallel\clInt.h">
-      <Filter>Header Files\parallel</Filter>
+      <Filter>Header Files\parallel\impl</Filter>
     </ClInclude>
     <ClInclude Include="parallel\m128d.h">
-      <Filter>Header Files\parallel</Filter>
+      <Filter>Header Files\parallel\impl</Filter>
     </ClInclude>
     <ClInclude Include="parallel\m128f.h">
-      <Filter>Header Files\parallel</Filter>
+      <Filter>Header Files\parallel\impl</Filter>
     </ClInclude>
     <ClInclude Include="parallel\m128i.h">
-      <Filter>Header Files\parallel</Filter>
+      <Filter>Header Files\parallel\impl</Filter>
     </ClInclude>
     <ClInclude Include="parallel\m256d.h">
-      <Filter>Header Files\parallel</Filter>
+      <Filter>Header Files\parallel\impl</Filter>
     </ClInclude>
     <ClInclude Include="parallel\m256f.h">
-      <Filter>Header Files\parallel</Filter>
+      <Filter>Header Files\parallel\impl</Filter>
     </ClInclude>
     <ClInclude Include="parallel\m256i.h">
-      <Filter>Header Files\parallel</Filter>
+      <Filter>Header Files\parallel\impl</Filter>
     </ClInclude>
     <ClInclude Include="parallel\x87compat.h">
+      <Filter>Header Files\parallel\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\avx.h">
       <Filter>Header Files\parallel</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\opencl.h">
+      <Filter>Header Files\parallel</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\sse.h">
+      <Filter>Header Files\parallel</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\all.h">
+      <Filter>Header Files\parallel</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\SISD.h">
+      <Filter>Header Files\parallel</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\billow.h">
+      <Filter>Header Files\modules\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\curve.h">
+      <Filter>Header Files\modules\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\modules.h">
+      <Filter>Header Files\modules\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\perlin.h">
+      <Filter>Header Files\modules\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\ridgedmultifrac.h">
+      <Filter>Header Files\modules\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\rotate.h">
+      <Filter>Header Files\modules\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\select.h">
+      <Filter>Header Files\modules\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\terrace.h">
+      <Filter>Header Files\modules\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\voronoi.h">
+      <Filter>Header Files\modules\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\all.h">
+      <Filter>Header Files\modules</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

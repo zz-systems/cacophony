@@ -2,9 +2,11 @@
 #ifndef PARANOISE_NOISE_GENERATORS
 #define PARANOISE_NOISE_GENERATORS
 
+#include "parallel/x87compat.h"
+
 #include "interpolation.h"
 #include "vectortable.h"
-#include "parallel/x87compat.h"
+#include "vector.h"
 
 #include <iostream>
 #include <functional>
@@ -149,7 +151,7 @@ namespace paranoise {	namespace generators {
 
 		auto _vi = extract(vectorIndices);
 
-		for (size_t i = 0; i < elem_count(xvGradient); i++)
+		for (size_t i = 0; i < dim(xvGradient); i++)
 		{
 			_xvGradient[i] = RandomVectors[_vi[i]];
 			_yvGradient[i] = RandomVectors[_vi[i] + 1];

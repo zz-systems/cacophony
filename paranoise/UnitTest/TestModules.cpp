@@ -1,9 +1,8 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
 
-#include "../paranoise/modules/perlin.h"
-#include "../paranoise/modules/ridgedmultifrac.h"
-#include "../paranoise/modules/billow.h"
+#include "../paranoise/parallel/all.h"
+#include "../paranoise/modules/all.h"
 
 #define TEST_USE_THREADS
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;

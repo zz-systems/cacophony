@@ -3,6 +3,7 @@
 #define BASETYPES_H
 
 #include <functional>
+
 #include "vector.h"
 
 namespace paranoise {

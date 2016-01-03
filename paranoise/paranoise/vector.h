@@ -15,7 +15,7 @@ union Vector3
 	Vector3() = default;
 	//Vector3(const T* rhs) { v = rhs; };
 		
-	Vector3(const Vector3<T>& rhs) { v = rhs.v; };
+	Vector3(const Vector3<T>& rhs) { x = rhs.x; y = rhs.y; z = rhs.z; };
 	Vector3(const T& all) : x(all), y(all), z(all) { };
 	Vector3(const T& x, const T& y, const T& z) : x(x), y(y), z(z) { };
 

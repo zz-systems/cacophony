@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
 
+#include "../paranoise/parallel/all.h"
 #include "../paranoise/interpolation.h"
 
 #define TEST_USE_THREADS

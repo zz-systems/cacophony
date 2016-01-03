@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
 
+#include "../paranoise/parallel/all.h"
 #include "../paranoise/basetypes.h"
 #include "../paranoise/noisegenerators.h"
 #include <iostream>

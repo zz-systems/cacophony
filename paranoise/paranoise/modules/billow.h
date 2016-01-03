@@ -42,7 +42,7 @@ namespace paranoise { namespace module {
 
 			signal = GradientCoherentNoise3D(n, seed, settings.quality);
 
-			signal = 2.0 * abs(signal) - 1.0;
+			signal = 2.0 * paranoise::parallel::abs(signal) - 1.0;
 
 			value = value + signal * curPersistence;
 
