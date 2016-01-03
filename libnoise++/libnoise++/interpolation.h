@@ -2,12 +2,13 @@
 #ifndef INTERPOLATION_H
 #define INTERPOLATION_H
 
+#include "parallel/x87compat.h"
 #include "basetypes.h"
 #include "intrinsic.h"
 
 namespace paranoise { namespace interpolation {
-	using namespace intrinsic;
-
+	using namespace parallel;
+	using namespace x87compat;
 	// Cubic ===================================================================================================
 	
 	SIMD_ENABLE_F(TReal)

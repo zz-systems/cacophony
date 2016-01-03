@@ -18,6 +18,7 @@ namespace paranoise {
 	typedef signed		short	int16;
 	typedef signed		char	int8;
 	
+#define ALIGN(bytes) __declspec(align(bytes))
 
 // define checked floating and integral type to use on SIMD-enabled functions/types. 
 #define SIMD_ENABLE(floatType, intType) \

@@ -6,7 +6,7 @@
 #define TEST_USE_THREADS
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace paranoise::interpolation;
-using namespace paranoise::intrinsic;
+using namespace paranoise::parallel;
 
 #ifdef TEST_USE_THREADS
 #include <ppl.h>

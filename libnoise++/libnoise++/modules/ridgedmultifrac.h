@@ -3,9 +3,11 @@
 #define PARANOISE_MODULES_RIDGED
 
 #include "../noisegenerators.h"
+#include "../parallel/x87compat.h"
 
 namespace paranoise { namespace module {
-	using namespace paranoise::generators;
+	using namespace generators;
+	using namespace x87compat;
 
 	struct ridged_settings
 	{

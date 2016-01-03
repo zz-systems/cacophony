@@ -6,9 +6,11 @@
 #include "../basetypes.h"
 #include "../intrinsic.h"
 #include "../noisegenerators.h"
+#include "../parallel/x87compat.h"
 
 namespace paranoise { namespace module {
-	using namespace paranoise::generators;
+	using namespace generators;
+	using namespace x87compat;
 
 	SIMD_ENABLE_F(TReal)
 	inline TReal blend(TReal v0, TReal v1, TReal alpha)

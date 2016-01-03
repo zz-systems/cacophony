@@ -4,10 +4,12 @@
 
 #include <limits>
 #include "../noisegenerators.h"
+#include "../parallel/x87compat.h"
 
 namespace paranoise { namespace module {
-	using namespace paranoise::generators;
-	
+	using namespace generators;
+	using namespace x87compat;
+
 	struct voronoi_settings
 	{
 		double	frequency = 1.0, 

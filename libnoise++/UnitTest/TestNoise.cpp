@@ -8,7 +8,7 @@
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace paranoise;
 using namespace paranoise::generators;
-using namespace paranoise::intrinsic;
+using namespace paranoise::parallel;
 
 namespace UnitTest
 {

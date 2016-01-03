@@ -3,14 +3,18 @@
 #define PARANOISE_MODULES_PERLIN
 
 #include "../noisegenerators.h"
+#include "../parallel/x87compat.h"
 
 namespace paranoise { namespace module {
-	using namespace paranoise::generators;
-
+	using namespace generators;
+	using namespace x87compat;
 	
 	struct perlin_settings
 	{
-		double frequency = 1.0, lacunarity = 2.0, persistence = 0.5;
+		double  frequency	= 1.0, 
+				lacunarity  = 2.0, 
+				persistence = 0.5;
+
 		Quality quality = Quality::Standard;
 		int seed = 0;
 		int octaves = 6;

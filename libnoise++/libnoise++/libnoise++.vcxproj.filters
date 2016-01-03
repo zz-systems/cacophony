@@ -16,7 +16,10 @@
     <Filter Include="Header Files\modules">
       <UniqueIdentifier>{365076c5-91db-4f56-8061-6fed446d3c8b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\intrinsics">
+    <Filter Include="Header Files\noise">
+      <UniqueIdentifier>{881234eb-b5af-4581-84d8-6e133a30fb21}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\parallel">
       <UniqueIdentifier>{5285bbc2-9e06-4154-9750-2e000ef9ed87}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -39,27 +42,6 @@
     <ClInclude Include="modules\modules.h">
       <Filter>Header Files\modules</Filter>
     </ClInclude>
-    <ClInclude Include="intrinsic\base.h">
-      <Filter>Header Files\intrinsics</Filter>
-    </ClInclude>
-    <ClInclude Include="intrinsic\m128d.h">
-      <Filter>Header Files\intrinsics</Filter>
-    </ClInclude>
-    <ClInclude Include="intrinsic\m256d.h">
-      <Filter>Header Files\intrinsics</Filter>
-    </ClInclude>
-    <ClInclude Include="intrinsic\m128f.h">
-      <Filter>Header Files\intrinsics</Filter>
-    </ClInclude>
-    <ClInclude Include="intrinsic\m128i.h">
-      <Filter>Header Files\intrinsics</Filter>
-    </ClInclude>
-    <ClInclude Include="intrinsic\m256f.h">
-      <Filter>Header Files\intrinsics</Filter>
-    </ClInclude>
-    <ClInclude Include="intrinsic\m256i.h">
-      <Filter>Header Files\intrinsics</Filter>
-    </ClInclude>
     <ClInclude Include="modules\perlin.h">
       <Filter>Header Files\modules</Filter>
     </ClInclude>
@@ -72,9 +54,6 @@
     <ClInclude Include="modules\voronoi.h">
       <Filter>Header Files\modules</Filter>
     </ClInclude>
-    <ClInclude Include="modules\terrace.h">
-      <Filter>Header Files\modules</Filter>
-    </ClInclude>
     <ClInclude Include="modules\select.h">
       <Filter>Header Files\modules</Filter>
     </ClInclude>
@@ -84,11 +63,47 @@
     <ClInclude Include="vector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="intrinsic\scalarcompat.h">
-      <Filter>Header Files\intrinsics</Filter>
-    </ClInclude>
     <ClInclude Include="modules\curve.h">
       <Filter>Header Files\modules</Filter>
+    </ClInclude>
+    <ClInclude Include="scheduler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\terrace.h">
+      <Filter>Header Files\modules</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\base.h">
+      <Filter>Header Files\parallel</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\clDouble.h">
+      <Filter>Header Files\parallel</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\clFloat.h">
+      <Filter>Header Files\parallel</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\clInt.h">
+      <Filter>Header Files\parallel</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\m128d.h">
+      <Filter>Header Files\parallel</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\m128f.h">
+      <Filter>Header Files\parallel</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\m128i.h">
+      <Filter>Header Files\parallel</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\m256d.h">
+      <Filter>Header Files\parallel</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\m256f.h">
+      <Filter>Header Files\parallel</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\m256i.h">
+      <Filter>Header Files\parallel</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\x87compat.h">
+      <Filter>Header Files\parallel</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

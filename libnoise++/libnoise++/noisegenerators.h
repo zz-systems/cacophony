@@ -4,6 +4,8 @@
 
 #include "interpolation.h"
 #include "vectortable.h"
+#include "parallel/x87compat.h"
+
 #include <iostream>
 #include <functional>
 
@@ -11,6 +13,7 @@
 
 namespace paranoise {	namespace generators {
 	using namespace interpolation;
+	using namespace x87compat;
 
 	enum Quality {
 		Fast,

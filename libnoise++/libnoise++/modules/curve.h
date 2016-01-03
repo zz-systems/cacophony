@@ -5,17 +5,15 @@
 #include <map>
 #include <algorithm>
 #include "../noisegenerators.h"
+#include "../parallel/x87compat.h"
 
 namespace paranoise { namespace module {
-	using namespace paranoise::generators;
+	using namespace generators;
+	using namespace x87compat;
 
 	SIMD_ENABLE_F(TReal)
 	struct curve_settings
 	{
-		double frequency = 1.0, lacunarity = 2.0, persistence = 0.5;
-		Quality quality = Quality::Standard;
-		int seed = 0;
-		int octaves = 6;
 		Module<TReal> source;
 		std::map<double, double> points;
 	};
@@ -39,8 +37,10 @@ namespace paranoise { namespace module {
 		auto i1 = clamp(startIndexes - 1, 0, cpc - 1);
 		auto i0 = clamp(startIndexes - 2, 0, cpc - 1);
 
+		auto mask = i1 == i2;
+		
 		//auto result = (i2 == i1) & 
-		TReal in1, in0, alpha, cp3, cp2, cp1, cp0;
+		TReal in1, in0, alpha, cp3, cp2, cp1, cp0, result;
 
 		for (int i = 0; i < elem_count(in1); i++)
 		{
@@ -51,11 +51,13 @@ namespace paranoise { namespace module {
 			cp2.values[i] = std::advance(settings.points.begin(), i2.values[i])->first;
 			cp1.values[i] = std::advance(settings.points.begin(), i1.values[i])->first;
 			cp0.values[i] = std::advance(settings.points.begin(), i0.values[i])->first;
+
+			result.values[i] = std::advance(settings.points.begin(), i1.values[i])->second;
 		}
 
 		alpha = (val - in0) / (in1 - in0);
 
-		return InterpolateCubic(cp0, cp1, cp2, cp3, cp4, alpha);
+		return result & mask | ~mask & InterpolateCubic(cp0, cp1, cp2, cp3, cp4, alpha);
 	}
 }}
 #endif

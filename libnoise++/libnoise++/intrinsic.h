@@ -3,46 +3,46 @@
 #define INTRINSIC_H
 
 #include "basetypes.h"
-#include "intrinsic\m128i.h"
-#include "intrinsic\m128f.h"
-#include "intrinsic\m128d.h"
+#include "parallel\m128i.h"
+#include "parallel\m128f.h"
+#include "parallel\m128d.h"
 
-#include "intrinsic\m256i.h"
-#include "intrinsic\m256f.h"
-#include "intrinsic\m256d.h"
+#include "parallel\m256i.h"
+#include "parallel\m256f.h"
+#include "parallel\m256d.h"
 
 
 template<>
-struct std::_Is_integral<paranoise::intrinsic::m128i>
+struct std::_Is_integral<paranoise::parallel::m128i>
 	: std::true_type
 {	};
 
 template<>
-struct std::_Is_integral<paranoise::intrinsic::m256i>
+struct std::_Is_integral<paranoise::parallel::m256i>
 	: std::true_type
 {	};
 
 template<>
-struct std::_Is_floating_point<paranoise::intrinsic::m128f>
+struct std::_Is_floating_point<paranoise::parallel::m128f>
 	: std::true_type
 {	};
 
 template<>
-struct std::_Is_floating_point<paranoise::intrinsic::m128d>
+struct std::_Is_floating_point<paranoise::parallel::m128d>
 	: std::true_type
 {	};
 
 template<>
-struct std::_Is_floating_point<paranoise::intrinsic::m256f>
+struct std::_Is_floating_point<paranoise::parallel::m256f>
 	: std::true_type
 {	};
 
 template<>
-struct std::_Is_floating_point<paranoise::intrinsic::m256d>
+struct std::_Is_floating_point<paranoise::parallel::m256d>
 	: std::true_type
 {	};
 
-namespace paranoise {	namespace intrinsic {	
+namespace paranoise {	namespace parallel {
 
 	// Converting constructors ===================================================================================
 
@@ -69,32 +69,6 @@ namespace paranoise {	namespace intrinsic {
 	inline m256d::m256d(const m256f& rhs) : m256d(rhs.val) { }
 	inline m256d::m256d(const m256i& rhs) : m256d(rhs.val) { }
 	inline m256d::m256d(const m256d& rhs) : m256d(rhs.val) { }
-
-	// Assignment ================================================================================================
-
-	/*inline m128i &m128i::operator =(const m128i &rhs) { this->val = rhs.val;			return *this; }
-	inline m128i &m128i::operator =(const m128f &rhs) { this->val = m128i(rhs).val;		return *this; }
-	inline m128i &m128i::operator =(const m128d &rhs) { this->val = m128i(rhs).val;		return *this; }
-
-	inline m128f &m128f::operator =(const m128i &rhs) { this->val = m128f(rhs).val;		return *this; }
-	inline m128f &m128f::operator =(const m128f &rhs) { this->val = rhs.val;			return *this; }
-	inline m128f &m128f::operator =(const m128d &rhs) { this->val = m128f(rhs).val;		return *this; }
-
-	inline m128d &m128d::operator =(const m128i &rhs) { this->val = m128d(rhs).val;		return *this; }
-	inline m128d &m128d::operator =(const m128f &rhs) { this->val = m128d(rhs).val;		return *this; }
-	inline m128d &m128d::operator =(const m128d &rhs) { this->val = rhs.val;			return *this; }
-
-	inline m256i &m256i::operator =(const m256i &rhs) { this->val = rhs.val;			return *this; }
-	inline m256i &m256i::operator =(const m256f &rhs) { this->val = m256i(rhs).val;		return *this; }
-	inline m256i &m256i::operator =(const m256d &rhs) { this->val = m256i(rhs).val;		return *this; }
-
-	inline m256f &m256f::operator =(const m256i &rhs) { this->val = m256f(rhs).val;		return *this; }
-	inline m256f &m256f::operator =(const m256f &rhs) { this->val = rhs.val;			return *this; }
-	inline m256f &m256f::operator =(const m256d &rhs) { this->val = m256f(rhs).val;		return *this; }
-
-	inline m256d &m256d::operator =(const m256i &rhs) { this->val = m256d(rhs).val;		return *this; }
-	inline m256d &m256d::operator =(const m256f &rhs) { this->val = m256d(rhs).val;		return *this; }
-	inline m256d &m256d::operator =(const m256d &rhs) { this->val = rhs.val;			return *this; }*/
 
 	// Load/Store ===============================================================================================
 
@@ -152,6 +126,10 @@ namespace paranoise {	namespace intrinsic {
 	// Integer SQRT =============================================================================================
 	inline m256i sqrt(const m256i& a) { return _mm256_sqrt_ps(m256f(a).val); }
 	inline m128i sqrt(const m128i& a) { return _mm_sqrt_ps(m128f(a).val); }
+
+	// Integer DIV
+	inline m128i operator /(const m128i& a, const m128i& b) { return _mm_div_ps		(m128f(a).val, m128f(b).val); }
+	inline m256i operator /(const m256i& a, const m256i& b) { return _mm256_div_ps	(m256f(a).val, m256f(b).val); }
 }}
 
 #endif 
