@@ -19,10 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{5B8F1E63-2A30-460E-B8A7-D2315691C8B7}</ProjectGuid>
-    <RootNamespace>libnoise</RootNamespace>
+    <ProjectGuid>{53C4A198-A582-497F-9ED2-C536D363366A}</ProjectGuid>
+    <RootNamespace>unrealcompat</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
-    <ProjectName>paranoise</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -119,40 +118,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="basetypes.h" />
-    <ClInclude Include="color.h" />
-    <ClInclude Include="interpolation.h" />
-    <ClInclude Include="models\primitives.h" />
-    <ClInclude Include="modules\all.h" />
-    <ClInclude Include="modules\billow.h" />
-    <ClInclude Include="modules\curve.h" />
-    <ClInclude Include="modules\modules.h" />
-    <ClInclude Include="modules\perlin.h" />
-    <ClInclude Include="modules\ridgedmultifrac.h" />
-    <ClInclude Include="modules\rotate.h" />
-    <ClInclude Include="modules\select.h" />
-    <ClInclude Include="modules\terrace.h" />
-    <ClInclude Include="modules\voronoi.h" />
-    <ClInclude Include="noisegenerators.h" />
-    <ClInclude Include="parallel\all.h" />
-    <ClInclude Include="parallel\avx.h" />
-    <ClInclude Include="parallel\base.h" />
-    <ClInclude Include="parallel\clDouble.h" />
-    <ClInclude Include="parallel\clFloat.h" />
-    <ClInclude Include="parallel\clInt.h" />
-    <ClInclude Include="parallel\double2.h" />
-    <ClInclude Include="parallel\float4.h" />
-    <ClInclude Include="parallel\int4.h" />
-    <ClInclude Include="parallel\double4.h" />
-    <ClInclude Include="parallel\float8.h" />
-    <ClInclude Include="parallel\int8.h" />
-    <ClInclude Include="parallel\opencl.h" />
-    <ClInclude Include="parallel\SISD.h" />
-    <ClInclude Include="parallel\sse.h" />
-    <ClInclude Include="parallel\x87compat.h" />
-    <ClInclude Include="scheduler.h" />
-    <ClInclude Include="vector.h" />
-    <ClInclude Include="vectortable.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

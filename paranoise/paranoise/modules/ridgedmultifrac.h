@@ -3,29 +3,29 @@
 #define PARANOISE_MODULES_RIDGED
 
 #include "../noisegenerators.h"
-#include "../parallel/x87compat.h"
+//#include "../parallel/x87compat.h"
 
 namespace paranoise { namespace module {
 	using namespace generators;
-	using namespace x87compat;
+	//using namespace x87compat;
 
 	struct ridged_settings
 	{
-		double frequency = 1.0, lacunarity = 2.0;
+		float frequency = 1.0, lacunarity = 2.0;
 		Quality quality = Quality::Standard;
 		int seed = 0;
 		int octaves = 6;
 
-		double spectralWeights[30];
+		float spectralWeights[30];
 		ridged_settings()
 		{
-			double	h		= 1.0, 
+			float	h		= 1.0, 
 					freq	= 1.0;
 
 			for (int i = 0; i < 30; i++) 
 			{
 				// Compute weight for each frequency.
-				spectralWeights[i] = std::pow(freq, -h);
+				spectralWeights[i] = std::powf(freq, -h);
 				freq = freq * lacunarity;
 			}
 		}
@@ -35,9 +35,9 @@ namespace paranoise { namespace module {
 	// Multifractal code originally written by F. Kenton "Doc Mojo" Musgrave,
 	// 1998.  Modified by jas for use with libnoise.
 	SIMD_ENABLE(TReal, TInt)
-	inline TReal ridged(Vector3<TReal>& coords, const ridged_settings& settings)
+	inline TReal ridged(const Vector3<TReal>& coords, const ridged_settings& settings)
 	{
-		coords = coords * Vector3<TReal>(settings.frequency);
+		auto _coords = coords * Vector3<TReal>(settings.frequency);
 
 		TReal signal = 0.0;
 		TReal value = 0.0;
@@ -52,10 +52,7 @@ namespace paranoise { namespace module {
 
 			// Make sure that these floating-point values have the same range as a 32-
 			// bit integer so that we can pass them to the coherent-noise functions.
-			Vector3<TReal> n;
-			n.x = TInt(coords.x);
-			n.y = TInt(coords.y);
-			n.z = TInt(coords.z);
+			Vector3<TReal> n(truncate<TReal, TInt>(_coords.x), truncate<TReal, TInt>(_coords.y), truncate<TReal, TInt>(_coords.z));
 
 			// Get the coherent-noise value.
 			TInt seed = (settings.seed + currentOctave) & 0xffffffff;
@@ -82,10 +79,10 @@ namespace paranoise { namespace module {
 			value = value + (signal * settings.spectralWeights[currentOctave]);
 
 			// Go to the next octave.
-			coords = coords * Vector3<TReal>(settings.lacunarity);
+			_coords = _coords * Vector3<TReal>(settings.lacunarity);
 		}
 
-		return (value * 1.25) - 1.0;
+		return (value * 1.25f) - 1.0f;
 	}
 }}
 #endif

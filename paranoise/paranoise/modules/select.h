@@ -3,11 +3,11 @@
 #define PARANOISE_MODULES_SELECT
 
 #include "../noisegenerators.h"
-#include "../parallel/x87compat.h"
+//#include "../parallel/x87compat.h"
 
 namespace paranoise { namespace module {
 	using namespace generators;
-	using namespace x87compat;
+	//using namespace x87compat;
 
 	SIMD_ENABLE_F(TReal)
 	struct select_settings
@@ -65,8 +65,8 @@ namespace paranoise { namespace module {
 		{
 			auto lowerCurve = bound - edgeFalloff; 
 			auto upperCurve = bound + edgeFalloff; 
-			auto sc = SCurve3((control - lowerCurve) / (upperCurve - lowerCurve));
-			return InterpolateLinear(from, to, sc);
+			auto sc = scurve3((control - lowerCurve) / (upperCurve - lowerCurve));
+			return lerp(from, to, sc);
 		}
 	}
 }}

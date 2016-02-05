@@ -4,11 +4,11 @@
 
 #include <limits>
 #include "../noisegenerators.h"
-#include "../parallel/x87compat.h"
+//#include "../parallel/x87compat.h"
 
 namespace paranoise { namespace module {
 	using namespace generators;
-	using namespace x87compat;
+	//using namespace x87compat;
 
 	struct voronoi_settings
 	{
@@ -25,12 +25,12 @@ namespace paranoise { namespace module {
 		// This method could be more efficient by caching the seed values.  Fix
 		// later.
 
-		auto _coords = coords * Vector3<TReal>(settings.lacunarity);
+		auto _coords = coords * Vector3<TReal>(settings.frequency);
 
-		auto cube = Vector3<TInt>;
-		cube.x = TInt(c.x) - TInt((c.x > 0) & 1);
-		cube.y = TInt(c.y) - TInt((c.y > 0) & 1);
-		cube.z = TInt(c.z) - TInt((c.z > 0) & 1);
+		Vector3<TInt> cube;
+		cube.x = TInt(_coords.x) - TInt((_coords.x > 0) & 1);
+		cube.y = TInt(_coords.y) - TInt((_coords.y > 0) & 1);
+		cube.z = TInt(_coords.z) - TInt((_coords.z > 0) & 1);
 
 		TReal minDist = std::numeric_limits<int>::min();
 		TReal candidate;
@@ -38,9 +38,9 @@ namespace paranoise { namespace module {
 		// Inside each unit cube, there is a seed point at a random position.  Go
 		// through each of the nearby cubes until we find a cube with a seed point
 		// that is closest to the specified position.
-		for (int z = cube.z - 2; z <= cube.z + 2; z++)
-		for (int y = cube.y - 2; y <= cube.y + 2; y++)
-		for (int x = cube.x - 2; x <= xube.x + 2; x++)
+		for (TInt z = cube.z - 2; z <= cube.z + 2; z = z + 1)
+		for (TInt y = cube.y - 2; y <= cube.y + 2; y = y + 1)
+		for (TInt x = cube.x - 2; x <= cube.x + 2; x = x + 1)
 		{
 			auto cur = Vector3<TInt>(x, y, z);
 

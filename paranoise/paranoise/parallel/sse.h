@@ -3,53 +3,53 @@
 #define PARANOISE_SSE_H
 
 #include "base.h"
-#include "m128i.h"
-#include "m128f.h"
-#include "m128d.h"
+#include "int4.h"
+#include "float4.h"
+#include "double2.h"
 #include "x87compat.h"
 
 // Traits =========================================================================================================
 template<>
-struct std::_Is_integral<paranoise::parallel::m128i>		: std::true_type {	};
+struct std::_Is_integral<paranoise::parallel::int4>		: std::true_type {	};
 
 template<>
-struct std::_Is_floating_point<paranoise::parallel::m128f>	: std::true_type {	};
+struct std::_Is_floating_point<paranoise::parallel::float4>	: std::true_type {	};
 
 template<>
-struct std::_Is_floating_point<paranoise::parallel::m128d>	: std::true_type {	};
+struct std::_Is_floating_point<paranoise::parallel::double2>	: std::true_type {	};
 
 namespace paranoise { namespace parallel {
 
 	// Converting constructors ===================================================================================
-	inline m128i::m128i(const m128f& rhs) : m128i(rhs.val) { }
-	inline m128i::m128i(const m128i& rhs) : m128i(rhs.val) { }
-	inline m128i::m128i(const m128d& rhs) : m128i(rhs.val) { }
+	inline int4::int4(const float4& rhs) : int4(rhs.val) { }
+	inline int4::int4(const int4& rhs) : int4(rhs.val) { }
+	inline int4::int4(const double2& rhs) : int4(rhs.val) { }
 
-	inline m128f::m128f(const m128f& rhs) : m128f(rhs.val) { }
-	inline m128f::m128f(const m128i& rhs) : m128f(rhs.val) { }
-	inline m128f::m128f(const m128d& rhs) : m128f(rhs.val) { }
+	inline float4::float4(const float4& rhs) : float4(rhs.val) { }
+	inline float4::float4(const int4& rhs) : float4(rhs.val) { }
+	inline float4::float4(const double2& rhs) : float4(rhs.val) { }
 
-	inline m128d::m128d(const m128f& rhs) : m128d(rhs.val) { }
-	inline m128d::m128d(const m128i& rhs) : m128d(rhs.val) { }
-	inline m128d::m128d(const m128d& rhs) : m128d(rhs.val) { }
+	inline double2::double2(const float4& rhs) : double2(rhs.val) { }
+	inline double2::double2(const int4& rhs) : double2(rhs.val) { }
+	inline double2::double2(const double2& rhs) : double2(rhs.val) { }
 
 	// Load/Store ===============================================================================================
-	inline int32* extract(m128i& src)				{ return src.i32; }
-	inline int32* extract(m128i& src, m128f& ref)	{ return src.i32; }
-	inline int64* extract(m128i& src, m128d& ref)	{ return src.val.m128i_i64; }
+	inline int32* extract(int4& src)				{ return src.i32; }
+	inline int32* extract(int4& src, float4& ref)	{ return src.i32; }
+	inline int64* extract(int4& src, double2& ref)	{ return src.val.m128i_i64; }
 
-	inline float* extract(m128f& src)				{ return src.values; }	
-	inline double* extract(m128d& src)				{ return src.values; }
+	inline float* extract(float4& src)				{ return src.values; }	
+	inline double* extract(double2& src)				{ return src.values; }
 
 	// Vector dimensions  =======================================================================================
-	inline size_t dim(const m128f& val) { return 4; }
-	inline size_t dim(const m128i& val) { return 4; }
-	inline size_t dim(const m128d& val) { return 2; }
+	inline size_t dim(const float4& val) { return 4; }
+	inline size_t dim(const int4& val) { return 4; }
+	inline size_t dim(const double2& val) { return 2; }
 
 	// Integer SQRT =============================================================================================	
-	inline m128i sqrt(const m128i& a) { return _mm_sqrt_ps(m128f(a).val); }
+	inline int4 sqrt(const int4& a) { return _mm_sqrt_ps(float4(a).val); }
 
 	// Integer DIV ==============================================================================================	
-	inline m128i operator /(const m128i& a, const m128i& b) { return _mm_div_ps(m128f(a).val, m128f(b).val); }
+	inline int4 operator /(const int4& a, const int4& b) { return _mm_div_ps(float4(a).val, float4(b).val); }
 }}
 #endif

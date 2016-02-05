@@ -28,6 +28,12 @@
     <Filter Include="Header Files\modules\impl">
       <UniqueIdentifier>{1de57c7b-6312-4626-9f36-4748d51b75ef}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\util">
+      <UniqueIdentifier>{4a372e04-5d11-4a29-8091-200e85bbb44b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\models">
+      <UniqueIdentifier>{c46dd8ba-79ac-4ce1-96df-a48f9e40ea2f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="scheduler.h">
@@ -43,24 +49,6 @@
       <Filter>Header Files\parallel\impl</Filter>
     </ClInclude>
     <ClInclude Include="parallel\clInt.h">
-      <Filter>Header Files\parallel\impl</Filter>
-    </ClInclude>
-    <ClInclude Include="parallel\m128d.h">
-      <Filter>Header Files\parallel\impl</Filter>
-    </ClInclude>
-    <ClInclude Include="parallel\m128f.h">
-      <Filter>Header Files\parallel\impl</Filter>
-    </ClInclude>
-    <ClInclude Include="parallel\m128i.h">
-      <Filter>Header Files\parallel\impl</Filter>
-    </ClInclude>
-    <ClInclude Include="parallel\m256d.h">
-      <Filter>Header Files\parallel\impl</Filter>
-    </ClInclude>
-    <ClInclude Include="parallel\m256f.h">
-      <Filter>Header Files\parallel\impl</Filter>
-    </ClInclude>
-    <ClInclude Include="parallel\m256i.h">
       <Filter>Header Files\parallel\impl</Filter>
     </ClInclude>
     <ClInclude Include="parallel\x87compat.h">
@@ -111,20 +99,44 @@
     <ClInclude Include="modules\all.h">
       <Filter>Header Files\modules</Filter>
     </ClInclude>
-    <ClInclude Include="basetypes.h">
-      <Filter>Header Files\noise</Filter>
-    </ClInclude>
-    <ClInclude Include="interpolation.h">
-      <Filter>Header Files\noise</Filter>
-    </ClInclude>
     <ClInclude Include="noisegenerators.h">
-      <Filter>Header Files\noise</Filter>
-    </ClInclude>
-    <ClInclude Include="vector.h">
       <Filter>Header Files\noise</Filter>
     </ClInclude>
     <ClInclude Include="vectortable.h">
       <Filter>Header Files\noise</Filter>
+    </ClInclude>
+    <ClInclude Include="vector.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="basetypes.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="interpolation.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="color.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="models\primitives.h">
+      <Filter>Header Files\models</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\double2.h">
+      <Filter>Header Files\parallel\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\float4.h">
+      <Filter>Header Files\parallel\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\int4.h">
+      <Filter>Header Files\parallel\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\double4.h">
+      <Filter>Header Files\parallel\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\float8.h">
+      <Filter>Header Files\parallel\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\int8.h">
+      <Filter>Header Files\parallel\impl</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

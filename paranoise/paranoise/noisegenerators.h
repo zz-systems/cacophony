@@ -2,7 +2,7 @@
 #ifndef PARANOISE_NOISE_GENERATORS
 #define PARANOISE_NOISE_GENERATORS
 
-#include "parallel/x87compat.h"
+//#include "parallel/x87compat.h"
 
 #include "interpolation.h"
 #include "vectortable.h"
@@ -15,7 +15,7 @@
 
 namespace paranoise {	namespace generators {
 	using namespace interpolation;
-	using namespace x87compat;
+	////using namespace x87compat;
 
 	enum Quality {
 		Fast,
@@ -78,14 +78,14 @@ namespace paranoise {	namespace generators {
 			case Quality::Fast:
 				break;
 			case Quality::Standard:
-				s.x = SCurve3(s.x);
-				s.y = SCurve3(s.y);
-				s.z = SCurve3(s.z);
+				s.x = scurve3(s.x);
+				s.y = scurve3(s.y);
+				s.z = scurve3(s.z);
 				break;
 			case Quality::Best:
-				s.x = SCurve5(s.x);
-				s.y = SCurve5(s.y);
-				s.z = SCurve5(s.z);
+				s.x = scurve5(s.x);
+				s.y = scurve5(s.y);
+				s.z = scurve5(s.z);
 				break;
 			}
 		}
@@ -105,26 +105,26 @@ namespace paranoise {	namespace generators {
 			n0 = noisegen(Vector3<TInt>(cube._0.x, cube._0.y, cube._0.z), seed);
 			n1 = noisegen(Vector3<TInt>(cube._1.x, cube._0.y, cube._0.z), seed);
 
-			ix0 = InterpolateLinear(n0, n1, s.x);
+			ix0 = lerp(n0, n1, s.x);
 
 			n0 = noisegen(Vector3<TInt>(cube._0.x, cube._1.y, cube._0.z), seed);
 			n1 = noisegen(Vector3<TInt>(cube._1.x, cube._1.y, cube._0.z), seed);
 
-			ix1 = InterpolateLinear(n0, n1, s.x);
-			iy0 = InterpolateLinear(ix0, ix1, s.y);
+			ix1 = lerp(n0, n1, s.x);
+			iy0 = lerp(ix0, ix1, s.y);
 
 			n0 = noisegen(Vector3<TInt>(cube._0.x, cube._0.y, cube._1.z), seed);
 			n1 = noisegen(Vector3<TInt>(cube._1.x, cube._0.y, cube._1.z), seed);
 
-			ix0 = InterpolateLinear(n0, n1, s.x);
+			ix0 = lerp(n0, n1, s.x);
 
 			n0 = noisegen(Vector3<TInt>(cube._0.x, cube._1.y, cube._1.z), seed);
 			n1 = noisegen(Vector3<TInt>(cube._1.x, cube._1.y, cube._1.z), seed);
 
-			ix1 = InterpolateLinear(n0, n1, s.y);
-			iy1 = InterpolateLinear(ix0, ix1, s.y);
+			ix1 = lerp(n0, n1, s.y);
+			iy1 = lerp(ix0, ix1, s.y);
 
-			return InterpolateLinear(iy0, iy1, s.z);
+			return lerp(iy0, iy1, s.z);
 		}
 	}
 
@@ -135,36 +135,28 @@ namespace paranoise {	namespace generators {
 	{
 		auto vectorIndices = (X_NOISE_GEN * nearby.x + Y_NOISE_GEN * nearby.y + Z_NOISE_GEN * nearby.z + SEED_NOISE_GEN * seed);
 	
-		if(std::is_integral<TInt>::value)
-			vectorIndices = vectorIndices & 0xffffffff;
+		vectorIndices &= (TInt) 0xffffffff;
+		vectorIndices ^= (vectorIndices >> SHIFT_NOISE_GEN);
+		vectorIndices &= (TInt) 0xFF;
+		vectorIndices <<= 2;
 
-		vectorIndices = vectorIndices ^ (vectorIndices >> SHIFT_NOISE_GEN);
-
-		vectorIndices = (vectorIndices & 0xFF);
-
-		vectorIndices = vectorIndices << 2;
-
-		TReal xvGradient, yvGradient, zvGradient;
-		auto	_xvGradient = extract(xvGradient),
-				_yvGradient = extract(yvGradient),
-				_zvGradient = extract(zvGradient);
+		Vector3<TReal> vGradient;
+		auto	_xvGradient = extract(vGradient.x),
+				_yvGradient = extract(vGradient.y),
+				_zvGradient = extract(vGradient.z);
 
 		auto _vi = extract(vectorIndices);
 
-		for (size_t i = 0; i < dim(xvGradient); i++)
+		for (size_t i = 0; i < dim(vGradient.x); i++)
 		{
 			_xvGradient[i] = RandomVectors[_vi[i]];
 			_yvGradient[i] = RandomVectors[_vi[i] + 1];
 			_zvGradient[i] = RandomVectors[_vi[i] + 2];
 		}
 		
-		TReal	xvPoint = input.x - TReal(nearby.x),
-				yvPoint = input.y - TReal(nearby.y),
-				zvPoint = input.z - TReal(nearby.z);
+		Vector3<TReal>	vPoint = input - (Vector3<TReal>)nearby;
 
-		return ((xvGradient * xvPoint)
-			+ (yvGradient * yvPoint)
-			+ (zvGradient * zvPoint)) * 2.12;
+		return dot(vGradient, vPoint) * 2.12f;
 	}
 
 	SIMD_ENABLE(TReal, TInt)
@@ -179,7 +171,7 @@ namespace paranoise {	namespace generators {
 		detail::map_coord_diff<TReal, TInt>(c, cube, noiseQuality, s);
 		
 		return detail::calc_noise<TReal, TInt>(cube, s, seed,
-			[&](const Vector3<TInt>& s, const TInt& seed) { return GradientNoise3D(c, s, seed); });
+			[&c](const Vector3<TInt>& s, const TInt& seed) { return GradientNoise3D(c, s, seed); });
 	}	
 
 	SIMD_ENABLE_I(TInt)
@@ -194,13 +186,14 @@ namespace paranoise {	namespace generators {
 
 		n = (n >> 13) ^ n;
 
-		return (n * (n * n * 60493 + 19990303) + 1376312589) & 0x7fffffff;
+		//return (n * (n * n * 60493 + 19990303) + 1376312589) & 0x7fffffff;
+		return (n * (n * n * 1087 + 2749) + 3433) & 0x7fffffff;
 	}
 
 	SIMD_ENABLE(TReal, TInt)
 	TReal ValueNoise3D(const Vector3<TInt>& c, const TInt& seed)
 	{
-		return 1.0 - (TReal(IntValueNoise3D(c, seed)) / 1073741824.0);
+		return 1 - (TReal(IntValueNoise3D(c, seed)) / 1073741824.0f);
 	}
 
 	SIMD_ENABLE(TReal, TInt)

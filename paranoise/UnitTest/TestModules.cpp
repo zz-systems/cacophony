@@ -3,12 +3,14 @@
 
 #include "../paranoise/parallel/all.h"
 #include "../paranoise/modules/all.h"
+#include "../paranoise/scheduler.h"
 
 #define TEST_USE_THREADS
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace paranoise::interpolation;
 using namespace paranoise::parallel;
 using namespace paranoise::module;
+using namespace paranoise::scheduler;
 using namespace paranoise;
 
 #ifdef TEST_USE_THREADS
@@ -25,33 +27,47 @@ namespace UnitTest
 		TEST_METHOD(Test_Module_Perlin)
 		{
 			auto settings = perlin_settings();
-			auto refresult = perlin<double, int>(Vector3<double>(1, 1, 1), settings);
+			auto refresult = perlin<float, int>(Vector3<float>(1, 1, 1), settings);
 
-			auto result = perlin<m128d, m128i>(Vector3<m128d>(1, 1, 1), settings);
+			auto result = perlin<float4, int4>(Vector3<float4>(1, 1, 1), settings);
 
-			Assert::AreEqual(refresult, result.values[0], std::numeric_limits<double>::epsilon());
+			Assert::AreEqual(refresult, result.values[0], std::numeric_limits<float>::epsilon());
 		}
 
 		TEST_METHOD(Test_Module_RidgedMultiFractal)
 		{
 			auto settings = ridged_settings();
-			auto refresult = ridged<double, int>(Vector3<double>(1, 1, 1), settings);
+			auto refresult = ridged<float, int>(Vector3<float>(1, 1, 1), settings);
 
-			//auto settings		= perlin_settings<m128d, m128i>();
-			auto result = ridged<m128d, m128i>(Vector3<m128d>(1, 1, 1), settings);
+			//auto settings		= perlin_settings<float4, int4>();
+			auto result = ridged<float4, int4>(Vector3<float4>(1, 1, 1), settings);
 
-			Assert::AreEqual(refresult, result.values[0], std::numeric_limits<double>::epsilon());
+			Assert::AreEqual(refresult, result.values[0], std::numeric_limits<float>::epsilon());
 		}
 
 		TEST_METHOD(Test_Module_Billow)
 		{
 			auto settings = billow_settings();
-			auto refresult = billow<double, int>(Vector3<double>(1, 1, 1), settings);
+			auto refresult = billow<float, int>(Vector3<float>(1, 1, 1), settings);
 
-			//auto settings		= perlin_settings<m128d, m128i>();
-			auto result = billow<m128d, m128i>(Vector3<m128d>(1, 1, 1), settings);
+			//auto settings		= perlin_settings<float4, int4>();
+			auto result = billow<float4, int4>(Vector3<float4>(1, 1, 1), settings);
 
-			Assert::AreEqual(refresult, result.values[0], std::numeric_limits<double>::epsilon());
+			Assert::AreEqual(refresult, result.values[0], std::numeric_limits<float>::epsilon());
+		}
+
+		TEST_METHOD(Test_Module_Scheduler)
+		{
+			billow_settings module_s;
+			module_s.seed = 125;
+			scheduler_settings scheduler_s;
+
+			scheduler_s.dimensions = { 4, 4, 4 };
+
+			auto result = schedule<float4>([&module_s](const Vector3<float4>& coords) { return billow<float4, int4>(coords, module_s); }, [](const Vector3<float4>& coords) { return coords; }, scheduler_s);
+			
+
+			Assert::AreEqual(1, 1, std::numeric_limits<float>::epsilon());
 		}
 	};
 }

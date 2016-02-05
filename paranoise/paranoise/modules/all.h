@@ -10,5 +10,5 @@
 #include "rotate.h"
 #include "select.h"
 #include "terrace.h"
-
+#include "voronoi.h"
 #endif

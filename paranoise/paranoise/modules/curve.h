@@ -5,11 +5,11 @@
 #include <map>
 #include <algorithm>
 #include "../noisegenerators.h"
-#include "../parallel/x87compat.h"
+//#include "../parallel/x87compat.h"
 
 namespace paranoise { namespace module {
 	using namespace generators;
-	using namespace x87compat;
+	//using namespace x87compat;
 
 	SIMD_ENABLE_F(TReal)
 	struct curve_settings
@@ -57,7 +57,7 @@ namespace paranoise { namespace module {
 
 		alpha = (val - in0) / (in1 - in0);
 
-		return result & mask | ~mask & InterpolateCubic(cp0, cp1, cp2, cp3, cp4, alpha);
+		return result & mask | ~mask & cerp(cp0, cp1, cp2, cp3, cp4, alpha);
 	}
 }}
 #endif

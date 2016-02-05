@@ -3,7 +3,6 @@
 #define BASETYPES_H
 
 #include <functional>
-
 #include "vector.h"
 
 namespace paranoise {
@@ -17,8 +16,11 @@ namespace paranoise {
 	typedef signed		long long	int64;
 	typedef signed		int		int32;
 	typedef signed		short	int16;
-	typedef signed		char	int8;
+	//typedef signed		char	int8;
 	
+	const double PI = 3.14159265358979323846;
+	const double DEG2RAD = PI / 180.0;
+
 #define ALIGN(bytes) __declspec(align(bytes))
 
 // define checked floating and integral type to use on SIMD-enabled functions/types. 
@@ -39,6 +41,9 @@ namespace paranoise {
 
 SIMD_ENABLE_F(TReal)
 using Module = std::function<TReal(const Vector3<TReal>&)>;
+
+SIMD_ENABLE_F(TReal)
+using Transformer = std::function<Vector3<TReal>(const Vector3<TReal>&)>;
 
 SIMD_ENABLE(TReal, TInt)
 using SeededModule = std::function<TReal(const Vector3<TReal>&, const TInt& seed)>;

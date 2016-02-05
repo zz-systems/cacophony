@@ -3,17 +3,17 @@
 #define PARANOISE_MODULES_PERLIN
 
 #include "../noisegenerators.h"
-#include "../parallel/x87compat.h"
+//#include "../parallel/x87compat.h"
 
 namespace paranoise { namespace module {
 	using namespace generators;
-	using namespace x87compat;
+	//using namespace x87compat;
 	
 	struct perlin_settings
 	{
-		double  frequency	= 1.0, 
-				lacunarity  = 2.0, 
-				persistence = 0.5;
+		float   frequency	= 1.0f, 
+				lacunarity  = 2.0f, 
+				persistence = 0.5f;
 
 		Quality quality = Quality::Standard;
 		int seed = 0;
@@ -25,7 +25,7 @@ namespace paranoise { namespace module {
 	{
 		TReal	value				= 0, 
 				signal				= 0, 
-				currentPersistence	= 0;
+				currentPersistence	= 1;
 		Vector3<TReal> n;
 		TInt seed;
 
@@ -35,13 +35,13 @@ namespace paranoise { namespace module {
 		{
 			// Make sure that these floating-point values have the same range as a 32-
 			// bit integer so that we can pass them to the coherent-noise functions.
-			n.x = TInt(_coords.x);
-			n.y = TInt(_coords.y);
-			n.z = TInt(_coords.z);
+			n.x = TReal(TInt(_coords.x));
+			n.y = TReal(TInt(_coords.y));
+			n.z = TReal(TInt(_coords.z));
 
 			// Get the coherent-noise value from the input value and add it to the
 			// final result.
-			seed = (settings.seed + curOctave) & (int)0xffffffff;
+			seed = (settings.seed + curOctave) & 0xffffffff;
 
 			signal = GradientCoherentNoise3D(n, seed, settings.quality);
 			value = value + signal * currentPersistence;

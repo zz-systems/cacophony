@@ -30,5 +30,23 @@ namespace paranoise { namespace parallel {
 
 	template<typename T>
 	inline T clamp(const T& val, const T& minval, const T& maxval) { return min(max(val, minval), maxval); }
+
+	SIMD_ENABLE(TReal, TInt)
+		inline TReal truncate(const TReal &val) { return (TReal)(TInt)val; }
+
+#define SIMD_ANY(type) template<typename type>
+
+	SIMD_ANY(TType) inline TType &operator +=(TType& a, const TType& b) { a = (a + b); return a; }
+	SIMD_ANY(TType) inline TType &operator -=(TType& a, const TType& b) { a = (a - b); return a; }
+	SIMD_ANY(TType) inline TType &operator *=(TType& a, const TType& b) { a = (a * b); return a; }
+	SIMD_ANY(TType) inline TType &operator /=(TType& a, const TType& b) { a = (a / b); return a; }
+
+	SIMD_ANY(TType) inline TType &operator !=(TType& a, const TType& b) { a = ~(a == b); return a; }
+	SIMD_ANY(TType) inline TType &operator &=(TType& a, const TType& b) { a = (a & b); return a; }
+	SIMD_ANY(TType) inline TType &operator |=(TType& a, const TType& b) { a = (a | b); return a; }
+	SIMD_ANY(TType) inline TType &operator ^=(TType& a, const TType& b) { a = (a ^ b); return a; }
+
+	SIMD_ANY(TType) inline TType operator >>=(TType& a, int amount) { a = a >> amount; return a; }
+	SIMD_ANY(TType) inline TType operator <<=(TType& a, int amount) { a = a << amount; return a; }
 }}
 #endif

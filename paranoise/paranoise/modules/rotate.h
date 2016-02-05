@@ -3,11 +3,11 @@
 #define PARANOISE_MODULES_SELECT
 
 #include "../noisegenerators.h"
-#include "../parallel/x87compat.h"
+//#include "../parallel/x87compat.h"
 
 namespace paranoise { namespace module {
 	using namespace generators;
-	using namespace x87compat;
+	//using namespace x87compat;
 
 	struct rotate_settings
 	{

@@ -6,16 +6,16 @@
 #include "../basetypes.h"
 //#include "../parallel/all.h"
 #include "../noisegenerators.h"
-#include "../parallel/x87compat.h"
+//#include "../parallel/x87compat.h"
 
 namespace paranoise { namespace module {
 	using namespace generators;
-	using namespace x87compat;
+	//using namespace x87compat;
 
 	SIMD_ENABLE_F(TReal)
 	inline TReal blend(TReal v0, TReal v1, TReal alpha)
 	{
-		return InterpolateLinear(v0, v1, (alpha + 1.0) / 2.0);
+		return lerp(v0, v1, (alpha + 1.0) / 2.0);
 	}
 
 	// blend input values according to blend factor alpha
