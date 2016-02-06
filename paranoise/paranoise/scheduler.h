@@ -7,17 +7,25 @@
 #include <ppl.h>
 #include <vector>
 
+#include "parallel/x87compat.h"
+
 namespace paranoise { namespace scheduler {
+	using namespace concurrency;
+	using namespace x87compat;
 
 	struct scheduler_settings
 	{
 		Vector3<int> dimensions;
 		int seed;
-		bool use_threads = true;
+		bool use_threads;
+
+		scheduler_settings(Vector3<int> dimensions, int seed = 0, bool use_threads = true)
+			: dimensions(dimensions), seed(seed), use_threads(use_threads)
+		{}
 	};
 
 	SIMD_ENABLE_F(TReal)
-	std::vector<std::vector<std::vector<float>>> *schedule(const Module<TReal>& source, const Transformer<TReal>& transform, const scheduler_settings& settings)
+	std::shared_ptr<std::vector<std::vector<std::vector<float>>>> schedule3D(const Module<TReal>& source, const Transformer<TReal>& transform, const scheduler_settings& settings)
 	{
 		int word = sizeof(TReal) >> 2;	
 		auto d = settings.dimensions;
@@ -62,5 +70,97 @@ namespace paranoise { namespace scheduler {
 
 		return result;
 	}
+
+	SIMD_ENABLE_F(TReal)
+		inline Vector3<TReal> build_coords(float x, float y)
+	{
+		return Vector3<TReal> {
+			TReal(x, x + 1.0f, x + 2.0f, x + 3.0f),
+			TReal(y),
+			0
+		};
+	}
+
+
+	/*if (word == 4)
+	{
+		float _x = x;
+
+		coords.x = TReal(_x, _x + 1.0f, _x + 2.0f, _x + 3.0f);
+		coords.y = (TReal)y;
+	}*/
+	/*else if (word == 8)
+	{
+	coords = Vector3<TReal>{
+	TReal(x, x + 1, x + 2, x + 3, x + 4, x + 5, x + 6, x + 7),
+	TReal(y),
+	TReal(z)
+	};
+	}*/
+
+	template<>
+	inline Vector3<float> build_coords(float x, float y)
+	{
+		return Vector3<float> {
+			x,
+			y,
+			0
+		};
+	}
+	using vector2D = std::vector<std::vector<float>>;
+
+	SIMD_ENABLE_F(TReal)
+	auto schedule2D(const Module<TReal>& source, const Transformer<TReal>& transform, const scheduler_settings& settings)
+	{
+		
+		int word = sizeof(TReal) >> 2;
+
+		auto d = settings.dimensions;
+
+		auto result = std::make_shared<vector2D>();
+
+		result->resize(d.y);
+		if (settings.use_threads)
+		{
+			//for (auto y = 0; y < d.y; y++)			
+			parallel_for(0, d.y, [&](auto y)
+			{
+				result->at(y).resize(d.x);
+				for (auto x = 0; x < d.x; x += word)
+				{
+					Vector3<TReal> coords = transform(build_coords<TReal>(x, y));
+
+					auto chunk = source(coords);
+					auto r = extract(chunk);
+
+					for (int i = 0; i < word; i++)
+					{
+						result->at(y).at(x + i) = r[i];
+					}
+				}
+			}
+			);
+		}
+		
+
+		return result;
+	}
+
+	/*SIMD_ENABLE_F(TReal)
+		inline schedule_thread_body(const std::shared_ptr<vector2D> &result, )
+	{
+		result->at(y).resize(d.x);
+		for (auto x = 0; x < d.x / word; x++)
+		{
+			Vector3<TReal> coords = transform(build_coords<TReal>((float)x / d.x, (float)y / d.y));
+
+			auto chunk = source(coords);
+
+			for (int i = 0; i < word; i++)
+			{
+				result->at(y).at(x + i) = extract(chunk)[i];
+			}
+		}
+	}*/
 }}
 #endif

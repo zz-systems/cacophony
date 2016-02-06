@@ -58,14 +58,12 @@ namespace UnitTest
 
 		TEST_METHOD(Test_Module_Scheduler)
 		{
-			billow_settings module_s;
+			/*billow_settings module_s;
 			module_s.seed = 125;
-			scheduler_settings scheduler_s;
+			scheduler_settings scheduler_s({4, 4, 4}, 1337, true);
 
-			scheduler_s.dimensions = { 4, 4, 4 };
-
-			auto result = schedule<float4>([&module_s](const Vector3<float4>& coords) { return billow<float4, int4>(coords, module_s); }, [](const Vector3<float4>& coords) { return coords; }, scheduler_s);
-			
+			auto result = schedule2D<float4>([&module_s](const Vector3<float4>& coords) { return billow<float4, int4>(coords, module_s); }, [](const Vector3<float4>& coords) { return coords; }, scheduler_s);
+			*/
 
 			Assert::AreEqual(1, 1, std::numeric_limits<float>::epsilon());
 		}

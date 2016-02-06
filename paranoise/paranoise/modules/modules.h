@@ -4,13 +4,13 @@
 
 #include <assert.h>
 #include "../basetypes.h"
-//#include "../parallel/all.h"
+#include "perlin.h"
 #include "../noisegenerators.h"
-//#include "../parallel/x87compat.h"
+#include "../parallel/x87compat.h"
 
 namespace paranoise { namespace module {
 	using namespace generators;
-	//using namespace x87compat;
+	using namespace x87compat;
 
 	SIMD_ENABLE_F(TReal)
 	inline TReal blend(TReal v0, TReal v1, TReal alpha)
@@ -28,22 +28,42 @@ namespace paranoise { namespace module {
 		return blend(v0(coords), v1(coords), alpha(coords));
 	}
 
-	// Apply turbulence to the source input
-	SIMD_ENABLE_F(TReal)
-	inline TReal turbulence(Module<TReal>			source,
-							Vector3<Module<TReal>> distorters,
-							Vector3<TReal> coords)
+	struct turbulence_settings : perlin_settings
 	{
-		auto dinput = Matrix3x3<TReal>(
-							{ 12414.0, 65124.0, 31337.0 },
-							{ 26519.0, 18128.0, 60493.0 },
-							{ 53820.0, 11213.0, 44845.0 }
-						) / 65536.0 + coords,
+		float power; 
+		int roughness;
 
-			distortion = Vector3<TReal>(distorters.x(dinput.x), distorters.y(dinput.y), distorters.z(dinput.z)) * power;
+		turbulence_settings(float power = 1.0, int roughness = 3, float frequency = 1.0, float lacunarity = 2.0, float persistence = 0.5, int octaves = 6, int seed = 0, Quality quality = Quality::Standard)
+			: perlin_settings(frequency, lacunarity, persistence, seed, octaves, quality),
+			power(power), roughness(roughness)
+		{}
+	};
+		
+	// Apply turbulence to the source input
+	SIMD_ENABLE(TReal, TInt)
+	inline TReal turbulence(Module<TReal> source,
+							const Vector3<TReal> &coords, 
+							const turbulence_settings &settings)
+	{
+		Matrix3x3<TReal> dinput = {
+			Vector3<TReal>{ 12414.0f, 65124.0f, 31337.0f } / (Vector3<TReal>) 65536.0f + coords,
+			Vector3<TReal>{ 26519.0f, 18128.0f, 60493.0f } / (Vector3<TReal>) 65536.0f + coords,
+			Vector3<TReal>{ 53820.0f, 11213.0f, 44845.0f } / (Vector3<TReal>) 65536.0f + coords
+		};
+
+		auto distortion = Vector3<TReal>(
+				perlin<TReal, TInt>(dinput._0, settings), 
+				perlin<TReal, TInt>(dinput._1, settings), 
+				perlin<TReal, TInt>(dinput._2, settings)) * (Vector3<TReal>)settings.power;
 
 
 		return source(coords + distortion);
+	}
+
+	SIMD_ENABLE_F(TReal)
+	inline TReal add(Module<TReal> one, Module<TReal> other, const Vector3<TReal> &coords)
+	{		
+		return one(coords) + other(coords);
 	}
 		
 	// Translate the source module's input
@@ -63,11 +83,11 @@ namespace paranoise { namespace module {
 	// Scale the source module's output and add a bias
 	SIMD_ENABLE_F(TReal)
 	inline TReal scale_output_biased(	Module<TReal> source, 
-										const Vector3<TReal>& factor, 
-										const Vector3<TReal>& bias, 
+										const TReal& factor, 
+										const TReal& bias, 
 										const Vector3<TReal>& coords)
 	{
-		return source(coords) * scale + bias;
+		return source(coords) * factor + bias;
 	}
 
 	// generate points on concentric spheres
@@ -96,10 +116,10 @@ namespace paranoise { namespace module {
 		
 		auto distFromCenter			= sqrt(_coords.x * _coords.x + _coords.z * _coords.z);
 		auto distFromSmallerSphere	= distFromCenter - floor(distFromCenter);
-		auto distFromLargerSphere	= 1.0 - distFromSmallerSphere;
+		auto distFromLargerSphere	= (TReal)1.0f - distFromSmallerSphere;
 		auto nearestDist			= min(distFromSmallerSphere, distFromLargerSphere);
 
-		return 1.0 - (nearestDist * 4.0); // Puts it in the -1.0 to +1.0 range.
+		return 1.0f - (nearestDist * 4.0f); // Puts it in the -1.0 to +1.0 range.
 	}
 
 	SIMD_ENABLE_F(TReal)

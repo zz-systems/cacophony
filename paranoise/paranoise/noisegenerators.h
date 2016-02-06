@@ -15,7 +15,7 @@
 
 namespace paranoise {	namespace generators {
 	using namespace interpolation;
-	////using namespace x87compat;
+	//using namespace x87compat;
 
 	enum Quality {
 		Fast,
@@ -53,9 +53,10 @@ namespace paranoise {	namespace generators {
 		{		
 			// Assuming that x > 0 yields either 0 or (+-)1, the result is ANDed with 1
 			// => equivalent to (x > 0.0? (int)x: (int)x - 1)
-			cube._0.x = TInt(c.x) - TInt((c.x > 0) & 1);
-			cube._0.y = TInt(c.y) - TInt((c.y > 0) & 1);
-			cube._0.z = TInt(c.z) - TInt((c.z > 0) & 1);
+			
+			cube._0.x = sel(c.x > 0, c.x, c.x - 1);
+			cube._0.y = sel(c.y > 0, c.y, c.y - 1);
+			cube._0.z = sel(c.z > 0, c.z, c.z - 1);
 
 			cube._1.x = cube._0.x + 1;
 			cube._1.y = cube._0.y + 1;
@@ -129,7 +130,7 @@ namespace paranoise {	namespace generators {
 	}
 
 	SIMD_ENABLE(TReal, TInt)
-	TReal GradientNoise3D(	const Vector3<TReal>& input,
+	inline TReal GradientNoise3D(	const Vector3<TReal>& input,
 							const Vector3<TInt>& nearby, 
 							const TInt& seed)
 	{
@@ -160,22 +161,45 @@ namespace paranoise {	namespace generators {
 	}
 
 	SIMD_ENABLE(TReal, TInt)
-	TReal GradientCoherentNoise3D(	const Vector3<TReal>& c,
+	inline TReal GradientCoherentNoise3D(	const Vector3<TReal>& c,
 									const TInt& seed, 
-									Quality noiseQuality)
+									Quality quality)
 	{		
 		Matrix3x2<TInt> cube;
-		detail::construct_cube<TReal, TInt>(c, cube);
+		detail::construct_cube(c, cube);
 
 		Vector3<TReal> s;
-		detail::map_coord_diff<TReal, TInt>(c, cube, noiseQuality, s);
+		detail::map_coord_diff<TReal, TInt>(c, cube, quality, s);
 		
-		return detail::calc_noise<TReal, TInt>(cube, s, seed,
-			[&c](const Vector3<TInt>& s, const TInt& seed) { return GradientNoise3D(c, s, seed); });
+		TReal n0, n1, ix0, ix1, iy0, iy1;
+
+		n0 = GradientNoise3D(c, Vector3<TInt>(cube._0.x, cube._0.y, cube._0.z), seed);
+		n1 = GradientNoise3D(c, Vector3<TInt>(cube._1.x, cube._0.y, cube._0.z), seed);
+
+		ix0 = lerp(n0, n1, s.x);
+
+		n0 = GradientNoise3D(c, Vector3<TInt>(cube._0.x, cube._1.y, cube._0.z), seed);
+		n1 = GradientNoise3D(c, Vector3<TInt>(cube._1.x, cube._1.y, cube._0.z), seed);
+
+		ix1 = lerp(n0, n1, s.x);
+		iy0 = lerp(ix0, ix1, s.y);
+
+		n0 = GradientNoise3D(c, Vector3<TInt>(cube._0.x, cube._0.y, cube._1.z), seed);
+		n1 = GradientNoise3D(c, Vector3<TInt>(cube._1.x, cube._0.y, cube._1.z), seed);
+
+		ix0 = lerp(n0, n1, s.x);
+
+		n0 = GradientNoise3D(c, Vector3<TInt>(cube._0.x, cube._1.y, cube._1.z), seed);
+		n1 = GradientNoise3D(c, Vector3<TInt>(cube._1.x, cube._1.y, cube._1.z), seed);
+
+		ix1 = lerp(n0, n1, s.y);
+		iy1 = lerp(ix0, ix1, s.y);
+
+		return lerp(iy0, iy1, s.z);
 	}	
 
 	SIMD_ENABLE_I(TInt)
-	TInt IntValueNoise3D(const Vector3<TInt>& c, const TInt& seed)
+	inline TInt IntValueNoise3D(const Vector3<TInt>& c, const TInt& seed)
 	{
 		TInt n = (
 			X_NOISE_GEN		 * c.x
@@ -191,22 +215,221 @@ namespace paranoise {	namespace generators {
 	}
 
 	SIMD_ENABLE(TReal, TInt)
-	TReal ValueNoise3D(const Vector3<TInt>& c, const TInt& seed)
+	inline TReal ValueNoise3D(const Vector3<TInt>& c, const TInt& seed)
 	{
 		return 1 - (TReal(IntValueNoise3D(c, seed)) / 1073741824.0f);
 	}
 
 	SIMD_ENABLE(TReal, TInt)
-	TReal ValueCoherentNoise3D(const Vector3<TReal>& c, const TInt& seed, Quality noiseQuality)
+	inline TReal ValueCoherentNoise3D(const Vector3<TReal>& c, const TInt& seed, Quality quality)
 	{
 		Matrix3x2<TInt> cube;
-		detail::construct_cube<TReal, TInt>(c, cube);
-		
-		Vector3<TReal> s;
-		detail::map_coord_diff<TReal, TInt>(c, cube, noiseQuality, s);
+		detail::construct_cube(c, cube);
 
-		return detail::calc_noise<TReal, TInt>(cube, s, seed, make_function(ValueNoise3D<TReal, TInt>));
+		Vector3<TReal> s;
+		detail::map_coord_diff<TReal, TInt>(c, cube, quality, s);
+
+		TReal n0, n1, ix0, ix1, iy0, iy1;
+
+		n0 = ValueNoise3D<TReal, TInt>(Vector3<TInt>(cube._0.x, cube._0.y, cube._0.z), seed);
+		n1 = ValueNoise3D<TReal, TInt>(Vector3<TInt>(cube._1.x, cube._0.y, cube._0.z), seed);
+
+		ix0 = lerp(n0, n1, s.x);
+
+		n0 = ValueNoise3D<TReal, TInt>(Vector3<TInt>(cube._0.x, cube._1.y, cube._0.z), seed);
+		n1 = ValueNoise3D<TReal, TInt>(Vector3<TInt>(cube._1.x, cube._1.y, cube._0.z), seed);
+
+		ix1 = lerp(n0, n1, s.x);
+		iy0 = lerp(ix0, ix1, s.y);
+
+		n0 = ValueNoise3D<TReal, TInt>(Vector3<TInt>(cube._0.x, cube._0.y, cube._1.z), seed);
+		n1 = ValueNoise3D<TReal, TInt>(Vector3<TInt>(cube._1.x, cube._0.y, cube._1.z), seed);
+
+		ix0 = lerp(n0, n1, s.x);
+
+		n0 = ValueNoise3D<TReal, TInt>(Vector3<TInt>(cube._0.x, cube._1.y, cube._1.z), seed);
+		n1 = ValueNoise3D<TReal, TInt>(Vector3<TInt>(cube._1.x, cube._1.y, cube._1.z), seed);
+
+		ix1 = lerp(n0, n1, s.y);
+		iy1 = lerp(ix0, ix1, s.y);
+
+		return lerp(iy0, iy1, s.z);
 	}
+
+/*
+	namespace original
+	{
+		float _ValueNoise3D(int x, int y, int z, int seed);
+		float _ValueCoherentNoise3D(double x, double y, double z, int seed,
+			Quality noiseQuality);
+		int _IntValueNoise3D(int x, int y, int z, int seed);
+		float _GradientNoise3D(float fx, float fy, float fz, int ix,
+			int iy, int iz, int seed);
+		float _GradientCoherentNoise3D(float x, float y, float z, int seed, Quality noiseQuality);
+		float _GradientCoherentNoise3D(float x, float y, float z, int seed, Quality noiseQuality)
+		{
+			// Create a unit-length cube aligned along an integer boundary.  This cube
+			// surrounds the input point.
+			int x0 = (x > 0.0 ? (int)x : (int)x - 1);
+			int x1 = x0 + 1;
+			int y0 = (y > 0.0 ? (int)y : (int)y - 1);
+			int y1 = y0 + 1;
+			int z0 = (z > 0.0 ? (int)z : (int)z - 1);
+			int z1 = z0 + 1;
+
+			// Map the difference between the coordinates of the input value and the
+			// coordinates of the cube's outer-lower-left vertex onto an S-curve.
+			float xs = 0, ys = 0, zs = 0;
+			switch (noiseQuality) {
+			case Quality::Fast:
+				xs = (x - (float)x0);
+				ys = (y - (float)y0);
+				zs = (z - (float)z0);
+				break;
+			case Quality::Standard:
+				xs = scurve3(x - (float)x0);
+				ys = scurve3(y - (float)y0);
+				zs = scurve3(z - (float)z0);
+				break;
+			case Quality::Best:
+				xs = scurve5(x - (float)x0);
+				ys = scurve5(y - (float)y0);
+				zs = scurve5(z - (float)z0);
+				break;
+			}
+
+			// Now calculate the noise values at each vertex of the cube.  To generate
+			// the coherent-noise value at the input point, interpolate these eight
+			// noise values using the S-curve value as the interpolant (trilinear
+			// interpolation.)
+			float n0, n1, ix0, ix1, iy0, iy1;
+			n0 = _GradientNoise3D(x, y, z, x0, y0, z0, seed);
+			n1 = _GradientNoise3D(x, y, z, x1, y0, z0, seed);
+			ix0 = lerp(n0, n1, xs);
+			n0 = _GradientNoise3D(x, y, z, x0, y1, z0, seed);
+			n1 = _GradientNoise3D(x, y, z, x1, y1, z0, seed);
+			ix1 = lerp(n0, n1, xs);
+			iy0 = lerp(ix0, ix1, ys);
+			n0 = _GradientNoise3D(x, y, z, x0, y0, z1, seed);
+			n1 = _GradientNoise3D(x, y, z, x1, y0, z1, seed);
+			ix0 = lerp(n0, n1, xs);
+			n0 = _GradientNoise3D(x, y, z, x0, y1, z1, seed);
+			n1 = _GradientNoise3D(x, y, z, x1, y1, z1, seed);
+			ix1 = lerp(n0, n1, xs);
+			iy1 = lerp(ix0, ix1, ys);
+
+			return lerp(iy0, iy1, zs);
+		}
+
+		float _GradientNoise3D(float fx, float fy, float fz, int ix,
+			int iy, int iz, int seed)
+		{
+			// Randomly generate a gradient vector given the integer coordinates of the
+			// input value.  This implementation generates a random number and uses it
+			// as an index into a normalized-vector lookup table.
+			int vectorIndex = (
+				X_NOISE_GEN    * ix
+				+ Y_NOISE_GEN    * iy
+				+ Z_NOISE_GEN    * iz
+				+ SEED_NOISE_GEN * seed)
+				& 0xffffffff;
+			vectorIndex ^= (vectorIndex >> SHIFT_NOISE_GEN);
+			vectorIndex &= 0xff;
+
+			float xvGradient = RandomVectors[(vectorIndex << 2)];
+			float yvGradient = RandomVectors[(vectorIndex << 2) + 1];
+			float zvGradient = RandomVectors[(vectorIndex << 2) + 2];
+
+			// Set up us another vector equal to the distance between the two vectors
+			// passed to this function.
+			float xvPoint = (fx - (float)ix);
+			float yvPoint = (fy - (float)iy);
+			float zvPoint = (fz - (float)iz);
+
+			// Now compute the dot product of the gradient vector with the distance
+			// vector.  The resulting value is gradient noise.  Apply a scaling value
+			// so that this noise value ranges from -1.0 to 1.0.
+			return ((xvGradient * xvPoint)
+				+ (yvGradient * yvPoint)
+				+ (zvGradient * zvPoint)) * 2.12;
+		}
+
+		int _IntValueNoise3D(int x, int y, int z, int seed)
+		{
+			// All constants are primes and must remain prime in order for this noise
+			// function to work correctly.
+			int n = (
+				X_NOISE_GEN    * x
+				+ Y_NOISE_GEN    * y
+				+ Z_NOISE_GEN    * z
+				+ SEED_NOISE_GEN * seed)
+				& 0x7fffffff;
+			n = (n >> 13) ^ n;
+			//return (n * (n * n * 60493 + 19990303) + 1376312589) & 0x7fffffff;
+			return (n * (n * n * 1087 + 2749) + 3433) & 0x7fffffff;
+		}
+
+		float _ValueCoherentNoise3D(double x, double y, double z, int seed,
+			Quality noiseQuality)
+		{
+			// Create a unit-length cube aligned along an integer boundary.  This cube
+			// surrounds the input point.
+			int x0 = (x > 0.0 ? (int)x : (int)x - 1);
+			int x1 = x0 + 1;
+			int y0 = (y > 0.0 ? (int)y : (int)y - 1);
+			int y1 = y0 + 1;
+			int z0 = (z > 0.0 ? (int)z : (int)z - 1);
+			int z1 = z0 + 1;
+
+			// Map the difference between the coordinates of the input value and the
+			// coordinates of the cube's outer-lower-left vertex onto an S-curve.
+			float xs = 0, ys = 0, zs = 0;
+			switch (noiseQuality) {
+			case Quality::Fast:
+				xs = (x - (float)x0);
+				ys = (y - (float)y0);
+				zs = (z - (float)z0);
+				break;
+			case Quality::Standard:
+				xs = scurve3(x - (float)x0);
+				ys = scurve3(y - (float)y0);
+				zs = scurve3(z - (float)z0);
+				break;
+			case Quality::Best:
+				xs = scurve5(x - (float)x0);
+				ys = scurve5(y - (float)y0);
+				zs = scurve5(z - (float)z0);
+				break;
+			}
+
+			// Now calculate the noise values at each vertex of the cube.  To generate
+			// the coherent-noise value at the input point, interpolate these eight
+			// noise values using the S-curve value as the interpolant (trilinear
+			// interpolation.)
+			float n0, n1, ix0, ix1, iy0, iy1;
+			n0 = _ValueNoise3D(x0, y0, z0, seed);
+			n1 = _ValueNoise3D(x1, y0, z0, seed);
+			ix0 = lerp(n0, n1, xs);
+			n0 = _ValueNoise3D(x0, y1, z0, seed);
+			n1 = _ValueNoise3D(x1, y1, z0, seed);
+			ix1 = lerp(n0, n1, xs);
+			iy0 = lerp(ix0, ix1, ys);
+			n0 = _ValueNoise3D(x0, y0, z1, seed);
+			n1 = _ValueNoise3D(x1, y0, z1, seed);
+			ix0 = lerp(n0, n1, xs);
+			n0 = _ValueNoise3D(x0, y1, z1, seed);
+			n1 = _ValueNoise3D(x1, y1, z1, seed);
+			ix1 = lerp(n0, n1, xs);
+			iy1 = lerp(ix0, ix1, ys);
+			return lerp(iy0, iy1, zs);
+		}
+
+		float _ValueNoise3D(int x, int y, int z, int seed)
+		{
+			return 1.0 - ((float)_IntValueNoise3D(x, y, z, seed) / 1073741824.0);
+		}
+	}
+	*/
 }}
 
 #endif

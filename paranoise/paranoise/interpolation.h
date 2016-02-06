@@ -7,7 +7,7 @@
 
 namespace paranoise { namespace interpolation {
 	//using namespace parallel;
-	////using namespace x87compat;
+	//using namespace x87compat;
 	// Cubic ===================================================================================================
 	
 	SIMD_ENABLE_F(TReal)

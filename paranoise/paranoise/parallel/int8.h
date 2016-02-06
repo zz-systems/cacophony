@@ -37,10 +37,12 @@ namespace paranoise {	namespace parallel {
 	inline int8 operator <(const int8& a, const int8& b) { return _mm256_cmpgt_epi32	(b.val, a.val); }
 	inline int8 operator==(const int8& a, const int8& b) { return _mm256_cmpeq_epi32 (a.val, b.val); }
 
+	inline int8 operator -(const int8& a)				 { return _mm256_sub_epi32(_mm256_set1_epi32(0), a.val); }
+	inline int8 operator ~(const int8& a)				 { return _mm256_andnot_si256(a.val, a.val); }
 	inline int8 operator |(const int8& a, const int8& b) { return _mm256_or_si256	(a.val, b.val); }
 	inline int8 operator &(const int8& a, const int8& b) { return _mm256_and_si256	(a.val, b.val); }
 	inline int8 operator ^(const int8& a, const int8& b) { return _mm256_xor_si256	(a.val, b.val); }
-	inline int8 operator ~(const int8& a)				    { return _mm256_andnot_si256(a.val, a.val); }
+	
 
 	
 	inline int8 min(const int8& a, const int8& b)		{ return _mm256_min_epi32	(a.val, b.val); }

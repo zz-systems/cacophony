@@ -3,28 +3,36 @@
 #define PARANOISE_MODULES_BILLOW
 
 #include "../noisegenerators.h"
-//#include "../parallel/x87compat.h"
+#include "../parallel/x87compat.h"
 
 namespace paranoise { namespace module {
 	using namespace generators;
-	//using namespace x87compat;
+	using namespace x87compat;
 
 	struct billow_settings
 	{
-		float frequency = 1.0, lacunarity = 2.0, persistence = 0.5;
-		Quality quality = Quality::Standard;
-		int seed = 0;
-		int octaves = 6;
+		float frequency, lacunarity, persistence;
+		Quality quality;
+		int seed, octaves;
+		
+		billow_settings(float frequency = 1.0, float lacunarity = 2.0, float persistence = 0.5, int octaves = 6, int seed = 0, Quality quality = Quality::Standard)
+			: frequency(frequency), lacunarity(lacunarity), persistence(persistence), seed(seed), octaves(octaves), quality(quality)
+		{}
 	};
 
 	SIMD_ENABLE(TReal, TInt)
 	inline TReal billow(const Vector3<TReal>& coords, const billow_settings& settings)
 	{
+		using VReal = Vector3<TReal>;
+
 		TReal value = 0.0;
 		TReal signal = 0.0;
 		TReal curPersistence = 1.0;
-		Vector3<TReal> n;
+		VReal n;
 		TInt seed;
+
+		const VReal lacunarity = settings.lacunarity;
+		const TReal persistence = settings.persistence;
 
 		auto _coords = coords * Vector3<TReal>(settings.lacunarity);
 
@@ -32,10 +40,11 @@ namespace paranoise { namespace module {
 
 			// Make sure that these floating-point values have the same range as a 32-
 			// bit integer so that we can pass them to the coherent-noise functions.
-			n.x = truncate<TReal, TInt>(_coords.x);
+			/*n.x = truncate<TReal, TInt>(_coords.x);
 			n.y = truncate<TReal, TInt>(_coords.y);
-			n.z = truncate<TReal, TInt>(_coords.z);
+			n.z = truncate<TReal, TInt>(_coords.z);*/
 
+			n = clamp_int32(_coords);
 			// Get the coherent-noise value from the input value and add it to the
 			// final result.
 			seed = (settings.seed + currentOctave) & 0xffffffff;
@@ -44,15 +53,14 @@ namespace paranoise { namespace module {
 
 			signal = 2.0f * paranoise::parallel::abs(signal) - 1.0f;
 
-			value = value + signal * curPersistence;
+			value += signal * curPersistence;
 
 			// Prepare the next octave.
-			_coords = _coords * Vector3<TReal>(settings.lacunarity);
-
-			curPersistence = curPersistence * settings.persistence;
+			_coords *= lacunarity;
+			curPersistence *= persistence;
 		}
 
-		value = value + 0.5f;
+		value += (TReal)0.5f;
 
 		return value;
 	}

@@ -34,10 +34,12 @@ namespace paranoise {	namespace parallel {
 	inline float8 operator <(const float8& a, const float8& b) { return _mm256_cmp_ps		(a.val, b.val, _CMP_LT_OQ); }
 	inline float8 operator==(const float8& a, const float8& b) { return _mm256_cmp_ps		(a.val, b.val, _CMP_EQ_OQ); }
 
+	inline float8 operator -(const float8& a)				   { return _mm256_sub_ps(_mm256_set1_ps(0.0), a.val); }
+	inline float8 operator ~(const float8& a)				   { return _mm256_andnot_ps(a.val, a.val); }
 	inline float8 operator |(const float8& a, const float8& b) { return _mm256_or_ps		(a.val, b.val); }
 	inline float8 operator &(const float8& a, const float8& b) { return _mm256_and_ps		(a.val, b.val); }
 	inline float8 operator ^(const float8& a, const float8& b) { return _mm256_xor_ps		(a.val, b.val); }
-	inline float8 operator ~(const float8& a)					{ return _mm256_andnot_ps	(a.val, a.val); }
+	
 
 	
 	inline float8 min(const float8& a, const float8& b)		{ return _mm256_min_ps		(a.val, b.val); }

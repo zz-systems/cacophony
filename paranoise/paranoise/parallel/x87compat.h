@@ -17,6 +17,9 @@ namespace paranoise {
 
 		template<typename T>
 		inline T operator & (const T a, const T mask) { return a * (1 & mask); }
+
+		template<typename T>
+		inline T cselect(const bool condition, const T &a, const T &b) { return condition ? a : b; }
 	}
 }
 #endif

@@ -5,11 +5,11 @@
 #include <map>
 #include <algorithm>
 #include "../noisegenerators.h"
-//#include "../parallel/x87compat.h"
+#include "../parallel/x87compat.h"
 
 namespace paranoise { namespace module {
 	using namespace generators;
-	//using namespace x87compat;
+	using namespace x87compat;
 
 	SIMD_ENABLE_F(TReal)
 	struct curve_settings

@@ -3,11 +3,11 @@
 #define PARANOISE_MODULES_RIDGED
 
 #include "../noisegenerators.h"
-//#include "../parallel/x87compat.h"
+#include "../parallel/x87compat.h"
 
 namespace paranoise { namespace module {
 	using namespace generators;
-	//using namespace x87compat;
+	using namespace x87compat;
 
 	struct ridged_settings
 	{
@@ -50,36 +50,33 @@ namespace paranoise { namespace module {
 
 		for (int currentOctave = 0; currentOctave < settings.octaves; currentOctave++) {
 
-			// Make sure that these floating-point values have the same range as a 32-
-			// bit integer so that we can pass them to the coherent-noise functions.
-			Vector3<TReal> n(truncate<TReal, TInt>(_coords.x), truncate<TReal, TInt>(_coords.y), truncate<TReal, TInt>(_coords.z));
-
 			// Get the coherent-noise value.
-			TInt seed = (settings.seed + currentOctave) & 0xffffffff;
-
-			signal = GradientCoherentNoise3D(n, seed, settings.quality);
+			signal = GradientCoherentNoise3D<TReal, TInt>(
+						clamp_int32<TReal>(_coords), 
+						(settings.seed + currentOctave) & 0xffffffff, 
+						settings.quality);
 
 			// Make the ridges.
 			signal = paranoise::parallel::abs(signal);
 			signal = offset - signal;
 
 			// Square the signal to increase the sharpness of the ridges.
-			signal = signal * signal;
+			signal *= signal;
 
 			// The weighting from the previous octave is applied to the signal.
 			// Larger values have higher weights, producing sharp points along the
 			// ridges.
-			signal = signal * weight;
+			signal *= weight;
 
 			// Weight successive contributions by the previous signal.
 			weight = signal * gain;
 			weight = clamp<TReal>(weight, 0.0, 1.0);
 
 			// Add the signal to the output value.
-			value = value + (signal * settings.spectralWeights[currentOctave]);
+			value += (signal * settings.spectralWeights[currentOctave]);
 
 			// Go to the next octave.
-			_coords = _coords * Vector3<TReal>(settings.lacunarity);
+			_coords *= Vector3<TReal>(settings.lacunarity);
 		}
 
 		return (value * 1.25f) - 1.0f;

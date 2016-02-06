@@ -3,52 +3,50 @@
 #define PARANOISE_MODULES_PERLIN
 
 #include "../noisegenerators.h"
-//#include "../parallel/x87compat.h"
+#include "../parallel/x87compat.h"
 
 namespace paranoise { namespace module {
 	using namespace generators;
-	//using namespace x87compat;
+	using namespace x87compat;
 	
 	struct perlin_settings
 	{
-		float   frequency	= 1.0f, 
-				lacunarity  = 2.0f, 
-				persistence = 0.5f;
+		float   frequency, 
+				lacunarity, 
+				persistence;
 
 		Quality quality = Quality::Standard;
 		int seed = 0;
 		int octaves = 6;
+
+		perlin_settings(float frequency = 1.0, float lacunarity = 2.0, float persistence = 0.5, int octaves = 6, int seed = 0, Quality quality = Quality::Standard)
+			: frequency(frequency), lacunarity(lacunarity), persistence(persistence), seed(seed), octaves(octaves), quality(quality)
+		{}
 	};
 
 	SIMD_ENABLE(TReal, TInt)
 	inline TReal perlin(const Vector3<TReal>& coords, const perlin_settings& settings)
 	{
+		using VReal = Vector3<TReal>;
+
 		TReal	value				= 0, 
-				signal				= 0, 
 				currentPersistence	= 1;
-		Vector3<TReal> n;
-		TInt seed;
 
-		auto _coords = coords * Vector3<TReal>(settings.frequency);
-
+		const VReal lacunarity	= settings.lacunarity;
+		const TReal persistence	= settings.persistence;
+		
+		auto _coords = coords * (Vector3<TReal>) settings.frequency;
+		
 		for (int curOctave = 0; curOctave < settings.octaves; curOctave++)
 		{
-			// Make sure that these floating-point values have the same range as a 32-
-			// bit integer so that we can pass them to the coherent-noise functions.
-			n.x = TReal(TInt(_coords.x));
-			n.y = TReal(TInt(_coords.y));
-			n.z = TReal(TInt(_coords.z));
-
-			// Get the coherent-noise value from the input value and add it to the
-			// final result.
-			seed = (settings.seed + curOctave) & 0xffffffff;
-
-			signal = GradientCoherentNoise3D(n, seed, settings.quality);
-			value = value + signal * currentPersistence;
+			value += currentPersistence * GradientCoherentNoise3D<TReal, TInt>(
+											clamp_int32<TReal>(_coords),
+											(settings.seed + curOctave) & 0xffffffff,
+											settings.quality);
 
 			// Prepare the next octave.
-			_coords = _coords * Vector3<TReal>(settings.lacunarity);
-			currentPersistence = currentPersistence * settings.persistence;
+			_coords				*= lacunarity;
+			currentPersistence	*= persistence;
 		}
 
 		return value;
