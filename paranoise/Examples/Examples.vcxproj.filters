@@ -13,9 +13,21 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="lib">
+      <UniqueIdentifier>{42351cc3-58bd-455a-9453-af9a9df27741}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
+    <Text Include="lib\CImg-1.6.9\Licence_CeCILL_V2-en.txt">
+      <Filter>lib</Filter>
+    </Text>
+    <Text Include="lib\CImg-1.6.9\Licence_CeCILL-C_V1-en.txt">
+      <Filter>lib</Filter>
+    </Text>
+    <Text Include="lib\CImg-1.6.9\README.txt">
+      <Filter>lib</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -23,6 +35,9 @@
     </ClInclude>
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\CImg-1.6.9\CImg.h">
+      <Filter>lib</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
