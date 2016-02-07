@@ -4,19 +4,14 @@
 #include "../paranoise/parallel/all.h"
 #include "../paranoise/modules/all.h"
 #include "../paranoise/scheduler.h"
+#include "util.h"
 
-#define TEST_USE_THREADS
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace paranoise::interpolation;
 using namespace paranoise::parallel;
 using namespace paranoise::module;
 using namespace paranoise::scheduler;
 using namespace paranoise;
-
-#ifdef TEST_USE_THREADS
-#include <ppl.h>
-using namespace concurrency;
-#endif
 
 namespace UnitTest
 {
@@ -27,11 +22,16 @@ namespace UnitTest
 		TEST_METHOD(Test_Module_Perlin)
 		{
 			auto settings = perlin_settings();
-			auto refresult = perlin<float, int>(Vector3<float>(1, 1, 1), settings);
 
-			auto result = perlin<float4, int4>(Vector3<float4>(1, 1, 1), settings);
+			for (float z = -1; z <= 1; z += 0.25)
+			for (float y = -1; y <= 1; y += 0.25)
+			for (float x = -1; x <= 1; x += 0.25)
+			{
+				auto ref = perlin<float, int>(Vector3<float>(x, y, z), settings);
 
-			Assert::AreEqual(refresult, result.values[0], std::numeric_limits<float>::epsilon());
+				AreEqual(ref, perlin<float4, int4>(Vector3<float4>(x, y, z), settings));
+				//AreEqual(ref, perlin<float8, int8>(Vector3<float8>(1, 1, 1), settings));
+			}
 		}
 
 		TEST_METHOD(Test_Module_RidgedMultiFractal)

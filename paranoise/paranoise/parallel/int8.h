@@ -43,7 +43,8 @@ namespace paranoise {	namespace parallel {
 	inline int8 operator &(const int8& a, const int8& b) { return _mm256_and_si256	(a.val, b.val); }
 	inline int8 operator ^(const int8& a, const int8& b) { return _mm256_xor_si256	(a.val, b.val); }
 	
-
+	inline int8 operator >>(const int8& a, int amount) { return _mm256_srli_epi32(a.val, amount); }
+	inline int8 operator <<(const int8& a, int amount) { return _mm256_slli_epi32(a.val, amount); }
 	
 	inline int8 min(const int8& a, const int8& b)		{ return _mm256_min_epi32	(a.val, b.val); }
 	inline int8 max(const int8& a, const int8& b)		{ return _mm256_max_epi32	(a.val, b.val); }	

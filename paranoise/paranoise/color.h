@@ -41,7 +41,7 @@ namespace paranoise { namespace util {
 
 		color_rgb getColor(const float value) const
 		{
-			auto v = clamp(value, -1.0f, 1.0f);
+			auto v = paranoise::parallel::clamp(value, -1.0f, 1.0f);
 
 			auto i0 = colors.lower_bound(v);
 			

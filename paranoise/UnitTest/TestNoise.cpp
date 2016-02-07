@@ -6,6 +6,8 @@
 #include "../paranoise/noisegenerators.h"
 #include <iostream>
 
+#include "util.h"
+
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace paranoise;
 using namespace paranoise::generators;
@@ -20,30 +22,29 @@ namespace UnitTest
 		TEST_METHOD(Test_GradientCoherentNoise3D)
 		{
 			for (auto q = 0; q <= 2; q++)
+			for (float z = -1; z <= 1; z += 0.25)
+			for (float y = -1; y <= 1; y += 0.25)
+			for (float x = -1; x <= 1; x += 0.25)			
 			{
-				auto reference	= GradientCoherentNoise3D(Vector3<float>(5.0, 2.5, 4.0), 1010, Quality(q));
+				auto ref	= GradientCoherentNoise3D(Vector3<float>(x, y, z), 1010, Quality(q));
 
-				auto sse_floats = GradientCoherentNoise3D<float4, int4>(Vector3<float4>(5.0, 2.5, 4.0), int4(1010), Quality(q));
-
-				//m256 avx_floats = cerp(ld1<m256>(1.0), ld1<m256>(2.0), ld1<m256>(4.0), ld1<m256>(5.0), ld1<m256>(1.0));
-				//float4 avx_floats = GradientCoherentNoise3D(ld1<float4>(1.0), ld1<float4>(2.0), ld1<float4>(4.0), ld1<int8>(1000), Quality::Fast);	
-
-				Assert::AreEqual(reference, sse_floats.values[0], std::numeric_limits<float>::epsilon());
-				//Assert::AreEqual(reference, avx_floats.floats[0]);
+				AreEqual(ref, GradientCoherentNoise3D<float4, int4>(Vector3<float4>(x, y, z), 1010, Quality(q)));
 			}
 		}
 
 		TEST_METHOD(Test_GradientNoise3D)
-		{
-			auto reference = GradientNoise3D(Vector3<float>(5.0, 2.5, 4.0), Vector3<int32>(1, 2, 4), 1010);
+		{	
+			for (int zi = -2; zi <= 2; zi += 1)
+			for (int yi = -2; yi <= 2; yi += 1)
+			for (int xi = -2; xi <= 2; xi += 1)
+			for (float z = -1; z <= 1; z += 0.25)
+			for (float y = -1; y <= 1; y += 0.25)
+			for (float x = -1; x <= 1; x += 0.25)
+			{
+				auto ref = GradientNoise3D<float, int>({ x, y, z }, { xi, zi, yi }, 1010);
 
-			auto sse_floats = GradientNoise3D(Vector3<float4>(5.0, 2.5, 4.0), Vector3<int4>(1, 2, 4), (int4)1010);
-
-			//m256 avx_floats = cerp(ld1<m256>(1.0), ld1<m256>(2.0), ld1<m256>(4.0), ld1<m256>(5.0), ld1<m256>(1.0));
-			//float4 avx_floats = GradientCoherentNoise3D(ld1<float4>(1.0), ld1<float4>(2.0), ld1<float4>(4.0), ld1<int8>(1000), Quality::Fast);
-			
-			
-			Assert::AreEqual(reference, sse_floats.values[0], std::numeric_limits<float>::epsilon());
+				AreEqual(ref, GradientNoise3D<float4, int4>({ x, y, z }, { xi, zi, yi }, 1010));
+			}
 		}
 
 		TEST_METHOD(Test_ValueCoherentNoise3D)
@@ -83,8 +84,30 @@ namespace UnitTest
 		}
 
 		TEST_METHOD(Test_CubeBounds_Single)
-		{			
-			int		one = 1;
+		{	
+			_MM_SET_ROUNDING_MODE(_MM_ROUND_TOWARD_ZERO);
+
+			for (float z = -1; z <= 1; z += 0.25f)
+			for (float y = -1; y <= 1; y += 0.25f)
+			for (float x = -1; x <= 1; x += 0.25f)
+			{
+				Matrix3x2<int> ref;
+				detail::construct_cube<float, int>({ x, y, z }, ref);
+
+				Matrix3x2<int4> sse;
+				detail::construct_cube<float4, int4>({ x, y, z }, sse);
+
+				std::cerr << " ";
+				for (int dy = 0; dy < 2; dy++)
+				{
+					for (int dx = 0; dx < 3; dx++)
+					{
+						AreEqual_NOE(ref.v[dy].v[dx], sse.v[dy].v[dx]);
+					}
+				}
+			}
+
+			/*int		one = 1;
 			float	zero = 0;
 			float	x = 2, y = 0, z = 1;
 
@@ -102,7 +125,7 @@ namespace UnitTest
 
 			Assert::AreEqual(x1, 2 - 1 + 1);
 			Assert::AreEqual(y1, 0 - 0 + 1);
-			Assert::AreEqual(z1, 1 - 1 + 1);
+			Assert::AreEqual(z1, 1 - 1 + 1);*/
 		}
 
 		TEST_METHOD(Test_CubeBounds_CAST_SIMD)

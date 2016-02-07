@@ -29,7 +29,5 @@ namespace paranoise { namespace parallel {
 
 	ANY(TType) inline TType operator >=(const TType& a, const TType& b) { return !(a < b); }
 	ANY(TType) inline TType operator <=(const TType& a, const TType& b) { return !(a > b); }
-
-	
 }}
 #endif

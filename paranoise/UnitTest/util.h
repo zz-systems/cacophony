@@ -13,22 +13,39 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 //std::cerr.rdbuf(sstream.rdbuf());
 //
 //#define REDIR_CERR_END \
-//code \
 //Logger::WriteMessage(sstream.str().c_str()); \
 //std::cerr.rdbuf(cerrbuf);
 
 
-template<typename TScalar, typename TVec, typename... Args>
-void paranoise_assert_implementation_equality(std::function<TScalar(Args...)> expected, std::function<TVec(Args...)> tested, Args&&... args)
+template<typename TScalar, typename TVec>
+inline void AreEqual(const TScalar &expected, const TVec &tested)
 {
-	auto ref = expected(args);
-	auto val = tested(args);
-
 	auto word = sizeof(TVec) >> 2;
+	TVec e = tested;
+	auto extracted = extract(e);
 
 	for (int i = 0; i < word; i++)
 	{
-		Assert::AreEqual(ref, extract(val)[i], std::numeric_limits<TScalar>::epsilon());
+		Assert::AreEqual(expected, extracted[i], std::numeric_limits<TScalar>::epsilon());		
 	}
+}
+
+template<typename TScalar, typename TVec>
+inline void AreEqual_NOE(const TScalar &expected, const TVec &tested)
+{
+	auto word = sizeof(TVec) >> 2;
+	TVec e = tested;
+	auto extracted = extract(e);
+
+	for (int i = 0; i < word; i++)
+	{
+		Assert::AreEqual(expected, extracted[i]);
+	}
+}
+
+template<typename TScalar>
+inline void AreEqual(const TScalar &expected, const TScalar &tested)
+{
+	Assert::AreEqual(expected, tested, std::numeric_limits<TScalar>::epsilon());
 }
 #endif

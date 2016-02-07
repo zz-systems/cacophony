@@ -54,9 +54,9 @@ namespace paranoise {	namespace generators {
 			// Assuming that x > 0 yields either 0 or (+-)1, the result is ANDed with 1
 			// => equivalent to (x > 0.0? (int)x: (int)x - 1)
 			
-			cube._0.x = sel(c.x > 0, c.x, c.x - 1);
-			cube._0.y = sel(c.y > 0, c.y, c.y - 1);
-			cube._0.z = sel(c.z > 0, c.z, c.z - 1);
+			cube._0.x = sel(c.x > 0, (TInt)c.x, TInt(c.x) - 1);
+			cube._0.y = sel(c.y > 0, (TInt)c.y, TInt(c.y) - 1);
+			cube._0.z = sel(c.z > 0, (TInt)c.z, TInt(c.z) - 1);
 
 			cube._1.x = cube._0.x + 1;
 			cube._1.y = cube._0.y + 1;
@@ -89,44 +89,7 @@ namespace paranoise {	namespace generators {
 				s.z = scurve5(s.z);
 				break;
 			}
-		}
-
-		// Now calculate the noise values at each vertex of the cube.  To generate
-		// the coherent-noise value at the input point, interpolate these eight
-		// noise values using the S-curve value as the interpolant (trilinear
-		// interpolation.)
-		SIMD_ENABLE(TReal, TInt)
-		inline TReal calc_noise(const Matrix3x2<TInt> &cube,
-								const Vector3<TReal>& s,
-								const TInt& seed, 
-								std::function<TReal(const Vector3<TInt>& c, const TInt& seed)> noisegen)
-		{		
-			TReal n0, n1, ix0, ix1, iy0, iy1;
-
-			n0 = noisegen(Vector3<TInt>(cube._0.x, cube._0.y, cube._0.z), seed);
-			n1 = noisegen(Vector3<TInt>(cube._1.x, cube._0.y, cube._0.z), seed);
-
-			ix0 = lerp(n0, n1, s.x);
-
-			n0 = noisegen(Vector3<TInt>(cube._0.x, cube._1.y, cube._0.z), seed);
-			n1 = noisegen(Vector3<TInt>(cube._1.x, cube._1.y, cube._0.z), seed);
-
-			ix1 = lerp(n0, n1, s.x);
-			iy0 = lerp(ix0, ix1, s.y);
-
-			n0 = noisegen(Vector3<TInt>(cube._0.x, cube._0.y, cube._1.z), seed);
-			n1 = noisegen(Vector3<TInt>(cube._1.x, cube._0.y, cube._1.z), seed);
-
-			ix0 = lerp(n0, n1, s.x);
-
-			n0 = noisegen(Vector3<TInt>(cube._0.x, cube._1.y, cube._1.z), seed);
-			n1 = noisegen(Vector3<TInt>(cube._1.x, cube._1.y, cube._1.z), seed);
-
-			ix1 = lerp(n0, n1, s.y);
-			iy1 = lerp(ix0, ix1, s.y);
-
-			return lerp(iy0, iy1, s.z);
-		}
+		}		
 	}
 
 	SIMD_ENABLE(TReal, TInt)
@@ -171,6 +134,11 @@ namespace paranoise {	namespace generators {
 		Vector3<TReal> s;
 		detail::map_coord_diff<TReal, TInt>(c, cube, quality, s);
 		
+
+		// Now calculate the noise values at each vertex of the cube.  To generate
+		// the coherent-noise value at the input point, interpolate these eight
+		// noise values using the S-curve value as the interpolant (trilinear
+		// interpolation.)
 		TReal n0, n1, ix0, ix1, iy0, iy1;
 
 		n0 = GradientNoise3D(c, Vector3<TInt>(cube._0.x, cube._0.y, cube._0.z), seed);

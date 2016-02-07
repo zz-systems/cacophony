@@ -51,5 +51,17 @@ namespace paranoise { namespace parallel {
 
 	// Integer DIV ==============================================================================================
 	inline int8 operator /(const int8& a, const int8& b) { return _mm256_div_ps(float8(a).val, float8(b).val); }	
+
+	inline int8 sel(const int8& mask, const int8 &a, const int8 &b)
+	{
+		auto t = _mm256_blendv_epi8(b.val, a.val, mask.val);
+		return t;
+	}
+
+	inline int8 sel(const float8& mask, const int8 &a, const int8 &b)
+	{
+		auto t = _mm256_blendv_epi8(b.val, a.val, _mm256_castps_si256(mask.val));
+		return t;
+	}
 }}
 #endif

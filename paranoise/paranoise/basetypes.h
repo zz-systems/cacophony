@@ -77,11 +77,16 @@ using SeededModule = std::function<TReal(const Vector3<TReal>&, const TInt& seed
 				sel<TCondition, TProcess>(condition.z, choice1.z, choice2.z));
 		}
 
-		ANY2(TCondition, TProcess)
-			inline TProcess sel(const TCondition &condition, const TProcess &choice1, const TProcess &choice2)
-		{
-			return (condition & choice1) | ((~condition) & choice2);
-		}
+		//ANY2(TCondition, TProcess)
+		//	inline TProcess sel(const TCondition &condition, const TProcess &choice1, const TProcess &choice2)
+		//{
+		//	auto trueBranch = condition & choice1;
+		//	auto notC = ~condition;// ^ condition;
+		//	auto falseBranch = notC & choice2;
+
+		//	auto combined = trueBranch | falseBranch;
+		//	return combined;//(condition & choice1) | ((~condition) & choice2);
+		//}
 
 		//SIMD_ENABLE(TReal, TInt)
 		//inline TReal truncate(const TReal &val) { return (TReal)(TInt)val; }

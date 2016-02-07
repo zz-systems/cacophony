@@ -7,11 +7,12 @@
 #include <ppl.h>
 #include <vector>
 
-#include "parallel/x87compat.h"
+#include "parallel/all.h"
 
 namespace paranoise { namespace scheduler {
 	using namespace concurrency;
 	using namespace x87compat;
+	using namespace parallel;
 
 	struct scheduler_settings
 	{
@@ -81,6 +82,25 @@ namespace paranoise { namespace scheduler {
 		};
 	}
 
+	template<>
+	inline Vector3<float4> build_coords(float x, float y)
+	{
+		return Vector3<float4> {
+			float4(x, x + 1.0f, x + 2.0f, x + 3.0f),
+				float4(y),
+				0
+		};
+	}
+
+	template<>
+	inline Vector3<float8> build_coords(float x, float y)
+	{
+		return Vector3<float8> {
+			float8(x, x + 1.0f, x + 2.0f, x + 3.0f, x + 4.0f, x + 5.0f, x + 6.0f, x + 7.0f),
+				float8(y),
+				0
+		};
+	}
 
 	/*if (word == 4)
 	{

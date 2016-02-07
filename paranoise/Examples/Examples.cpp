@@ -78,11 +78,12 @@ gradient1D wood_grad =
 int main()
 {
 	cout << "generate granite" << endl;
+	_MM_SET_ROUNDING_MODE(_MM_ROUND_TOWARD_ZERO);
 
-	using _float = float4;
-	using _int = int4;
+	using _float = float8;
+	using _int = int8;
 
-	auto result = schedule2D<_float>(generate_wood_bind<_float, _int>(), id, scheduler_settings(Vector3<int>(512, 512, 0), 1337, true));
+	auto result = schedule2D<_float>(generate_wood_bind<_float, _int>(), id<Vector3<_int>>, scheduler_settings(Vector3<int>(512, 512, 0), 1337, true));
 	CImg<uint8> img(512, 512, 1, 3);
 	
 	auto index = 0;

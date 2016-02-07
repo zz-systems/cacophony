@@ -63,7 +63,7 @@ namespace paranoise { namespace parallel {
 
 
 	inline int4 min(const int4& a, const int4& b)		{ return _mm_min_epi32		(a.val, b.val); }
-	inline int4 max(const int4& a, const int4& b)		{ return _mm_max_epi32		(a.val, b.val); }		
+	inline int4 max(const int4& a, const int4& b)		{ return _mm_max_epi32		(a.val, b.val); }	
 }}
 
 #endif

@@ -51,5 +51,17 @@ namespace paranoise { namespace parallel {
 
 	// Integer DIV ==============================================================================================	
 	inline int4 operator /(const int4& a, const int4& b) { return _mm_div_ps(float4(a).val, float4(b).val); }
+
+	inline int4 sel(const int4& mask, const int4 &a, const int4 &b)
+	{
+		auto t = _mm_blendv_epi8(b.val, a.val, mask.val);
+		return t;
+	}
+
+	inline int4 sel(const float4& mask, const int4 &a, const int4 &b)
+	{
+		auto t = _mm_blendv_epi8(b.val, a.val, _mm_castps_si128(mask.val));
+		return t;
+	}
 }}
 #endif
