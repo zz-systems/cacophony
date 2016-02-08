@@ -16,11 +16,8 @@ namespace paranoise {
 	typedef signed		long long	int64;
 	typedef signed		int		int32;
 	typedef signed		short	int16;
-	//typedef signed		char	int8;
+	//typedef signed		char	int8;	
 	
-	const float PI = 3.14159265358979323846;
-	const float DEG2RAD = PI / 180.0;
-	const float SQRT_3  = sqrtf(3);
 
 #define ALIGN(bytes) __declspec(align(bytes))
 
@@ -40,8 +37,39 @@ namespace paranoise {
 #define ANY(type) template<typename type>
 #define ANY2(type1, type2) template<typename type1, typename type2>
 
+#define UNOP(type, op) inline type operator op(const type& a)				
+#define BINOP(type, op) inline type operator op(const type& a, const type& b)
+
+#define UNFUNC(type, name) inline type name(const type &a)
+#define BINFUNC(type, name) inline type name(const type &a, const type &b)
+
+#define STDUNP (a.val)
+#define STDBINP (a.val, b.val)
+#define STDBDY(intrin) return intrin STDBINP
+#define STDBDY1(intrin) return intrin STDUNP
+
 //#define SIMD_ENABLE() SIMD_ENABLE(TReal, TInt)
 	
+
+	ANY(TType)
+		constexpr TType PI() { return (TType) 3.14159265358979323846; }
+
+	ANY(TType)
+		constexpr TType DEG2RAD() { return PI<TType>() / 180.0; }
+
+	ANY(TType)
+		constexpr TType SQRT_3() { return (TType)sqrt(3); }
+
+	ANY(TType)
+		constexpr TType ONE() { return (TType)1; }
+
+	ANY(TType)
+		constexpr TType ZERO() { return (TType)0; }
+
+	ANY(TType)
+		constexpr TType NZERO() { return (TType)-0.0; }
+
+	const float _SQRT_3 = sqrtf(3);
 
 SIMD_ENABLE_F(TReal)
 using Module = std::function<TReal(const Vector3<TReal>&)>;
@@ -55,11 +83,15 @@ inline TType id (const TType &a) { return a; }
 SIMD_ENABLE(TReal, TInt)
 using SeededModule = std::function<TReal(const Vector3<TReal>&, const TInt& seed)>;
 
+
 	template<typename T>
 	std::function<typename std::enable_if<std::is_function<T>::value, T>::type> make_function(T *t) 
 	{
 		return{ t };
 	}
+
+	template<typename T>
+	constexpr size_t dim() { return sizeof(T) >> 2; }
 
 	namespace parallel {
 		ANY(TProcess)
@@ -119,6 +151,12 @@ using SeededModule = std::function<TReal(const Vector3<TReal>&, const TInt& seed
 		inline double sqrt(double a) { return ::sqrt(a); }
 		inline float  sqrt(float a) { return ::sqrtf(a); }
 		inline int    sqrt(int a) { return (int)::floor(::sqrt((double)a)); }
+
+		ANY(TType)
+			inline TType fmadd(const TType &a, const TType &b, const TType &c) { return a * b + c; }
+
+		ANY(TType)
+			inline TType fmsub(const TType &a, const TType &b, const TType &c) { return a * b - c; }
 
 		ANY(TType)
 			inline TType clamp(const TType& val, const TType& minval, const TType& maxval) { return min(max(val, minval), maxval); }

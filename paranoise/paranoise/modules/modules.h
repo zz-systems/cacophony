@@ -28,36 +28,41 @@ namespace paranoise { namespace module {
 		return blend(v0(coords), v1(coords), alpha(coords));
 	}
 
-	struct turbulence_settings : perlin_settings
+	SIMD_ENABLE(TReal, TInt)
+	struct turbulence_settings : perlin_settings<TReal, TInt>
 	{
-		float power; 
-		int roughness;
+		Vector3<TReal> power;
 
-		turbulence_settings(float power = 1.0, int roughness = 3, float frequency = 1.0, float lacunarity = 2.0, float persistence = 0.5, int octaves = 6, int seed = 0, Quality quality = Quality::Standard)
-			: perlin_settings(frequency, lacunarity, persistence, seed, octaves, quality),
-			power(power), roughness(roughness)
+		Matrix3x3<TReal> dinput = {
+			Vector3<TReal>{ 12414.0f, 65124.0f, 31337.0f } / (Vector3<TReal>) 65536.0f,
+			Vector3<TReal>{ 26519.0f, 18128.0f, 60493.0f } / (Vector3<TReal>) 65536.0f,
+			Vector3<TReal>{ 53820.0f, 11213.0f, 44845.0f } / (Vector3<TReal>) 65536.0f
+		};
+
+		turbulence_settings(float power = 1.0, int roughness = 3, float frequency = 1.0, float lacunarity = 2.0, float persistence = 0.5, int seed = 0, Quality quality = Quality::Standard)
+			: perlin_settings(frequency, lacunarity, persistence, seed, roughness, quality),
+			power(power)
+		{}
+
+		turbulence_settings(const turbulence_settings<TReal, TInt> &s)
+			: perlin_settings(s),
+			power(s.power)
 		{}
 	};
 		
 	// Apply turbulence to the source input
 	SIMD_ENABLE(TReal, TInt)
 	inline TReal turbulence(Module<TReal> source,
-							const Vector3<TReal> &coords, 
-							const turbulence_settings &settings)
+							const Vector3<TReal> &c, 
+							const turbulence_settings<TReal, TInt> &s)
 	{
-		Matrix3x3<TReal> dinput = {
-			Vector3<TReal>{ 12414.0f, 65124.0f, 31337.0f } / (Vector3<TReal>) 65536.0f + coords,
-			Vector3<TReal>{ 26519.0f, 18128.0f, 60493.0f } / (Vector3<TReal>) 65536.0f + coords,
-			Vector3<TReal>{ 53820.0f, 11213.0f, 44845.0f } / (Vector3<TReal>) 65536.0f + coords
-		};
-
 		auto distortion = Vector3<TReal>(
-				perlin<TReal, TInt>(dinput._0, settings), 
-				perlin<TReal, TInt>(dinput._1, settings), 
-				perlin<TReal, TInt>(dinput._2, settings)) * (Vector3<TReal>)settings.power;
+				perlin<TReal, TInt>(s.dinput._0 + c, s),
+				perlin<TReal, TInt>(s.dinput._1 + c, s),
+				perlin<TReal, TInt>(s.dinput._2 + c, s)) * s.power;
 
 
-		return source(coords + distortion);
+		return source(c + distortion);
 	}
 
 	SIMD_ENABLE_F(TReal)

@@ -9,44 +9,46 @@ namespace paranoise { namespace module {
 	using namespace generators;
 	using namespace x87compat;
 	
+	SIMD_ENABLE(TReal, TInt)
 	struct perlin_settings
 	{
-		float   frequency, 
+		TReal   frequency, 
 				lacunarity, 
 				persistence;
 
 		Quality quality = Quality::Standard;
-		int seed = 0;
-		int octaves = 6;
+		TInt seed;
+		int octaves;
 
 		perlin_settings(float frequency = 1.0, float lacunarity = 2.0, float persistence = 0.5, int octaves = 6, int seed = 0, Quality quality = Quality::Standard)
 			: frequency(frequency), lacunarity(lacunarity), persistence(persistence), seed(seed), octaves(octaves), quality(quality)
 		{}
+
+		perlin_settings(const perlin_settings<TReal, TInt> &s)
+			: frequency(s.frequency), lacunarity(s.lacunarity), persistence(s.persistence), seed(s.seed), octaves(s.octaves), quality(s.quality)
+		{}
 	};
 
 	SIMD_ENABLE(TReal, TInt)
-	inline TReal perlin(const Vector3<TReal>& coords, const perlin_settings& settings)
+	inline TReal perlin(const Vector3<TReal>& c, const perlin_settings<TReal, TInt>& s)
 	{
 		using VReal = Vector3<TReal>;
 
 		TReal	value				= 0, 
 				currentPersistence	= 1;
-
-		const VReal lacunarity	= settings.lacunarity;
-		const TReal persistence	= settings.persistence;
 		
-		auto _coords = coords * (Vector3<TReal>) settings.frequency;
+		auto _coords = c * s.frequency;
 		
-		for (int curOctave = 0; curOctave < settings.octaves; curOctave++)
+		for (int curOctave = 0; curOctave < s.octaves; curOctave++)
 		{
 			value += currentPersistence * GradientCoherentNoise3D<TReal, TInt>(
 											clamp_int32<TReal>(_coords),
-											(settings.seed + curOctave) & 0xffffffff,
-											settings.quality);
+											s.seed + curOctave, //& 0xffffffff,
+											s.quality);
 
 			// Prepare the next octave.
-			_coords				*= lacunarity;
-			currentPersistence	*= persistence;
+			_coords				*= s.lacunarity;
+			currentPersistence	*= s.persistence;
 		}
 
 		return value;

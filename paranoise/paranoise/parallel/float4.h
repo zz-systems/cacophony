@@ -13,7 +13,7 @@ namespace paranoise { namespace parallel {
 		float values[4];
 
 		float4() = default;
-		float4(const float& rhs)		{ val = _mm_set_ps1(rhs); }
+		float4(const float& rhs) : val(_mm_set1_ps(rhs)) {} //val(_mm_set_ps1(rhs)) {}
 
 		float4(const uint8& _0, const uint8& _1, const uint8& _2, const uint8& _3)	{ val = _mm_cvtepi32_ps(_mm_set_epi32(_3, _2, _1, _0)); }
 		float4(const int32& _0, const int32& _1, const int32& _2, const int32& _3)	{ val = _mm_cvtepi32_ps(_mm_set_epi32(_3, _2, _1, _0)); }
@@ -27,65 +27,56 @@ namespace paranoise { namespace parallel {
 		float4(const int4&	rhs);
 		float4(const double2&	rhs);		
 	};
-
-	inline float4 operator +(const float4& a, const float4& b) { return _mm_add_ps		(a.val, b.val); }
-	inline float4 operator -(const float4& a, const float4& b) { return _mm_sub_ps		(a.val, b.val); }
-	inline float4 operator *(const float4& a, const float4& b) { return _mm_mul_ps		(a.val, b.val); }
-	inline float4 operator /(const float4& a, const float4& b) { return _mm_div_ps		(a.val, b.val); }
-
-	inline float4 operator >(const float4& a, const float4& b) 
-	{
-		auto t = _mm_cmpgt_ps(a.val, b.val); 
-		return t; 
-	}
-	inline float4 operator <(const float4& a, const float4& b) { return _mm_cmplt_ps	(a.val, b.val); }	
-	inline float4 operator==(const float4& a, const float4& b) { return _mm_cmpeq_ps	(a.val, b.val); }
-
-	inline float4 operator -(const float4& a)				   { return _mm_sub_ps		(_mm_set1_ps(0.0), a.val); }
-	inline float4 operator ~(const float4& a) { 
-		return _mm_andnot_ps(a.val, _mm_castsi128_ps(_mm_set1_epi32(0xFFFFFFFF)));
-	}
-	inline float4 operator &(const float4& a, const float4& b) { return _mm_and_ps		(a.val, b.val); }
-	inline float4 operator |(const float4& a, const float4& b) { return _mm_or_ps		(a.val, b.val); }
-	inline float4 operator ^(const float4& a, const float4& b) { return _mm_xor_ps		(a.val, b.val); }
 	
 
-	inline float4		abs(const float4& a) {
+	BINOP(float4, +) { STDBDY(_mm_add_ps); }
+	BINOP(float4, -) { STDBDY(_mm_sub_ps); }
+	BINOP(float4, *) { STDBDY(_mm_mul_ps); }
+	BINOP(float4, /) { STDBDY(_mm_div_ps); }
+
+	BINOP(float4, > ) {	STDBDY(_mm_cmpgt_ps); }
+	BINOP(float4, < ) {	STDBDY(_mm_cmplt_ps); }
+	BINOP(float4, == ) { STDBDY(_mm_cmpeq_ps); }
+
+	UNOP(float4, -) { return _mm_sub_ps(_mm_set1_ps(0.0), a.val); }
+	
+	UNOP(float4, ~) { return _mm_andnot_ps(a.val, _mm_castsi128_ps(_mm_set1_epi32(0xFFFFFFFF))); }
+
+	BINOP(float4, &) { STDBDY(_mm_and_ps); }
+	BINOP(float4, |) { STDBDY(_mm_or_ps);  }
+	BINOP(float4, ^) { STDBDY(_mm_xor_ps); }
+	
+	UNFUNC(float4, abs) {
 		static const __m128 sign_mask = _mm_set_ps1(-0.f); // -0.f = 1 << 31
 		return _mm_andnot_ps(sign_mask, a.val);
 	}
 
-	inline float4 min(const float4& a, const float4& b)		{ return _mm_min_ps		(a.val, b.val); }
-	inline float4 max(const float4& a, const float4& b)		{ return _mm_max_ps		(a.val, b.val); }	
+	BINFUNC(float4, min)	{ STDBDY(_mm_min_ps); }
+	BINFUNC(float4, max)	{ STDBDY(_mm_max_ps); }	
 
-	inline float4 sqrt(const float4& a)						{ return _mm_sqrt_ps	(a.val); }
+	UNFUNC(float4, sqrt)	{ STDBDY1(_mm_sqrt_ps); }
 
-	inline float4 floor(const float4& a) {
-		auto v0 = _mm_setzero_si128();
-		auto v1 = _mm_cmpeq_epi32(v0, v0);
-		auto ji = _mm_srli_epi32(v1, 25);
-		auto j = *(__m128*)&_mm_slli_epi32(ji, 23); //create vector 1.0f
-		auto i = _mm_cvttps_epi32(a.val);
-		auto fi = _mm_cvtepi32_ps(i);
-		auto igx = _mm_cmpgt_ps(fi, a.val);
-		j = _mm_and_ps(igx, j);
-		return _mm_sub_ps(fi, j);
+	inline float4 sel(const float4& mask, const float4 &a, const float4 &b)	{ return _mm_blendv_ps(b.val, a.val, mask.val);	}
+	inline float4 fmadd(const float4 &a, const float4 &b, const float4 &c) { return _mm_fmadd_ps(a.val, b.val, c.val); }	
+	inline float4 fmsub(const float4 &a, const float4 &b, const float4 &c) { return _mm_fmsub_ps(a.val, b.val, c.val); }
+
+	UNFUNC(float4, floor) 
+	{
+		auto fi = (float4)(int4)a;
+
+		return sel(fi > a, fi - one<float4>(), fi);//- (fi > a) & j;
 	}
 
-	inline float4 ceil(const float4& a) {
-		auto v0 = _mm_setzero_si128();
-		auto v1 = _mm_cmpeq_epi32(v0, v0);
-		auto ji = _mm_srli_epi32(v1, 25);
-		auto j = *(__m128*)&_mm_slli_epi32(ji, 23); //create vector 1.0f
-		auto i = _mm_cvttps_epi32(a.val);
-		auto fi = _mm_cvtepi32_ps(i);
-		auto igx = _mm_cmplt_ps(fi, a.val);
-		j = _mm_and_ps(igx, j);
-		return _mm_add_ps(fi, j);
+	UNFUNC(float4, ceil)
+	{
+		auto fi = (float4)(int4)a;
+
+		return sel(fi < a, fi + one<float4>(), fi);
 	}
 
-	inline float4 round(const float4 &a) {
-		auto v0 = _mm_setzero_ps();             //generate the highest value &lt; 2
+	UNFUNC(float4, round)
+	{
+		auto v0 = _mm_setzero_ps();             //generate the highest value < 2
 		auto v1 = _mm_cmpeq_ps(v0, v0);
 		auto vNearest2 = *(__m128*)&_mm_srli_epi32(*(__m128i*)&v1, 2);
 		auto i = _mm_cvttps_epi32(a.val);
@@ -95,13 +86,8 @@ namespace paranoise { namespace parallel {
 		auto rmd2i = _mm_cvttps_epi32(rmd2);    // after being truncated of course
 		auto rmd2Trunc = _mm_cvtepi32_ps(rmd2i);
 		auto r = _mm_add_ps(aTrunc, rmd2Trunc);
-		return r;
-	}
 
-	inline float4 sel(const float4& mask, const float4 &a, const float4 &b)
-	{
-		auto t = _mm_blendv_ps(b.val, a.val, mask.val);
-		return t;
+		return r;
 	}
 }}
 

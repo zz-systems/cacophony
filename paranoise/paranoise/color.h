@@ -4,7 +4,7 @@
 
 #include "basetypes.h"
 #include "interpolation.h"
-#include <map>
+#include <vector>
 
 
 namespace paranoise { namespace util {
@@ -33,7 +33,7 @@ namespace paranoise { namespace util {
 		
 	struct gradient1D
 	{
-		std::map<float, color_rgb> colors;
+		std::vector<std::pair<const float, color_rgb>> colors;
 
 		gradient1D() = default;
 		gradient1D(std::initializer_list<std::pair<const float, color_rgb>> init) : colors(init)
@@ -41,14 +41,33 @@ namespace paranoise { namespace util {
 
 		color_rgb getColor(const float value) const
 		{
-			auto v = paranoise::parallel::clamp(value, -1.0f, 1.0f);
+			auto v = value;//paranoise::parallel::clamp(value, -1.01f, 1.01f);
 
-			auto i0 = colors.lower_bound(v);
+			int index = 0;
+			for (auto &iter : colors)
+			{
+				index++;
+				if (value < iter.first)
+					break;
+			}
+
+			auto i0 = parallel::clamp(index - 1, 0, (int)colors.size() - 1);
+			auto i1 = parallel::clamp(index,     0, (int)colors.size() - 1);
+
+			if (i0 == i1)
+				return colors[i1].second;
+
+			auto k0 = colors[i0].first;
+			auto c0 = colors[i0].second;
+
+			auto k1 = colors[i1].first;
+			auto c1 = colors[i1].second;
+			//auto i0 = colors.lower_bound(v);
 			
 			/*if (v0 == v1)
 				return v1->second;*/
 
-			auto k0 = i0->first;
+			/*auto k0 = i0->first;
 			auto c0 = i0->second;
 
 			if (i0 == colors.end())
@@ -60,16 +79,16 @@ namespace paranoise { namespace util {
 				return c0;
 
 			auto k1 = i0->first;
-			auto c1 = i0->second;
+			auto c1 = i0->second;*/
 
-			auto alpha = (v - k0) / (k1 - k0);
+			auto alpha = ((v - k0) / (k1 - k0));
 
-			color_rgb result = {
-				(uint8) lerp<float>(c0.r, c1.r, v),
-				(uint8) lerp<float>(c0.g, c1.g, v),
-				(uint8) lerp<float>(c0.b, c1.b, v),
-				(uint8) lerp<float>(c0.a, c1.a, v)
-			};
+			color_rgb result(
+				(uint8) (lerp<float>(c0.r, c1.r, alpha)),
+				(uint8) (lerp<float>(c0.g, c1.g, alpha)),
+				(uint8) (lerp<float>(c0.b, c1.b, alpha)),
+				(uint8) (lerp<float>(c0.a, c1.a, alpha))
+			);
 
 			return result;
 		}

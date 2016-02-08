@@ -95,8 +95,7 @@ namespace paranoise {	namespace parallel {
 
 	inline float8 sel(const float8& mask, const float8 &a, const float8 &b)
 	{
-		auto t = _mm256_blendv_ps(b.val, a.val, mask.val);
-		return t;
+		return _mm256_blendv_ps(b.val, a.val, mask.val);
 	}
 }}
 

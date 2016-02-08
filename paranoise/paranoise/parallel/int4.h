@@ -55,8 +55,7 @@ namespace paranoise { namespace parallel {
 	inline int4 operator -(const int4& a)					{ return _mm_sub_epi32		(_mm_set1_epi32(0), a.val); }
 	inline int4 operator |(const int4& a, const int4& b)	{ return _mm_or_si128		(a.val, b.val); }
 	inline int4 operator &(const int4& a, const int4& b)	{ return _mm_and_si128		(a.val, b.val); }
-	inline int4 operator ^(const int4& a, const int4& b)	{ return _mm_xor_si128		(a.val, b.val); }
-	
+	inline int4 operator ^(const int4& a, const int4& b)	{ return _mm_xor_si128		(a.val, b.val); }	
 
 	inline int4 operator >>(const int4& a, int amount)	{ return _mm_srli_epi32		(a.val, amount); }
 	inline int4 operator <<(const int4& a, int amount)	{ return _mm_slli_epi32		(a.val, amount); }

@@ -6,7 +6,7 @@
 
 #include <ppl.h>
 #include <vector>
-
+#include <fstream>
 #include "parallel/all.h"
 
 namespace paranoise { namespace scheduler {
@@ -17,6 +17,7 @@ namespace paranoise { namespace scheduler {
 	struct scheduler_settings
 	{
 		Vector3<int> dimensions;
+
 		int seed;
 		bool use_threads;
 
@@ -76,7 +77,7 @@ namespace paranoise { namespace scheduler {
 		inline Vector3<TReal> build_coords(float x, float y)
 	{
 		return Vector3<TReal> {
-			TReal(x, x + 1.0f, x + 2.0f, x + 3.0f),
+			TReal(x),
 			TReal(y),
 			0
 		};
@@ -137,31 +138,44 @@ namespace paranoise { namespace scheduler {
 
 		auto d = settings.dimensions;
 
-		auto result = std::make_shared<vector2D>();
+		auto result = std::make_shared<std::vector<float>>(d.x * d.y * d.z);
+	/*	result->resize(d.y);
+		for (int y = 0; y < d.y; y++)
+			result->at(y).resize(d.x);*/
 
-		result->resize(d.y);
+		//result->resize(d.x * d.y * d.z);
+
+		//auto extent = settings.bounds._1 - settings.bounds._0;
+		//auto delta	= extent / d;
+		//auto cur	= settings.bounds._0;
+		std::mutex lock;
+
+		
 		if (settings.use_threads)
 		{
 			//for (auto y = 0; y < d.y; y++)			
-			parallel_for(0, d.y, [&](auto y)
+			parallel_for(0, d.y, [&](const auto y)
 			{
-				result->at(y).resize(d.x);
+				_MM_SET_ROUNDING_MODE(_MM_ROUND_TOWARD_ZERO);
+
+				auto stride = &result->at(y * d.x);
+
 				for (auto x = 0; x < d.x; x += word)
 				{
-					Vector3<TReal> coords = transform(build_coords<TReal>(x, y));
-
-					auto chunk = source(coords);
-					auto r = extract(chunk);
-
+					auto coords = transform(build_coords<TReal>(x, y));
+					auto r = source(coords);
+					auto chunk = extract(r);
+					//auto r = extract(chunk);
+					
 					for (int i = 0; i < word; i++)
 					{
-						result->at(y).at(x + i) = r[i];
+						stride[x + i] = chunk[i];
 					}
-				}
+					
+				}//lock.unlock();
 			}
 			);
 		}
-		
 
 		return result;
 	}

@@ -13,7 +13,7 @@ namespace paranoise { namespace module {
 	struct select_settings
 	{
 		double edgeFalloff = 0.0, lowerBound = -1.0, upperBound = 1.0;
-		Module<TReal> one, other, controller;
+		Module<TReal> a, b, controller;
 	};
 
 	SIMD_ENABLE_F(TReal)
@@ -21,8 +21,8 @@ namespace paranoise { namespace module {
 						const Vector3<TReal>&		  coords)
 	{
 		auto cv	= settings.controller	(coords);
-		auto r0	= settings.one			(coords);
-		auto r1	= settings.other		(coords);
+		auto r0	= settings.a			(coords);
+		auto r1	= settings.b			(coords);
 
 		if (settings.edgeFalloff > 0.0)
 		{

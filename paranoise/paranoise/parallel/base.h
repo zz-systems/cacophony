@@ -14,12 +14,19 @@
 
 namespace paranoise { namespace parallel {	
 
+	template<typename T> constexpr T one() { return T(1); }
+
 	ANY(TType) inline TType &operator +=(TType& a, const TType& b) { a = (a + b); return a; }
 	ANY(TType) inline TType &operator -=(TType& a, const TType& b) { a = (a - b); return a; }
 	ANY(TType) inline TType &operator *=(TType& a, const TType& b) { a = (a * b); return a; }
 	ANY(TType) inline TType &operator /=(TType& a, const TType& b) { a = (a / b); return a; }
 
-	ANY(TType) inline TType &operator !=(TType& a, const TType& b) { a = ~(a == b); return a; }
+	//ANY2(TType1, TType2) inline TType1 &operator +=(TType1& a, const TType2& b) { a = (a + b); return a; }
+	//ANY2(TType1, TType2) inline TType1 &operator -=(TType1& a, const TType2& b) { a = (a - b); return a; }
+	//ANY2(TType1, TType2) inline TType1 &operator *=(TType1& a, const TType2& b) { a = (a * b); return a; }
+	//ANY2(TType1, TType2) inline TType1 &operator /=(TType1& a, const TType2& b) { a = (a / b); return a; }
+
+	//ANY(TType) inline TType &operator !=(TType& a, const TType& b) { a = ~(a == b); return a; }
 	ANY(TType) inline TType &operator &=(TType& a, const TType& b) { a = (a & b); return a; }
 	ANY(TType) inline TType &operator |=(TType& a, const TType& b) { a = (a | b); return a; }
 	ANY(TType) inline TType &operator ^=(TType& a, const TType& b) { a = (a ^ b); return a; }

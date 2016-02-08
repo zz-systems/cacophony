@@ -54,14 +54,12 @@ namespace paranoise { namespace parallel {
 
 	inline int8 sel(const int8& mask, const int8 &a, const int8 &b)
 	{
-		auto t = _mm256_blendv_epi8(b.val, a.val, mask.val);
-		return t;
+		return _mm256_blendv_epi8(b.val, a.val, mask.val);
 	}
 
 	inline int8 sel(const float8& mask, const int8 &a, const int8 &b)
 	{
-		auto t = _mm256_blendv_epi8(b.val, a.val, _mm256_castps_si256(mask.val));
-		return t;
+		return _mm256_blendv_epi8(b.val, a.val, _mm256_castps_si256(mask.val));
 	}
 }}
 #endif

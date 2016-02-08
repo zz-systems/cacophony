@@ -33,6 +33,21 @@ template<typename T>
 inline Vector3<T>	operator /(const Vector3<T>& a, const Vector3<T>& b) { return Vector3<T>(a.x / b.x, a.y / b.y, a.z / b.z); }
 
 template<typename T>
+inline Vector3<T>	operator +(const Vector3<T>& a, const T& b) { return Vector3<T>(a.x + b, a.y + b, a.z + b); }
+template<typename T>
+inline Vector3<T>	operator -(const Vector3<T>& a, const T& b) { return Vector3<T>(a.x - b, a.y - b, a.z - b); }
+template<typename T>
+inline Vector3<T>	operator *(const Vector3<T>& a, const T& b) { return Vector3<T>(a.x * b, a.y * b, a.z * b); }
+template<typename T>
+inline Vector3<T>	operator /(const Vector3<T>& a, const T& b) { return Vector3<T>(a.x / b, a.y / b, a.z / b); }
+
+
+template<typename T> inline Vector3<T> &operator +=(Vector3<T>& a, const T& b) { a = (a + b); return a; }
+template<typename T> inline Vector3<T> &operator -=(Vector3<T>& a, const T& b) { a = (a - b); return a; }
+template<typename T> inline Vector3<T> &operator *=(Vector3<T>& a, const T& b) { a = (a * b); return a; }
+template<typename T> inline Vector3<T> &operator /=(Vector3<T>& a, const T& b) { a = (a / b); return a; }
+
+template<typename T>
 inline Vector3<T>	operator <(const Vector3<T>& a, const Vector3<T>& b) { return Vector3<T>(a.x < b.x, a.y < b.y, a.z < b.z); }
 template<typename T>
 inline Vector3<T>	operator <=(const Vector3<T>& a, const Vector3<T>& b) { return Vector3<T>(a.x <= b.x, a.y <= b.y, a.z <= b.z); }

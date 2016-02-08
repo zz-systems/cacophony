@@ -25,62 +25,56 @@ namespace paranoise { namespace module {
 	SIMD_ENABLE(TReal, TInt)
 	inline TReal voronoi(const Vector3<TReal>& coords, const voronoi_settings& settings)
 	{
-		// This method could be more efficient by caching the seed values.  Fix
-		// later.
+		auto seed		= Vector3<TInt>(settings.seed, settings.seed + 1, settings.seed + 2);
+		auto _coords	= coords * Vector3<TReal>(settings.frequency);
 
-		auto _coords = coords * Vector3<TReal>(settings.frequency);
+		Vector3<TInt> cube {
+			(TInt)_coords.x - sel(_coords.x > 0, ZERO<TInt>(), ONE<TInt>()),
+			(TInt)_coords.y - sel(_coords.y > 0, ZERO<TInt>(), ONE<TInt>()),
+			(TInt)_coords.z - sel(_coords.z > 0, ZERO<TInt>(), ONE<TInt>())
+		};
 
-		Vector3<TInt> cube;// = _coords - ((_coords > 0) & 1);
-		cube.x = (TInt) (_coords.x - sel(_coords.x > 0, 1, 0)); //((_coords.x > 0) & 1));
-		cube.y = (TInt) (_coords.y - sel(_coords.y > 0, 1, 0)); //((_coords.y > 0) & 1));
-		cube.z = (TInt) (_coords.z - sel(_coords.z > 0, 1, 0)); //((_coords.z > 0) & 1));
+		TReal value, mask, absDist, minDist = std::numeric_limits<int>::max();
 
-		TReal minDist = std::numeric_limits<TReal>::min();
-		Vector3<TReal> candidate;
+		Vector3<TReal> candidate = { 0, 0, 0 };
+		Vector3<TReal> cur, pos, dist;
 
-		auto word = sizeof(TReal) >> 2;
 		// Inside each unit cube, there is a seed point at a random position.  Go
 		// through each of the nearby cubes until we find a cube with a seed point
 		// that is closest to the specified position.
-
-		//for (int dim = 0; dim < word; dim++)
-		//for (int z = extract(cube.z)[dim] - 2; z <= extract(cube.z)[dim] + 2; z += 1)
-		//for (int y = extract(cube.y)[dim] - 2; y <= extract(cube.y)[dim] + 2; y += 1)
-		//for (int x = extract(cube.x)[dim] - 2; x <= extract(cube.x)[dim] + 2; x += 1)
-
+		
 		for (int zoff = -2; zoff <= 2; zoff++)
 		for (int yoff = -2; yoff <= 2; yoff++)
 		for (int xoff = -2; xoff <= 2; xoff++)
 		{
-			auto cur = Vector3<TReal>(cube.x + xoff, cube.y + yoff, cube.z + zoff);
+			cur.x = cube.x + xoff;
+			cur.y = cube.y + yoff;
+			cur.z = cube.z + zoff;
+			
+			pos.x = cur.x + ValueNoise3D<TReal, TInt>(cur, seed.x);
+			pos.y = cur.y + ValueNoise3D<TReal, TInt>(cur, seed.y);
+			pos.z = cur.z + ValueNoise3D<TReal, TInt>(cur, seed.z);
 
-			auto pos = cur + Vector3<TReal> {
-				ValueNoise3D<TReal, TInt>(cur, settings.seed),
-				ValueNoise3D<TReal, TInt>(cur, settings.seed + 1),
-				ValueNoise3D<TReal, TInt>(cur, settings.seed + 2),
-			};
+			dist	= pos - _coords;
+			absDist	= dot(dist, dist);
 
-			auto dist = pos - _coords;
-			auto absDist = dot(dist, dist);
+			//select_candidate(absDist, pos, minDist, candidate);
+			mask = absDist < minDist;
 
-			select_candidate(absDist, pos, minDist, candidate);
-			//find_candidate<TReal, TInt>(_coords, Vector3<TReal>(x, y, z), settings.seed, minDist, candidate);
+			candidate.x = sel(mask, pos.x, candidate.x);
+			candidate.y = sel(mask, pos.y, candidate.y);
+			candidate.z = sel(mask, pos.z, candidate.z);
+
+			minDist = sel(mask, absDist, minDist);			
 		}
 
-		/*find_candidate(Vector3<TReal>(cube.x - 2, cube.y - 2, cube.z - 2), minDist, candidate);
-		find_candidate(Vector3<TReal>(cube.x - 2, cube.y - 2, cube.z - 1), minDist, candidate);
-		find_candidate(Vector3<TReal>(cube.x - 2, cube.y - 2, cube.z - 0), minDist, candidate);
-		find_candidate(Vector3<TReal>(cube.x - 2, cube.y - 2, cube.z + 1), minDist, candidate);
-		find_candidate(Vector3<TReal>(cube.x - 2, cube.y - 2, cube.z + 2), minDist, candidate);*/
-
-		TReal value = 0;
 		if (settings.enableDistance)
 		{
 			auto diff = candidate - _coords;
-			value = paranoise::sqrt(dot(diff, diff)) * SQRT_3 - 1.0f;
+			value = paranoise::parallel::sqrt(dot(diff, diff)) * SQRT_3<TReal>() - ONE<TReal>();
 		}
 
-		return value + (settings.displacement * ValueNoise3D<TReal, TInt>(Vector3<TInt>(candidate), settings.seed));
+		return value + (settings.displacement * ValueNoise3D<TReal, TInt>(candidate, seed.x));
 	}	
 
 	SIMD_ENABLE_F(TReal)
@@ -88,7 +82,9 @@ namespace paranoise { namespace module {
 	{
 		auto mask	= absDist < minDist;
 		minDist		= sel(mask, absDist, minDist);
-		candidate	= sel(Vector3<TReal>(mask), pos, candidate);
+		candidate.x = sel(mask, pos.x, candidate.x);
+		candidate.y = sel(mask, pos.y, candidate.y);
+		candidate.z = sel(mask, pos.z, candidate.z);
 	}
 
 	template<>

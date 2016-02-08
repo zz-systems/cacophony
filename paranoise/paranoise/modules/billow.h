@@ -9,11 +9,13 @@ namespace paranoise { namespace module {
 	using namespace generators;
 	using namespace x87compat;
 
+	SIMD_ENABLE(TReal, TInt)
 	struct billow_settings
 	{
-		float frequency, lacunarity, persistence;
+		TReal frequency, lacunarity, persistence;
 		Quality quality;
-		int seed, octaves;
+		TInt seed;
+		int octaves;
 		
 		billow_settings(float frequency = 1.0, float lacunarity = 2.0, float persistence = 0.5, int octaves = 6, int seed = 0, Quality quality = Quality::Standard)
 			: frequency(frequency), lacunarity(lacunarity), persistence(persistence), seed(seed), octaves(octaves), quality(quality)
@@ -21,7 +23,7 @@ namespace paranoise { namespace module {
 	};
 
 	SIMD_ENABLE(TReal, TInt)
-	inline TReal billow(const Vector3<TReal>& coords, const billow_settings& settings)
+	inline TReal billow(const Vector3<TReal>& c, const billow_settings<TReal, TInt>& s)
 	{
 		using VReal = Vector3<TReal>;
 
@@ -29,35 +31,26 @@ namespace paranoise { namespace module {
 		TReal signal = 0.0;
 		TReal curPersistence = 1.0;
 		VReal n;
-		TInt seed;
 
-		const VReal lacunarity = settings.lacunarity;
-		const TReal persistence = settings.persistence;
+		auto _coords = c * s.lacunarity;
 
-		auto _coords = coords * Vector3<TReal>(settings.lacunarity);
-
-		for (int currentOctave = 0; currentOctave < settings.octaves; currentOctave++) {
+		for (int currentOctave = 0; currentOctave < s.octaves; currentOctave++) {
 
 			// Make sure that these floating-point values have the same range as a 32-
-			// bit integer so that we can pass them to the coherent-noise functions.
-			/*n.x = truncate<TReal, TInt>(_coords.x);
-			n.y = truncate<TReal, TInt>(_coords.y);
-			n.z = truncate<TReal, TInt>(_coords.z);*/
+			// bit integer so that we can pass them to the coherent-noise functions.	
 
 			n = clamp_int32(_coords);
+
 			// Get the coherent-noise value from the input value and add it to the
 			// final result.
-			seed = (settings.seed + currentOctave) & 0xffffffff;
+			signal = GradientCoherentNoise3D(n, s.seed + currentOctave, s.quality);
 
-			signal = GradientCoherentNoise3D(n, seed, settings.quality);
-
-			signal = 2.0f * paranoise::parallel::abs(signal) - 1.0f;
-
-			value += signal * curPersistence;
+			signal	= fmsub(2.0f, paranoise::parallel::abs(signal), 1.0f);
+			value	+= signal * curPersistence;
 
 			// Prepare the next octave.
-			_coords *= lacunarity;
-			curPersistence *= persistence;
+			_coords *= s.lacunarity;
+			curPersistence *= s.persistence;
 		}
 
 		value += (TReal)0.5f;
