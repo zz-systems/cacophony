@@ -21,15 +21,13 @@ namespace UnitTest
 
 		TEST_METHOD(Test_Module_Perlin)
 		{
-			auto settings = perlin_settings();
-
 			for (float z = -1; z <= 1; z += 0.25)
 			for (float y = -1; y <= 1; y += 0.25)
 			for (float x = -1; x <= 1; x += 0.25)
 			{
-				auto ref = perlin<float, int>(Vector3<float>(x, y, z), settings);
+				auto ref = perlin<float, int>(Vector3<float>(x, y, z), perlin_settings<float, int>());
 
-				AreEqual(ref, perlin<float4, int4>(Vector3<float4>(x, y, z), settings));
+				AreEqual(ref, perlin<float4, int4>(Vector3<float4>(x, y, z), perlin_settings<float4, int4>()));
 				//AreEqual(ref, perlin<float8, int8>(Vector3<float8>(1, 1, 1), settings));
 			}
 		}
@@ -47,11 +45,10 @@ namespace UnitTest
 
 		TEST_METHOD(Test_Module_Billow)
 		{
-			auto settings = billow_settings();
-			auto refresult = billow<float, int>(Vector3<float>(1, 1, 1), settings);
+			auto refresult = billow<float, int>(Vector3<float>(1, 1, 1), billow_settings<float, int>());
 
 			//auto settings		= perlin_settings<float4, int4>();
-			auto result = billow<float4, int4>(Vector3<float4>(1, 1, 1), settings);
+			auto result = billow<float4, int4>(Vector3<float4>(1, 1, 1), billow_settings<float4, int4>());
 
 			Assert::AreEqual(refresult, result.values[0], std::numeric_limits<float>::epsilon());
 		}

@@ -38,25 +38,33 @@ namespace paranoise {	namespace generators {
 	const int SHIFT_NOISE_GEN = 13;
 #else
 	// Constants used by the current version of libnoise.
-	const int X_NOISE_GEN = 1619;
-	const int Y_NOISE_GEN = 31337;
-	const int Z_NOISE_GEN = 6971;
-	const int SEED_NOISE_GEN = 1013;
+	const int _X_NOISE_GEN = 1619;
+	const int _Y_NOISE_GEN = 31337;
+	const int _Z_NOISE_GEN = 6971;
+
+	template<typename T>
+	constexpr Vector3<T> NOISE_GEN() { return Vector3<T>(1619, 31337, 6971); }
+
+	const int _SEED_NOISE_GEN = 1013;
 	const int SHIFT_NOISE_GEN = 8;
+
+	template<typename T>
+	constexpr T SEED_NOISE_GEN() { return (T)1013;	}
+	
 #endif
 		
 	namespace detail {
 		// Create a unit-length cube aligned along an integer boundary.  This cube
 		// surrounds the input point.
 		SIMD_ENABLE(TReal, TInt)
-		inline void construct_cube(const Vector3<TReal>& c, Matrix3x2<TInt> &cube)
+		FORCEINLINE void construct_cube(const Vector3<TReal>& c, Matrix3x2<TInt> &cube)
 		{		
 			// Assuming that x > 0 yields either 0 or (+-)1, the result is ANDed with 1
 			// => equivalent to (x > 0.0? (int)x: (int)x - 1)
 			
-			cube._0.x = (TInt)c.x - sel(c.x > 0, ZERO<TInt>(), ONE<TInt>());
-			cube._0.y = (TInt)c.y - sel(c.y > 0, ZERO<TInt>(), ONE<TInt>());
-			cube._0.z = (TInt)c.z - sel(c.z > 0, ZERO<TInt>(), ONE<TInt>());
+			cube._0.x = (TInt)c.x - sel(c.x > 0, consts<TInt>::zero(), consts<TInt>::one());
+			cube._0.y = (TInt)c.y - sel(c.y > 0, consts<TInt>::zero(), consts<TInt>::one());
+			cube._0.z = (TInt)c.z - sel(c.z > 0, consts<TInt>::zero(), consts<TInt>::one());
 
 			cube._1.x = cube._0.x + 1;
 			cube._1.y = cube._0.y + 1;
@@ -64,16 +72,16 @@ namespace paranoise {	namespace generators {
 		}
 
 		SIMD_ENABLE(TReal, TInt)
-		inline void map_coord_diff(	const Vector3<TReal>& c,
-									const Matrix3x2<TInt> &cube,
-									Quality quality,
-									Vector3<TReal>& s)
+		FORCEINLINE void map_coord_diff(	const Vector3<TReal>& c,
+											const Matrix3x2<TInt> &cube,
+											Quality quality,
+											Vector3<TReal>& s)
 		{
 			// Map the difference between the coordinates of the input value and the
 			// coordinates of the cube's outer-lower-left vertex onto an S-curve.
-			s.x = c.x - TReal(cube._0.x);
-			s.y = c.y - TReal(cube._0.y);
-			s.z = c.z - TReal(cube._0.z);
+			s.x = c.x - static_cast<TReal>(cube._0.x);
+			s.y = c.y - static_cast<TReal>(cube._0.y);
+			s.z = c.z - static_cast<TReal>(cube._0.z);
 
 			/*auto best = quality == Quality::Best;
 			auto fast = quality == Quality::Standard;
@@ -271,22 +279,21 @@ namespace paranoise {	namespace generators {
 		}
 	}*/
 	SIMD_ENABLE(TReal, TInt)
-	inline TReal GradientNoise3D(	const Vector3<TReal>& input,
+	FORCEINLINE TReal GradientNoise3D(	const Vector3<TReal>& input,
 							const Vector3<TInt>& nearby, 
 							const TInt& seed)
 	{
-		auto vi = (X_NOISE_GEN * nearby.x + Y_NOISE_GEN * nearby.y + Z_NOISE_GEN * nearby.z + SEED_NOISE_GEN * seed);
-	
-		vi &= (TInt) 0xffffffff;
+		auto vi		= (SEED_NOISE_GEN<TInt>() * seed + dot(NOISE_GEN<TInt>(), nearby)) & static_cast<TInt>(0xFFFF'FFFF);
+		
 		vi ^= (vi >> SHIFT_NOISE_GEN);
-		vi &= (TInt) 0xFF;
-		vi <<= 2;
+		vi &= (TInt) 0xFF;	
+		vi <<= 2;	
 
 		Vector3<TReal> grad;
 		Vector3<float*> vgrad = { extract(grad.x), extract(grad.y), extract(grad.z) };
 
 		auto vvi = extract(vi);
-
+		// TODO: Gather scatter
 		for (size_t i = 0; i < dim<TReal>(); i++)
 		{
 			vgrad.x[i] = RandomVectors[vvi[i]];
@@ -299,7 +306,7 @@ namespace paranoise {	namespace generators {
 	}
 
 	SIMD_ENABLE(TReal, TInt)
-	inline TReal GradientCoherentNoise3D(	const Vector3<TReal>& c,
+	TReal GradientCoherentNoise3D(	const Vector3<TReal>& c,
 									const TInt& seed, 
 									Quality quality)
 	{		
@@ -341,14 +348,9 @@ namespace paranoise {	namespace generators {
 	}	
 
 	SIMD_ENABLE_I(TInt)
-	inline TInt IntValueNoise3D(const Vector3<TInt>& c, const TInt& seed)
+	FORCEINLINE TInt IntValueNoise3D(const Vector3<TInt>& c, const TInt& seed)
 	{
-		TInt n = (
-			X_NOISE_GEN		 * c.x
-			+ Y_NOISE_GEN    * c.y
-			+ Z_NOISE_GEN    * c.z
-			+ SEED_NOISE_GEN * seed)
-			& 0x7fffffff;
+		TInt n = (dot(NOISE_GEN<TInt>(), c) + SEED_NOISE_GEN<TInt>() * seed) & 0x7fffffff;
 
 		n = (n >> 13) ^ n;
 
@@ -357,13 +359,13 @@ namespace paranoise {	namespace generators {
 	}
 
 	SIMD_ENABLE(TReal, TInt)
-	inline TReal ValueNoise3D(const Vector3<TInt>& c, const TInt& seed)
+	FORCEINLINE TReal ValueNoise3D(const Vector3<TInt>& c, const TInt& seed)
 	{
 		return ONE<TReal>() - (TReal(IntValueNoise3D(c, seed)) / 1073741824.0f);
 	}
 
 	SIMD_ENABLE(TReal, TInt)
-	inline TReal ValueCoherentNoise3D(const Vector3<TReal>& c, const TInt& seed, Quality quality)
+	TReal ValueCoherentNoise3D(const Vector3<TReal>& c, const TInt& seed, Quality quality)
 	{
 		Matrix3x2<TInt> cube;
 		detail::construct_cube(c, cube);

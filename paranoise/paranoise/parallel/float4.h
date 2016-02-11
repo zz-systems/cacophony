@@ -8,6 +8,7 @@ namespace paranoise { namespace parallel {
 	union int4;
 	union double2;
 
+	
 	ALIGN(16) union float4 {
 		__m128 val;
 		float values[4];
@@ -27,51 +28,56 @@ namespace paranoise { namespace parallel {
 		float4(const int4&	rhs);
 		float4(const double2&	rhs);		
 	};
-	
 
+	template<> inline float4 create_mask(int mask) { return  _mm_castsi128_ps(_mm_set1_epi32(mask)); }
+
+	const auto ones		 = create_mask<float4>(0xFFFF'FFFF);
+	const auto sign1all0 = create_mask<float4>(0x8000'0000);
+	const auto sign0all1 = create_mask<float4>(0x7FFF'FFFF);
+
+	
 	BINOP(float4, +) { STDBDY(_mm_add_ps); }
 	BINOP(float4, -) { STDBDY(_mm_sub_ps); }
 	BINOP(float4, *) { STDBDY(_mm_mul_ps); }
-	BINOP(float4, /) { STDBDY(_mm_div_ps); }
+	BINOP(float4, / ) { return _mm_mul_ps(a.val, _mm_rcp_ps(b.val)); }//*/STDBDY(_mm_div_ps); }
 
 	BINOP(float4, > ) {	STDBDY(_mm_cmpgt_ps); }
 	BINOP(float4, < ) {	STDBDY(_mm_cmplt_ps); }
 	BINOP(float4, == ) { STDBDY(_mm_cmpeq_ps); }
 
-	UNOP(float4, -) { return _mm_sub_ps(_mm_set1_ps(0.0), a.val); }
+	UNOP(float4, -) { return a ^ sign1all0; }//*/return _mm_sub_ps(_mm_set1_ps(0.0), a.val); }
 	
-	UNOP(float4, ~) { return _mm_andnot_ps(a.val, _mm_castsi128_ps(_mm_set1_epi32(0xFFFFFFFF))); }
+	UNOP(float4, ~) { return _mm_andnot_ps(a.val, ones.val); }
 
 	BINOP(float4, &) { STDBDY(_mm_and_ps); }
 	BINOP(float4, |) { STDBDY(_mm_or_ps);  }
 	BINOP(float4, ^) { STDBDY(_mm_xor_ps); }
 	
 	UNFUNC(float4, abs) {
-		static const __m128 sign_mask = _mm_set_ps1(-0.f); // -0.f = 1 << 31
-		return _mm_andnot_ps(sign_mask, a.val);
+		return a & sign0all1;//_mm_and_ps(_mm_castsi128_ps(_mm_set1_epi32(0x7FFF'FFFF)), a.val);
 	}
 
 	BINFUNC(float4, min)	{ STDBDY(_mm_min_ps); }
 	BINFUNC(float4, max)	{ STDBDY(_mm_max_ps); }	
 
-	UNFUNC(float4, sqrt)	{ STDBDY1(_mm_sqrt_ps); }
+	UNFUNC(float4, sqrt) { return _mm_mul_ps(a.val, _mm_rsqrt_ps(a.val)); } // STDBDY1(_mm_sqrt_ps);}
 
 	inline float4 sel(const float4& mask, const float4 &a, const float4 &b)	{ return _mm_blendv_ps(b.val, a.val, mask.val);	}
 	inline float4 fmadd(const float4 &a, const float4 &b, const float4 &c) { return _mm_fmadd_ps(a.val, b.val, c.val); }	
 	inline float4 fmsub(const float4 &a, const float4 &b, const float4 &c) { return _mm_fmsub_ps(a.val, b.val, c.val); }
-
+	
 	UNFUNC(float4, floor) 
 	{
 		auto fi = (float4)(int4)a;
 
-		return sel(fi > a, fi - one<float4>(), fi);//- (fi > a) & j;
+		return sel(fi > a, fi - consts<float4>::one(), fi);//- (fi > a) & j;
 	}
 
 	UNFUNC(float4, ceil)
 	{
 		auto fi = (float4)(int4)a;
 
-		return sel(fi < a, fi + one<float4>(), fi);
+		return sel(fi < a, fi + consts<float4>::one(), fi);
 	}
 
 	UNFUNC(float4, round)

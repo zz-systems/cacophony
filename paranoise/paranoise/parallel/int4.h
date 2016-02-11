@@ -3,6 +3,7 @@
 #define PARANOISE_INTRINSIC_M128I_H
 
 #include "base.h"
+#define __SSE4_1__
 
 namespace paranoise { namespace parallel {
 
@@ -46,10 +47,9 @@ namespace paranoise { namespace parallel {
 	// yet to implement
 	
 
-
 	inline int4 operator >(const int4& a, const int4& b)	{ return _mm_cmpgt_epi32	(a.val, b.val); }
 	inline int4 operator <(const int4& a, const int4& b)	{ return _mm_cmplt_epi32	(a.val, b.val); }	
-	inline int4 operator==(const int4& a, const int4& b) { return _mm_cmpeq_epi32	(a.val, b.val); }
+	inline int4 operator==(const int4& a, const int4& b)	{ return _mm_cmpeq_epi32	(a.val, b.val); }
 
 	inline int4 operator ~(const int4& a)					{ return _mm_andnot_si128	(a.val, a.val); }
 	inline int4 operator -(const int4& a)					{ return _mm_sub_epi32		(_mm_set1_epi32(0), a.val); }

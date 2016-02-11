@@ -20,6 +20,7 @@ namespace paranoise {
 	
 
 #define ALIGN(bytes) __declspec(align(bytes))
+#define FORCEINLINE __forceinline
 
 // define checked floating and integral type to use on SIMD-enabled functions/types. 
 #define SIMD_ENABLE(floatType, intType) \
@@ -50,6 +51,18 @@ namespace paranoise {
 
 //#define SIMD_ENABLE() SIMD_ENABLE(TReal, TInt)
 	
+#define CONSTDEF(TType, name, body) constexpr TType name() { return static_cast<TType>(body); }
+
+	ANY(TType)
+	struct consts
+	{
+		static CONSTDEF(TType, pi,		3.14159265358979323846);
+		static CONSTDEF(TType, deg2rad,	pi<TType>() / 180.0);
+		static CONSTDEF(TType, sqrt3,	(sqrt(3)));
+		static CONSTDEF(TType, one,		1);
+		static CONSTDEF(TType, zero,	0);
+	};
+		
 
 	ANY(TType)
 		constexpr TType PI() { return (TType) 3.14159265358979323846; }
@@ -68,6 +81,15 @@ namespace paranoise {
 
 	ANY(TType)
 		constexpr TType NZERO() { return (TType)-0.0; }
+
+	ANY(TType)
+		constexpr TType ALL1() { return (TType)0xFFFF'FFFF; }
+
+	ANY(TType)
+		constexpr TType FLOATSIGNBIT() { return (TType)0x8000'0000;	}
+	ANY(TType)
+		constexpr TType FLOATNOSIGNBIT() { return (TType)0x7FFF'FFFF; }
+
 
 	const float _SQRT_3 = sqrtf(3);
 
@@ -152,9 +174,11 @@ using SeededModule = std::function<TReal(const Vector3<TReal>&, const TInt& seed
 		inline float  sqrt(float a) { return ::sqrtf(a); }
 		inline int    sqrt(int a) { return (int)::floor(::sqrt((double)a)); }
 
+		// Fused Multiply-Add		[y = a * b + c]
 		ANY(TType)
 			inline TType fmadd(const TType &a, const TType &b, const TType &c) { return a * b + c; }
-
+		
+		// Fused Multiply-Subtract	[y = a * b - c]
 		ANY(TType)
 			inline TType fmsub(const TType &a, const TType &b, const TType &c) { return a * b - c; }
 

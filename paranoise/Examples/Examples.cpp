@@ -7,8 +7,10 @@
 #include <vector>
 #include <fstream>
 #include <chrono>
-#include "lib/CImg-1.6.9/CImg.h"
 
+#ifndef PROFILE
+#include "lib/CImg-1.6.9/CImg.h"
+#endif
 
 #include "../paranoise/modules/all.h"
 #include "../paranoise/parallel/all.h"
@@ -135,8 +137,13 @@ int main()
 	using vec = Vector3<float>;
 	using fvec = Vector3<_float>;
 
+#ifdef PROFILE
+	const int w = 2048;//4096; //8192 * 2;
+	const int h = 2048;//4096; //8192 * 2;
+#else 
 	const int w = 4096; //8192 * 2;
 	const int h = 4096; //8192 * 2;
+#endif
 
 	scheduler_settings settings({ w, h, 1 }, 1337, true);
 
@@ -152,6 +159,7 @@ int main()
 	auto v = *result;
 	cout << "SIMD Duration (Code + Compiler optimized): " << simd_duration << endl;
 
+#ifndef PROFILE
 	auto sisd_t1 = high_resolution_clock::now();
 
 	auto discard = schedule2D<float>(
@@ -191,7 +199,7 @@ int main()
 	);
 
 	img.display("kebabtron", true);
-	
+#endif
 
     return 0;
 }
