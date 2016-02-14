@@ -133,6 +133,7 @@
     <ClInclude Include="modules\rotate.h" />
     <ClInclude Include="modules\select.h" />
     <ClInclude Include="modules\terrace.h" />
+    <ClInclude Include="modules\turbulence.h" />
     <ClInclude Include="modules\voronoi.h" />
     <ClInclude Include="noisegenerators.h" />
     <ClInclude Include="parallel\all.h" />

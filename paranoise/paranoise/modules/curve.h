@@ -3,7 +3,9 @@
 #define PARANOISE_MODULES_CURVE
 
 #include <map>
+#include <vector>
 #include <algorithm>
+
 #include "../noisegenerators.h"
 #include "../parallel/x87compat.h"
 
@@ -11,53 +13,35 @@ namespace paranoise { namespace module {
 	using namespace generators;
 	using namespace x87compat;
 
-	SIMD_ENABLE_F(TReal)
-	struct curve_settings
-	{
-		Module<TReal> source;
-		std::map<double, double> points;
-	};
-
 	SIMD_ENABLE(TReal, TInt)
-	inline TReal curve(const Vector3<TReal>& coords, const curve_settings<TReal>& settings)
+	struct curve
 	{
-		auto cpc = settings.points.count();		
-		assert(cpc >= 4);
+		std::vector<std::pair<const TReal, TReal>> points;
 
-		auto val = settings.source(coords);
-		TInt startIndexes;
-		
-		for (int i = 0, auto iter = settings.points.begin(); iter != settings.points.end(); i++, iter++)
+		curve(const std::initializer_list<std::pair<const TReal, TReal>>& lst) : points(lst)
+		{}
+
+		inline TReal operator()(const Vector3<TReal>& coords, const Module<TReal> &source) const
 		{
-			startIndexes = startIndexes | (iter->first > val) & i;
+			auto val = source(coords);
+			TReal v3, v2, v1, v0, mask;
+
+			for (int i = 0; i < points.size() - 1; i++)
+			{
+				mask = points[i].first > val;
+
+				v3 = sel(mask, points[i + 1].second, v3);
+				v2 = sel(mask, points[i	   ].second, v2);
+				v1 = sel(mask, points[i - 1].second, v1);
+				v0 = sel(mask, points[i - 2].second, v0);
+			}
+			
+			auto alpha	= (val - v1) / (v2 - v1);
+
+			return cerp(v0, v1, v2, v3, alpha);
 		}
 
-		auto i3 = clamp(startIndexes + 1, 0, cpc - 1);
-		auto i2 = clamp(startIndexes    , 0, cpc - 1);
-		auto i1 = clamp(startIndexes - 1, 0, cpc - 1);
-		auto i0 = clamp(startIndexes - 2, 0, cpc - 1);
-
-		auto mask = i1 == i2;
-		
-		//auto result = (i2 == i1) & 
-		TReal in1, in0, alpha, cp3, cp2, cp1, cp0, result;
-
-		for (int i = 0; i < elem_count(in1); i++)
-		{
-			in0.values[i] = std::advance(settings.points.begin(), i1.values[i])->first;
-			in1.values[i] = std::advance(settings.points.begin(), i2.values[i])->first;			
-
-			cp3.values[i] = std::advance(settings.points.begin(), i3.values[i])->first;
-			cp2.values[i] = std::advance(settings.points.begin(), i2.values[i])->first;
-			cp1.values[i] = std::advance(settings.points.begin(), i1.values[i])->first;
-			cp0.values[i] = std::advance(settings.points.begin(), i0.values[i])->first;
-
-			result.values[i] = std::advance(settings.points.begin(), i1.values[i])->second;
-		}
-
-		alpha = (val - in0) / (in1 - in0);
-
-		return result & mask | ~mask & cerp(cp0, cp1, cp2, cp3, cp4, alpha);
-	}
+		// inline operator (Module<TReal>)() { return operator(); }
+	};	
 }}
 #endif

@@ -9,14 +9,14 @@ namespace paranoise { namespace module {
 	using namespace generators;
 	using namespace x87compat;
 
-	SIMD_ENABLE_F(TReal)
-	struct rotate_settings
+	SIMD_ENABLE(TReal, TInt)
+	struct rotate
 	{
 		Matrix3x3<TReal> rot;
 		Vector3<float>  angles;
 
-		rotate_settings() : rotate_settings({ 0, 0, 0 }) {}
-		rotate_settings(Vector3<float> angles) : angles(angles)
+		rotate() : rotate_settings({ 0, 0, 0 }) {}
+		rotate(Vector3<float> angles) : angles(angles)
 		{
 			auto cos = Vector3<TReal>( ::cos(angles.x), ::cos(angles.y), ::cos(angles.z) );
 			auto sin = Vector3<TReal>( ::sin(angles.x), ::sin(angles.y), ::sin(angles.z) );
@@ -25,14 +25,13 @@ namespace paranoise { namespace module {
 			rot._1 = Vector3<TReal>{ sin.y * sin.x * cos.z - cos.y * sin.z,	cos.x * cos.z,		-cos.y * sin.x * cos.z - sin.y * sin.z };
 			rot._2 = Vector3<TReal>{-sin.y * cos.x,							sin.x,				cos.y * cos.x						   };
 		}
+
+		inline TReal operator()(const Vector3<TReal>& coords, const Module<TReal>& source)
+		{
+			return source(rot * coords);
+		}
 	};
 
-	SIMD_ENABLE(TReal, TInt)
-	inline TReal rotate(	const Module<TReal>& source,
-							const Vector3<TReal>& coords,
-							const rotate_settings<TReal>& settings)
-	{
-		return source(settings.rot * coords);
-	}
+	// inline operator (Module<TReal>)() { return operator(); }
 }}
 #endif

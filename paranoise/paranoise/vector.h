@@ -104,6 +104,7 @@ union Matrix3x2
 	};
 };
 
+
 //template<typename T>
 //inline Vector3<T>	operator +(const Vector3<T>& a, const Vector3<T>& b) { return Vector3<T>(a.x + b.x, a.y + b.y, a.z + b.z); }
 //template<typename T>

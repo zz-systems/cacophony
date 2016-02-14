@@ -11,4 +11,5 @@
 #include "select.h"
 #include "terrace.h"
 #include "voronoi.h"
+#include "turbulence.h"
 #endif

@@ -3,6 +3,8 @@
 #define PARANOISE_MODULE_MODULES_H
 
 #include <assert.h>
+#include <map>
+
 #include "../basetypes.h"
 #include "perlin.h"
 #include "../noisegenerators.h"
@@ -20,84 +22,45 @@ namespace paranoise { namespace module {
 
 	// blend input values according to blend factor alpha
 	SIMD_ENABLE_F(TReal)
-	inline TReal blend(	Module<TReal> v0,
+	inline TReal blend( Vector3<TReal> coords,
+						Module<TReal> v0,
 						Module<TReal> v1,
-						Module<TReal> alpha,
-						Vector3<TReal> coords)
+						Module<TReal> alpha)
 	{
 		return blend(v0(coords), v1(coords), alpha(coords));
-	}
-
-	SIMD_ENABLE(TReal, TInt)
-	struct turbulence_settings : perlin_settings<TReal, TInt>
-	{
-		Vector3<TReal> power;
-
-		Matrix3x3<TReal> dinput = {
-			Vector3<TReal>{ 12414.0f, 65124.0f, 31337.0f } / (Vector3<TReal>) 65536.0f,
-			Vector3<TReal>{ 26519.0f, 18128.0f, 60493.0f } / (Vector3<TReal>) 65536.0f,
-			Vector3<TReal>{ 53820.0f, 11213.0f, 44845.0f } / (Vector3<TReal>) 65536.0f
-		};
-
-		turbulence_settings(float power = 1.0, int roughness = 3, float frequency = 1.0, float lacunarity = 2.0, float persistence = 0.5, int seed = 0, Quality quality = Quality::Standard)
-			: perlin_settings(frequency, lacunarity, persistence, seed, roughness, quality),
-			power(power)
-		{}
-
-		turbulence_settings(const turbulence_settings<TReal, TInt> &s)
-			: perlin_settings(s),
-			power(s.power)
-		{}
-	};
-		
-	// Apply turbulence to the source input
-	SIMD_ENABLE(TReal, TInt)
-	inline TReal turbulence(Module<TReal> source,
-							const Vector3<TReal> &c, 
-							const turbulence_settings<TReal, TInt> &s)
-	{
-		auto distortion = Vector3<TReal>(
-				perlin<TReal, TInt>(s.dinput._0 + c, s),
-				perlin<TReal, TInt>(s.dinput._1 + c, s),
-				perlin<TReal, TInt>(s.dinput._2 + c, s)) * s.power;
-
-
-		return source(c + distortion);
-	}
-
-	SIMD_ENABLE_F(TReal)
-	inline TReal add(Module<TReal> one, Module<TReal> other, const Vector3<TReal> &coords)
-	{		
-		return one(coords) + other(coords);
-	}
+	}	
 		
 	// Translate the source module's input
 	SIMD_ENABLE_F(TReal)
-	inline TReal translate(Module<TReal> source, const Vector3<TReal>& translation, const Vector3<TReal>& coords)
+	inline TReal translate(const Vector3<TReal>& coords, const Vector3<TReal>& translation, Module<TReal> source)
 	{
 		return source(coords + translation);
 	}
 
 	// Scale the source module's input
 	SIMD_ENABLE_F(TReal)
-	inline TReal scale_input(Module<TReal> source, const Vector3<TReal>& scale, const Vector3<TReal>& coords)
+	inline TReal scale_input(const Vector3<TReal>& coords, const Vector3<TReal>& scale, Module<TReal> source)
 	{
 		return source(coords * scale);
 	}
 
 	// Scale the source module's output and add a bias
 	SIMD_ENABLE_F(TReal)
-	inline TReal scale_output_biased(	Module<TReal> source, 
-										const TReal& factor, 
-										const TReal& bias, 
-										const Vector3<TReal>& coords)
+	inline TReal scale_output(const Vector3<TReal>& coords, const TReal& scale, Module<TReal> source)
+	{
+		return source(coords) * factor;
+	}
+
+	// Scale the source module's output and add a bias
+	SIMD_ENABLE_F(TReal)
+	inline TReal scale_output_biased(const Vector3<TReal>& coords, const TReal& scale, const TReal& bias, Module<TReal> source)
 	{
 		return source(coords) * factor + bias;
 	}
 
 	// generate points on concentric spheres
 	SIMD_ENABLE_F(TReal)
-	inline TReal concentric_spheres(const TReal& frequency, 
+	inline TReal spheres(const TReal& frequency, 
 									const Vector3<TReal>& coords)
 	{
 		auto _coords = coords * frequency;
@@ -110,10 +73,9 @@ namespace paranoise { namespace module {
 		return 1.0 - (nearestDist * 4.0); // Puts it in the -1.0 to +1.0 range.
 	}
 
-	// generate points on concentric cylinders
+	// generate points on cylinders
 	SIMD_ENABLE_F(TReal)
-	inline TReal concentric_cylinders(const TReal& frequency,
-									  const Vector3<TReal>& coords)
+	inline TReal cylinders(const Vector3<TReal>& coords, const TReal& frequency)
 	{
 		auto _coords = coords;
 		_coords.x *= frequency;
@@ -141,9 +103,22 @@ namespace paranoise { namespace module {
 	inline TReal checkerboard(const Vector3<TReal>& coords)
 	{
 		// Equivalent to
-		// return (TInt(coords.x) & 1 ^ TInt(coords.y) & 1 ^ TInt(coords.z) & 1) ? -1.0 : 1.0
+		// return (TInt(coords.x) & 1 ^ TInt(coords.y) & 1 ^ TInt(coords.z) & 1) ? -1.0 : 1.0		
 		// ( And repeat that for each vector field :) )
-		return 1 - (((TInt(coords.x) ^ TInt(coords.y) ^ TInt(coords.z)) & 1) << 1);
+		return 1 - (((static_cast<TInt>(coords.x) ^ static_cast<TInt>(coords.y) ^ static_cast<TInt>(coords.z)) & 1) << 1);
+	}
+
+	SIMD_ENABLE(TReal, TInt)
+	inline Module<TReal> memoize(const Module<TReal>& source)
+	{
+		return [source](const Vector3<TReal>& coords)
+		{
+			static std::map<Vector3<TReal>, TReal> cache;
+			
+			return cache.count(coords) > 0 
+				? cache[coords]
+				: cache[coords] = source(coords);
+		};
 	}
 }}
 #endif

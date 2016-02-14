@@ -10,7 +10,7 @@ namespace paranoise { namespace module {
 	using namespace x87compat;
 	
 	SIMD_ENABLE(TReal, TInt)
-	struct perlin_settings
+	struct perlin
 	{
 		TReal   frequency, 
 				lacunarity, 
@@ -20,38 +20,41 @@ namespace paranoise { namespace module {
 		TInt seed;
 		int octaves;
 
-		perlin_settings(float frequency = 1.0, float lacunarity = 2.0, float persistence = 0.5, int octaves = 6, int seed = 0, Quality quality = Quality::Standard)
+		perlin(float frequency = 1.0, float lacunarity = 2.0, float persistence = 0.5, int octaves = 6, int seed = 0, Quality quality = Quality::Standard)
 			: frequency(frequency), lacunarity(lacunarity), persistence(persistence), seed(seed), octaves(octaves), quality(quality)
 		{}
 
-		perlin_settings(const perlin_settings<TReal, TInt> &s)
-			: frequency(s.frequency), lacunarity(s.lacunarity), persistence(s.persistence), seed(s.seed), octaves(s.octaves), quality(s.quality)
+
+		perlin(const perlin<TReal, TInt>& rhs)
+			: frequency(rhs.frequency), lacunarity(rhs.lacunarity), persistence(rhs.persistence), seed(rhs.seed), octaves(rhs.octaves), quality(rhs.quality)
 		{}
-	};
-
-	SIMD_ENABLE(TReal, TInt)
-	inline TReal perlin(const Vector3<TReal>& c, const perlin_settings<TReal, TInt>& s)
-	{
-		using VReal = Vector3<TReal>;
-
-		TReal	value				= 0, 
-				currentPersistence	= 1;
-		
-		auto _coords = c * s.frequency;
-		
-		for (int curOctave = 0; curOctave < s.octaves; curOctave++)
+				
+		inline TReal operator()(const Vector3<TReal>& c) const
 		{
-			value += currentPersistence * GradientCoherentNoise3D<TReal, TInt>(
-											clamp_int32<TReal>(_coords),
-											s.seed + curOctave, //& 0xffffffff,
-											s.quality);
+			using VReal = Vector3<TReal>;
 
-			// Prepare the next octave.
-			_coords				*= s.lacunarity;
-			currentPersistence	*= s.persistence;
+			TReal	value = 0,
+				currentPersistence = 1;
+
+			auto _coords = c * frequency;
+
+			for (int curOctave = 0; curOctave < octaves; curOctave++)
+			{
+				value += currentPersistence * GradientCoherentNoise3D<TReal, TInt>(
+					clamp_int32<TReal>(_coords),
+					seed + curOctave, //& 0xffffffff,
+					quality);
+
+				// Prepare the next octave.
+				_coords *= lacunarity;
+				currentPersistence *= persistence;
+			}
+
+			return value;
 		}
 
-		return value;
-	}
+		inline operator Module<TReal>() const { return [this](const auto &c) { return this->operator()(c); }; }
+		//{ return &perlin<TReal, TInt>::operator(); }
+	};	
 }}
 #endif

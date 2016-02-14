@@ -19,11 +19,12 @@ namespace paranoise { namespace interpolation {
 		auto q = n0_n1 - p;
 		auto r = n2 - n0;
 
-
 		auto a² = a * a;
 		auto a³ = a² * a;
 
-		return (p * a³) + (q * a²) + (r * a) + n1;
+		auto qa² = q * a²;
+
+		return fmadd(p, a³, qa²) + fmadd(r, a, n1);
 	}	
 
 	// Linear ==================================================================================================

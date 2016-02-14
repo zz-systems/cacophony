@@ -10,64 +10,65 @@ namespace paranoise { namespace module {
 	using namespace x87compat;
 
 	SIMD_ENABLE_F(TReal)
-	struct select_settings
+	struct select
 	{
-		double edgeFalloff = 0.0, lowerBound = -1.0, upperBound = 1.0;
-		Module<TReal> a, b, controller;
-	};
+		float edgeFalloff = 0.0, lowerBound = -1.0, upperBound = 1.0;
+		
+		select(float edgeFalloff = 0.0, float lowerBound = -1.0, float upperBound = 1.0)
+			: edgeFalloff(edgeFalloff), lowerBound(lowerBound), upperBound(upperBound)
+		{}
 
-	SIMD_ENABLE_F(TReal)
-	inline TReal select(const select_settings<TReal>& settings,
-						const Vector3<TReal>&		  coords)
-	{
-		auto cv	= settings.controller	(coords);
-		auto r0	= settings.a			(coords);
-		auto r1	= settings.b			(coords);
-
-		if (settings.edgeFalloff > 0.0)
+		inline TReal operator()(const Vector3<TReal>& coords, const Module<TReal>& a, const Module<TReal>& b, const Module<TReal>& controller) const
 		{
-			// condition vectors
-			// if(cv < settings.lowerBound - settings.edgeFalloff) ...
-			auto mask4 = (cv < (settings.lowerBound - settings.edgeFalloff));
-			// if(cv < settings.lowerBound + settings.edgeFalloff) ...
-			auto mask3 = (cv < (settings.lowerBound + settings.edgeFalloff));
-			// if(cv < settings.upperBound - settings.edgeFalloff) ...
-			auto mask2 = (cv < (settings.upperBound - settings.edgeFalloff));
-			// if(cv < settings.upperBound + settings.edgeFalloff) ...
-			auto mask1 = (cv < (settings.upperBound + settings.edgeFalloff));			
-			// else
-			auto mask0 = ~(mask4 | mask3 | mask2 | mask1);
+			auto cv = controller(coords);
+			auto r0 = a(coords);
+			auto r1 = b(coords);
 
-			// calculation vectors
-			auto r0s4	= mask4 & r0;	
-			auto rs3	= mask3 & detail::InterpolateBetweenBounds(r0, r1, cv, settings.lowerBound, settings.edgeFalloff);
-			auto r1s2	= mask2 & r1;
-			auto rs1	= mask1 & detail::InterpolateBetweenBounds(r1, r0, cv, settings.upperBound, settings.edgeFalloff);
-			auto r0s0	= mask0 & r0;
+			if (edgeFalloff > 0.0)
+			{
+				// condition vectors
+				// if(cv < settings.lowerBound - settings.edgeFalloff) ...
+				auto mask4 = (cv < (settings.lowerBound - settings.edgeFalloff));
+				// if(cv < settings.lowerBound + settings.edgeFalloff) ...
+				auto mask3 = (cv < (settings.lowerBound + settings.edgeFalloff));
+				// if(cv < settings.upperBound - settings.edgeFalloff) ...
+				auto mask2 = (cv < (settings.upperBound - settings.edgeFalloff));
+				// if(cv < settings.upperBound + settings.edgeFalloff) ...
+				auto mask1 = (cv < (settings.upperBound + settings.edgeFalloff));
+				// else
+				auto mask0 = ~(mask4 | mask3 | mask2 | mask1);
 
-			// merge results
-			result = r0s0 | rs1 | r1s2 | rs3 | r0s4;
+				// calculation vectors
+				auto r0s4 = mask4 & r0;
+				auto rs3 = mask3 & interpolate_bounds(r0, r1, cv, settings.lowerBound, settings.edgeFalloff);
+				auto r1s2 = mask2 & r1;
+				auto rs1 = mask1 & interpolate_bounds(r1, r0, cv, settings.upperBound, settings.edgeFalloff);
+				auto r0s0 = mask0 & r0;
+
+				// merge results
+				result = r0s0 | rs1 | r1s2 | rs3 | r0s4;
+			}
+			else
+			{
+				auto mask = (cv < lowerBound) | (cv > upperBound);
+
+				return (mask & r0) | (~mask & r1);
+			}
 		}
-		else
-		{
-			auto mask = (cv < settings.lowerBound) | (cv > settings.upperBound);
 
-			return (mask & r0) | (~mask & r1);
-		}
-	}
-
-	namespace detail {
-		SIMD_ENABLE(TReal, TInt) 
-		inline TReal InterpolateBetweenBounds(	const Vector3<TReal>& from, 
-												const Vector3<TReal>& to, 
-												const Vector3<TReal>& control, 
-												TReal bound, TReal edgeFalloff)
+	private:
+		inline TReal interpolate_bounds(const Vector3<TReal>& from,
+			const Vector3<TReal>& to,
+			const Vector3<TReal>& control,
+			TReal bound, TReal edgeFalloff)
 		{
-			auto lowerCurve = bound - edgeFalloff; 
-			auto upperCurve = bound + edgeFalloff; 
+			auto lowerCurve = bound - edgeFalloff;
+			auto upperCurve = bound + edgeFalloff;
 			auto sc = scurve3((control - lowerCurve) / (upperCurve - lowerCurve));
 			return lerp(from, to, sc);
 		}
-	}
+	};
+
+	// inline operator (Module<TReal>)() { return operator(); }
 }}
 #endif
