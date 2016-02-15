@@ -86,7 +86,7 @@ template<typename T>
 inline Vector3<T>	&operator ^=(Vector3<T>& a, const Vector3<T>& b) { a.x ^= b.x; a.y ^= b.y; a.z ^= b.z; return a; }
 
 template<typename T>
-inline T dot(const Vector3<T>& a, const Vector3<T>& b) { return a.x * b.x + a.y * b.y + a.z * b.z; }
+inline T dot(const Vector3<T>& a, const Vector3<T>& b) { return a.x * b.x + a.y * b.y + a.z * b.z; } // fmadd?
 
 template<typename T, typename U>
 inline Vector3<T> truncate(const Vector3<T> &val) { return Vector3<T>(truncate<T, U>(val.x), truncate<T, U>(val.y), truncate<T, U>(val.z)); }
@@ -102,6 +102,12 @@ union Matrix3x2
 		Vector3<T> _0;
 		Vector3<T> _1;
 	};
+
+	inline Matrix3x2() = default;
+	//Vector3(const T* rhs) { v = rhs; };
+
+	inline Matrix3x2(const Matrix3x2<T>& rhs) : _0(rhs._0), _1(rhs._1) {  };
+	inline Matrix3x2(const Vector3<T>& _0, const Vector3<T>& _1) : _0(_0), _1(_1) {  };
 };
 
 

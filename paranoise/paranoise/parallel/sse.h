@@ -37,7 +37,7 @@ namespace paranoise { namespace parallel {
 	inline int32* extract(int4& src)				{ return src.i32; }
 	inline int32* extract(int4& src, float4& ref)	{ return src.i32; }
 	inline int64* extract(int4& src, double2& ref)	{ return src.val.m128i_i64; }
-
+	
 	inline float* extract(float4& src)				{ return src.values; }	
 	inline double* extract(double2& src)				{ return src.values; }
 

@@ -176,6 +176,30 @@ namespace paranoise { namespace scheduler {
 			}
 			);
 		}
+		else
+		{
+			_MM_SET_ROUNDING_MODE(_MM_ROUND_TOWARD_ZERO);
+
+			for (int y = 0; y < d.y; y++)
+			{
+				auto stride = &result->at(y * d.x);
+
+				for (auto x = 0; x < d.x; x += word)
+				{
+					auto coords = transform(build_coords<TReal>(x, y));
+					auto r = source(coords);
+					auto chunk = extract(r);
+					//auto r = extract(chunk);
+
+					//memcpy(stride + x, chunk, word);
+					for (int i = 0; i < word; i++)
+					{
+						stride[x + i] = chunk[i];
+					}
+
+				}//lock.unlock();
+			};
+		}
 
 		return result;
 	}

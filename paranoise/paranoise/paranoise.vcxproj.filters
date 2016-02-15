@@ -39,9 +39,6 @@
     <ClInclude Include="scheduler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="parallel\base.h">
-      <Filter>Header Files\parallel\impl</Filter>
-    </ClInclude>
     <ClInclude Include="parallel\clDouble.h">
       <Filter>Header Files\parallel\impl</Filter>
     </ClInclude>
@@ -143,6 +140,12 @@
     </ClInclude>
     <ClInclude Include="modules\turbulence.h">
       <Filter>Header Files\modules\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\base.h">
+      <Filter>Header Files\parallel</Filter>
+    </ClInclude>
+    <ClInclude Include="capabiliy.h">
+      <Filter>Header Files\parallel\impl</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

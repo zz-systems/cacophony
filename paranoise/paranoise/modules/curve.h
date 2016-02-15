@@ -26,6 +26,7 @@ namespace paranoise { namespace module {
 			auto val = source(coords);
 			TReal v3, v2, v1, v0, mask;
 
+			// TODO: bounds
 			for (int i = 0; i < points.size() - 1; i++)
 			{
 				mask = points[i].first > val;

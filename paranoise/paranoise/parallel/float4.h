@@ -16,6 +16,7 @@ namespace paranoise { namespace parallel {
 		float4() = default;
 		float4(const float& rhs) : val(_mm_set1_ps(rhs)) {} //val(_mm_set_ps1(rhs)) {}
 
+		//float4(float* rhs) : val(_mm_load_ps(rhs)) {}
 		float4(const uint8& _0, const uint8& _1, const uint8& _2, const uint8& _3)	{ val = _mm_cvtepi32_ps(_mm_set_epi32(_3, _2, _1, _0)); }
 		float4(const int32& _0, const int32& _1, const int32& _2, const int32& _3)	{ val = _mm_cvtepi32_ps(_mm_set_epi32(_3, _2, _1, _0)); }
 		float4(const float& _0, const float& _1, const float& _2, const float& _3)	{ val = _mm_set_ps(_3, _2, _1, _0); }

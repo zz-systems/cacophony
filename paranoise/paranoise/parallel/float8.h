@@ -32,6 +32,12 @@ namespace paranoise {	namespace parallel {
 		float8(const double4&	rhs);
 	};
 
+	template<> inline float8 create_mask(int mask) { return  _mm256_castsi256_ps(_mm256_set1_epi32(mask)); }
+
+	const auto ones8 = create_mask<float8>(0xFFFF'FFFF);
+	const auto sign1all08 = create_mask<float8>(0x8000'0000);
+	const auto sign0all18 = create_mask<float8>(0x7FFF'FFFF);
+
 	inline float8 operator +(const float8& a, const float8& b) { return _mm256_add_ps		(a.val, b.val); }
 	inline float8 operator -(const float8& a, const float8& b) { return _mm256_sub_ps		(a.val, b.val); }
 	inline float8 operator *(const float8& a, const float8& b) { return _mm256_mul_ps		(a.val, b.val); }
@@ -47,13 +53,18 @@ namespace paranoise {	namespace parallel {
 	inline float8 operator &(const float8& a, const float8& b) { return _mm256_and_ps		(a.val, b.val); }
 	inline float8 operator ^(const float8& a, const float8& b) { return _mm256_xor_ps		(a.val, b.val); }
 	
-
+	UNFUNC(float8, abs) {
+		return a & sign0all18;//_mm_and_ps(_mm_castsi128_ps(_mm_set1_epi32(0x7FFF'FFFF)), a.val);
+	}
 	
 	inline float8 min(const float8& a, const float8& b)		{ return _mm256_min_ps		(a.val, b.val); }
 	inline float8 max(const float8& a, const float8& b)		{ return _mm256_max_ps		(a.val, b.val); }	
 
 	inline float8 sqrt(const float8& a)						{ return _mm256_sqrt_ps		(a.val); }
 
+	inline float8 sel(const float8& mask, const float8 &a, const float8 &b) { return _mm256_blendv_ps(b.val, a.val, mask.val); }
+	inline float8 fmadd(const float8 &a, const float8 &b, const float8 &c) { return _mm256_fmadd_ps(a.val, b.val, c.val); }
+	inline float8 fmsub(const float8 &a, const float8 &b, const float8 &c) { return _mm256_fmsub_ps(a.val, b.val, c.val); }
 
 	inline float8 floor(const float8& a) {
 		auto v0 = _mm256_setzero_si256();
@@ -91,11 +102,6 @@ namespace paranoise {	namespace parallel {
 		auto rmd2Trunc = _mm256_cvtepi32_ps(rmd2i);
 		auto r = _mm256_add_ps(aTrunc, rmd2Trunc);
 		return r;
-	}
-
-	inline float8 sel(const float8& mask, const float8 &a, const float8 &b)
-	{
-		return _mm256_blendv_ps(b.val, a.val, mask.val);
 	}
 }}
 

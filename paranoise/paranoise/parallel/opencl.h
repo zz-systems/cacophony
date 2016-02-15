@@ -4,7 +4,7 @@
 
 #include "base.h"
 #include "clInt.h"
-#include "clFloat.h"
-#include "clDouble.h"
+//#include "clFloat.h"
+//#include "clDouble.h"
 
 #endif
