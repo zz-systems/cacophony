@@ -6,15 +6,15 @@
 
 namespace paranoise {	namespace parallel {
 
-	union float8;
-	union double4;
+	struct float8;
+	struct double4;
 
-	ALIGN(32) union int8 {
+	ALIGN(32) struct int8 {
 		__m256i val;
-
+/*
 		int64 i64[4];
 		int32 i32[8];
-		int16 i16[16];
+		int16 i16[16];*/
 
 		int8() = default;
 		int8(const int32& rhs)		{ val = _mm256_set1_epi32(rhs); }
@@ -46,8 +46,8 @@ namespace paranoise {	namespace parallel {
 	inline int8 operator >>(const int8& a, int amount) { return _mm256_srli_epi32(a.val, amount); }
 	inline int8 operator <<(const int8& a, int amount) { return _mm256_slli_epi32(a.val, amount); }
 	
-	inline int8 min(const int8& a, const int8& b)		{ return _mm256_min_epi32	(a.val, b.val); }
-	inline int8 max(const int8& a, const int8& b)		{ return _mm256_max_epi32	(a.val, b.val); }	
+	inline int8 vmin(const int8& a, const int8& b)		{ return _mm256_min_epi32	(a.val, b.val); }
+	inline int8 vmax(const int8& a, const int8& b)		{ return _mm256_max_epi32	(a.val, b.val); }	
 }}
 
 #endif

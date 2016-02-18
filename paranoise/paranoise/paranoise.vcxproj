@@ -123,6 +123,7 @@
     <ClInclude Include="basetypes.h" />
     <ClInclude Include="capabiliy.h" />
     <ClInclude Include="color.h" />
+    <ClInclude Include="constants.h" />
     <ClInclude Include="interpolation.h" />
     <ClInclude Include="mapper.h" />
     <ClInclude Include="models\primitives.h" />

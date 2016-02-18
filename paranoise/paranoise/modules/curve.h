@@ -31,10 +31,10 @@ namespace paranoise { namespace module {
 			{
 				mask = points[i].first > val;
 
-				v3 = sel(mask, points[i + 1].second, v3);
-				v2 = sel(mask, points[i	   ].second, v2);
-				v1 = sel(mask, points[i - 1].second, v1);
-				v0 = sel(mask, points[i - 2].second, v0);
+				v3 = vsel(mask, points[i + 1].second, v3);
+				v2 = vsel(mask, points[i	].second, v2);
+				v1 = vsel(mask, points[i - 1].second, v1);
+				v0 = vsel(mask, points[i - 2].second, v0);
 			}
 			
 			auto alpha	= (val - v1) / (v2 - v1);

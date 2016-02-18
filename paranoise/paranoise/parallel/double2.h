@@ -5,12 +5,12 @@
 #include "base.h"
 
 namespace paranoise { namespace parallel {
-	union float4;
-	union int4;
+	struct float4;
+	struct int4;
 
-	ALIGN(16) union double2 {
+	ALIGN(16) struct double2 {
 		__m128d val;
-		double values[2];
+		//double values[2];
 
 		double2() = default;
 		double2(const double& rhs)	{ val = _mm_set1_pd(rhs); }
@@ -41,10 +41,10 @@ namespace paranoise { namespace parallel {
 		return _mm_andnot_pd(sign_mask, a.val); // !sign_mask & x
 	}
 
-	inline double2 min(const double2& a, const double2& b)		{ return _mm_min_pd		(a.val, b.val);	}
-	inline double2 max(const double2& a, const double2& b)		{ return _mm_max_pd		(a.val, b.val);	}	
+	inline double2 vmin(const double2& a, const double2& b)		{ return _mm_min_pd		(a.val, b.val);	}
+	inline double2 vmax(const double2& a, const double2& b)		{ return _mm_max_pd		(a.val, b.val);	}	
 
-	inline double2 sqrt(const double2& a)						{ return _mm_sqrt_pd	(a.val); }
+	inline double2 vsqrt(const double2& a)						{ return _mm_sqrt_pd	(a.val); }
 
 	//inline double2	adjustoToInt32(const double2& a)					 { return _mm_cvtepi32_ps(_mm_cvtps_epi32(a.val)); }
 }}

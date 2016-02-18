@@ -5,21 +5,24 @@
 #include "base.h"
 
 namespace paranoise { namespace parallel {
-	union int4;
-	union double2;
-
-	
-	ALIGN(16) union float4 {
+	struct int4;
+	struct double2;
+		
+	ALIGN(16) struct float4 {
 		__m128 val;
-		float values[4];
 
 		float4() = default;
-		float4(const float& rhs) : val(_mm_set1_ps(rhs)) {} //val(_mm_set_ps1(rhs)) {}
+		float4(const float &rhs) {
+			float c[4] = { rhs, rhs, rhs, rhs };
+			val = _mm_load_ps(c);
+		}	
+		
 
-		//float4(float* rhs) : val(_mm_load_ps(rhs)) {}
-		float4(const uint8& _0, const uint8& _1, const uint8& _2, const uint8& _3)	{ val = _mm_cvtepi32_ps(_mm_set_epi32(_3, _2, _1, _0)); }
-		float4(const int32& _0, const int32& _1, const int32& _2, const int32& _3)	{ val = _mm_cvtepi32_ps(_mm_set_epi32(_3, _2, _1, _0)); }
-		float4(const float& _0, const float& _1, const float& _2, const float& _3)	{ val = _mm_set_ps(_3, _2, _1, _0); }
+		float4(const float* rhs) : val(_mm_load_ps(rhs)) {}
+
+		float4(VARGS4(uint8))	{ val = _mm_cvtepi32_ps(_mm_set_epi32(VPASS4)); }
+		float4(VARGS4(int32))	{ val = _mm_cvtepi32_ps(_mm_set_epi32(VPASS4)); }
+		float4(VARGS4(float))	{ val = _mm_set_ps(VPASS4); }
 
 		float4(const __m128& rhs)	{ val = rhs; }
 		float4(const __m128i& rhs)	{ val = _mm_cvtepi32_ps(rhs); }
@@ -29,59 +32,82 @@ namespace paranoise { namespace parallel {
 		float4(const int4&	rhs);
 		float4(const double2&	rhs);		
 	};
-
-	template<> inline float4 create_mask(int mask) { return  _mm_castsi128_ps(_mm_set1_epi32(mask)); }
-
-	const auto ones		 = create_mask<float4>(0xFFFF'FFFF);
-	const auto sign1all0 = create_mask<float4>(0x8000'0000);
-	const auto sign0all1 = create_mask<float4>(0x7FFF'FFFF);
-
 	
-	BINOP(float4, +) { STDBDY(_mm_add_ps); }
-	BINOP(float4, -) { STDBDY(_mm_sub_ps); }
-	BINOP(float4, *) { STDBDY(_mm_mul_ps); }
-	BINOP(float4, / ) { return _mm_mul_ps(a.val, _mm_rcp_ps(b.val)); }//*/STDBDY(_mm_div_ps); }
-
-	BINOP(float4, > ) {	STDBDY(_mm_cmpgt_ps); }
-	BINOP(float4, < ) {	STDBDY(_mm_cmplt_ps); }
-	BINOP(float4, == ) { STDBDY(_mm_cmpeq_ps); }
-
-	UNOP(float4, -) { return a ^ sign1all0; }//*/return _mm_sub_ps(_mm_set1_ps(0.0), a.val); }
-	
-	UNOP(float4, ~) { return _mm_andnot_ps(a.val, ones.val); }
-
-	BINOP(float4, &) { STDBDY(_mm_and_ps); }
-	BINOP(float4, |) { STDBDY(_mm_or_ps);  }
-	BINOP(float4, ^) { STDBDY(_mm_xor_ps); }
-	
-	UNFUNC(float4, abs) {
-		return a & sign0all1;//_mm_and_ps(_mm_castsi128_ps(_mm_set1_epi32(0x7FFF'FFFF)), a.val);
-	}
-
-	BINFUNC(float4, min)	{ STDBDY(_mm_min_ps); }
-	BINFUNC(float4, max)	{ STDBDY(_mm_max_ps); }	
-
-	UNFUNC(float4, sqrt) { return _mm_mul_ps(a.val, _mm_rsqrt_ps(a.val)); } // STDBDY1(_mm_sqrt_ps);}
-
-	inline float4 sel(const float4& mask, const float4 &a, const float4 &b)	{ return _mm_blendv_ps(b.val, a.val, mask.val);	}
-	inline float4 fmadd(const float4 &a, const float4 &b, const float4 &c) { return _mm_fmadd_ps(a.val, b.val, c.val); }	
-	inline float4 fmsub(const float4 &a, const float4 &b, const float4 &c) { return _mm_fmsub_ps(a.val, b.val, c.val); }
-	
-	UNFUNC(float4, floor) 
+	inline auto ones()
 	{
-		auto fi = (float4)(int4)a;
-
-		return sel(fi > a, fi - consts<float4>::one(), fi);//- (fi > a) & j;
+		auto t = _mm_setzero_si128();
+		return _mm_cmpeq_epi32(t, t);
 	}
 
-	UNFUNC(float4, ceil)
+	inline auto one()
 	{
-		auto fi = (float4)(int4)a;
-
-		return sel(fi < a, fi + consts<float4>::one(), fi);
+		return _mm_srli_epi32(ones(), 31);
 	}
 
-	UNFUNC(float4, round)
+	inline auto sign1all0()
+	{
+		return _mm_slli_epi32(ones(), 31);
+	}
+
+	inline auto sign0all1()
+	{
+		return _mm_srli_epi32(ones(), 1);
+	}
+
+	// Arithmetic =====================================================================================================
+	BIN_OP(float4, +) { BIN_BODY(_mm_add_ps); }
+	BIN_OP(float4, -) { BIN_BODY(_mm_sub_ps); }
+	BIN_OP(float4, *) { BIN_BODY(_mm_mul_ps); }
+	BIN_OP(float4, / ) { BODY(_mm_mul_ps(a.val, _mm_rcp_ps(b.val))); }//*/ { BIN_BODY(_mm_div_ps); }
+
+	UN_OP(float4, -) { BODY(_mm_xor_ps(a.val, _mm_castsi128_ps(sign1all0()))); }//*/return _mm_sub_ps(_mm_set1_ps(0.0), a.val); }
+
+	// Comparison =====================================================================================================	
+	BIN_OP(float4, > )	{ BIN_BODY(_mm_cmpgt_ps); }
+	BIN_OP(float4, < )	{ BIN_BODY(_mm_cmplt_ps); }
+	BIN_OP(float4, == ) { BIN_BODY(_mm_cmpeq_ps); }	
+	
+	// Bitwise ========================================================================================================
+	UN_OP(float4, ~) { BODY(_mm_andnot_ps(a.val, _mm_castsi128_ps(ones()))); }
+
+	BIN_OP(float4, &) { BIN_BODY(_mm_and_ps); }
+	BIN_OP(float4, |) { BIN_BODY(_mm_or_ps);  }
+	BIN_OP(float4, ^) { BIN_BODY(_mm_xor_ps); }
+	
+	// Special functions ==============================================================================================
+	// Branchless select
+	TRI_FUNC(float4, vsel) { TRI_BODY_R(_mm_blendv_ps); }
+	// Fused multiply-add
+	TRI_FUNC(float4, vfmadd) { TRI_BODY(_mm_fmadd_ps); }
+	// Fused multipl-subtract
+	TRI_FUNC(float4, vfmsub) { TRI_BODY(_mm_fmsub_ps); }
+
+	// Mathematical functions =========================================================================================
+	// Absolute
+	UN_FUNC(float4, vabs) { BODY(_mm_and_ps(a.val, _mm_castsi128_ps(sign0all1()))); }
+	// Minimum
+	BIN_FUNC(float4, vmin)	{ BIN_BODY(_mm_min_ps); }
+	// Maximum
+	BIN_FUNC(float4, vmax)	{ BIN_BODY(_mm_max_ps); }	
+	// Square root
+	UN_FUNC(float4, vsqrt) { BODY(_mm_mul_ps(a.val, _mm_rsqrt_ps(a.val))); }//*/  { UN_BODY(_mm_sqrt_ps); }
+
+	// Floor
+	UN_FUNC(float4, vfloor)
+	{
+		auto fi = static_cast<float4>(static_cast<int4>(a));
+		return vsel(fi > a, fi - static_cast<float4>(one()), fi);//- (fi > a) & j;
+	}
+
+	// Ceil
+	UN_FUNC(float4, vceil)
+	{
+		auto fi = static_cast<float4>(static_cast<int4>(a));
+		return vsel(fi < a, fi + static_cast<float4>(one()), fi);
+	}
+
+	// Round
+	UN_FUNC(float4, vround)
 	{
 		auto v0 = _mm_setzero_ps();             //generate the highest value < 2
 		auto v1 = _mm_cmpeq_ps(v0, v0);
@@ -95,7 +121,7 @@ namespace paranoise { namespace parallel {
 		auto r = _mm_add_ps(aTrunc, rmd2Trunc);
 
 		return r;
-	}
+	}	
 }}
 
 #endif

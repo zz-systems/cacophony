@@ -33,6 +33,8 @@ using namespace examples;
 
 using namespace std;
 
+
+
 int main(int argc, char** argv)
 {
 	capability c;
@@ -62,7 +64,7 @@ int main(int argc, char** argv)
 	auto f1 = [=]()
 	{
 		return schedule2D<vfloat>(
-			generate_granite<vfloat, vint>(),
+			generate_complex_planet<vfloat, vint>(),
 			[w, h](const fvec &c) { return (c)* fvec(10, 10, 10) / fvec(w, h, h) - fvec(5, 5, 5);},
 			settings);
 	};
@@ -70,7 +72,7 @@ int main(int argc, char** argv)
 	auto f2 = [=]() 
 	{
 		return schedule2D<float>(
-			generate_granite<float, int>(),
+			generate_complex_planet<float, int>(),
 			[w, h](const vec &c) { return (c)* vec(10, 10, 10) / vec(w, h, h) - vec(5, 5, 5);},
 			settings);
 	};

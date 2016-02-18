@@ -38,61 +38,55 @@ namespace paranoise {
 #define ANY(type) template<typename type>
 #define ANY2(type1, type2) template<typename type1, typename type2>
 
-#define UNOP(type, op) inline type operator op(const type& a)				
-#define BINOP(type, op) inline type operator op(const type& a, const type& b)
+#define UN_OP(type, op) inline type operator op(const type a)				
+#define BIN_OP(type, op) inline type operator op(const type a, const type b)
 
-#define UNFUNC(type, name) inline type name(const type &a)
-#define BINFUNC(type, name) inline type name(const type &a, const type &b)
+#define FUNC(type, name) inline type name()
+#define UN_FUNC(type, name) inline type name(const type a)
+#define BIN_FUNC(type, name) inline type name(const type a, const type b)
+#define TRI_FUNC(type, name) inline type name(const type a, const type b, const type c)
 
-#define STDUNP (a.val)
+#define STDUNP  (a.val)
 #define STDBINP (a.val, b.val)
-#define STDBDY(intrin) return intrin STDBINP
-#define STDBDY1(intrin) return intrin STDUNP
+#define STDTRIP(opt) (a.val, b.val, opt)
+#define STDDUPP (a.val, a.val)
+
+// cosmetic...
+#define BODY(expr) return expr
+
+// body for 1 argument
+#define UN_BODY(intrin) return intrin STDUNP
+// body for 1 argument, duplicated
+#define UN_BODY_D(intrin) return intrin STDDUPP
+
+// body for 2 arguments
+#define BIN_BODY(intrin) return intrin STDBINP
+// body for 2 arguments in reversed order
+#define BIN_BODY_R(intrin) return intrin STDBINP
+
+// body for 3 arguments
+#define TRI_BODY(intrin) return intrin (a.val, b.val, c.val)
+// body for 3 arguments in reversed order
+#define TRI_BODY_R(intrin) return intrin (c.val, b.val, a.val)
+
+// body for 2 standard and one special argument
+#define TRI_BODY_O(intrin, opt) return intrin STDTRIP(opt)
+
+// Constructor arguments (4-vector)
+#define VARGS4(type) const type& _0, const type& _1, const type& _2, const type& _3
+// Pass 4 constructor arguments
+#define VPASS4 _3, _2, _1, _0
+
+// Constructor arguments (8-vector)
+#define VARGS8(type) const type& _0, const type& _1, const type& _2, const type& _3, const type& _4, const type& _5, const type& _6, const type& _7
+// Pass 8 constructor arguments
+#define VPASS8 _7, _6, _5, _4, _3, _2, _1, _0
 
 //#define SIMD_ENABLE() SIMD_ENABLE(TReal, TInt)
 	
 #define CONSTDEF(TType, name, body) constexpr TType name() { return static_cast<TType>(body); }
 
-	ANY(TType)
-	struct consts
-	{
-		static CONSTDEF(TType, pi,		3.14159265358979323846);
-		static CONSTDEF(TType, deg2rad,	pi<TType>() / 180.0);
-		static CONSTDEF(TType, sqrt3,	(sqrt(3)));
-		static CONSTDEF(TType, one,		1);
-		static CONSTDEF(TType, zero,	0);
-	};
-		
-
-	ANY(TType)
-		constexpr TType PI() { return (TType) 3.14159265358979323846; }
-
-	ANY(TType)
-		constexpr TType DEG2RAD() { return PI<TType>() / 180.0; }
-
-	ANY(TType)
-		constexpr TType SQRT_3() { return (TType)sqrt(3); }
-
-	ANY(TType)
-		constexpr TType ONE() { return (TType)1; }
-
-	ANY(TType)
-		constexpr TType ZERO() { return (TType)0; }
-
-	ANY(TType)
-		constexpr TType NZERO() { return (TType)-0.0; }
-
-	ANY(TType)
-		constexpr TType ALL1() { return (TType)0xFFFF'FFFF; }
-
-	ANY(TType)
-		constexpr TType FLOATSIGNBIT() { return (TType)0x8000'0000;	}
-	ANY(TType)
-		constexpr TType FLOATNOSIGNBIT() { return (TType)0x7FFF'FFFF; }
-
-
-	const float _SQRT_3 = sqrtf(3);
-
+	
 SIMD_ENABLE_F(TReal)
 using Module = std::function<TReal(const Vector3<TReal>&)>;
 
@@ -117,13 +111,13 @@ using SeededModule = std::function<TReal(const Vector3<TReal>&, const TInt& seed
 
 	namespace parallel {
 		ANY(TProcess)
-			inline TProcess sel(const bool &condition, const TProcess &choice1, const TProcess &choice2)
+			inline TProcess vsel(const bool &condition, const TProcess &choice1, const TProcess &choice2)
 		{
 			return condition ? choice1 : choice2;
 		}
 
 		ANY2(TCondition, TProcess)
-			inline Vector3<TProcess> sel(const Vector3<TCondition> &condition, const Vector3<TProcess> &choice1, const Vector3<TProcess> &choice2)
+			inline Vector3<TProcess> vsel(const Vector3<TCondition> &condition, const Vector3<TProcess> &choice1, const Vector3<TProcess> &choice2)
 		{
 			return Vector3<TProcess>(
 				sel<TCondition, TProcess>(condition.x, choice1.x, choice2.x),
@@ -131,59 +125,42 @@ using SeededModule = std::function<TReal(const Vector3<TReal>&, const TInt& seed
 				sel<TCondition, TProcess>(condition.z, choice1.z, choice2.z));
 		}
 
-		//ANY2(TCondition, TProcess)
-		//	inline TProcess sel(const TCondition &condition, const TProcess &choice1, const TProcess &choice2)
-		//{
-		//	auto trueBranch = condition & choice1;
-		//	auto notC = ~condition;// ^ condition;
-		//	auto falseBranch = notC & choice2;
-
-		//	auto combined = trueBranch | falseBranch;
-		//	return combined;//(condition & choice1) | ((~condition) & choice2);
-		//}
-
-		//SIMD_ENABLE(TReal, TInt)
-		//inline TReal truncate(const TReal &val) { return (TReal)(TInt)val; }
-
 		SIMD_ENABLE_F(TReal)
 			inline TReal clamp_int32(const TReal &val)
 		{
-			return clamp(val, (TReal)-1073741824.0f, (TReal)1073741824.0f);
+			return vclamp(val, (TReal)-1073741824.0f, (TReal)1073741824.0f);
 		}
 
 		inline double abs(double a) { return ::fabs(a); }
 		inline float  abs(float a) { return ::fabsf(a); }
 		inline int	  abs(int a) { return ::abs(a); }
 
-		ANY(TType)
-			inline TType min(TType a, TType b) { return std::min(a, b); }
+		ANY(TType) BIN_FUNC(TType, vmin) { BODY(std::min(a, b)); }
 
-		ANY(TType)
-			inline TType max(TType a, TType b) { return std::max(a, b); }
+		ANY(TType) BIN_FUNC(TType, vmax) { BODY(std::max<TType>(a, b)); }
 
-		inline double floor(double a) { return std::floor(a); }
-		inline float floor(float a) { return std::floorf(a); }
+		inline double vfloor(double a) { return std::floor(a); }
+		inline float vfloor(float a) { return std::floorf(a); }
 
-		inline double ceil(double a) { return std::ceil(a); }
-		inline float ceil(float a) { return std::ceilf(a); }
+		inline double vceil(double a) { return std::ceil(a); }
+		inline float vceil(float a) { return std::ceilf(a); }
 
-		inline double round(double a) { return std::round(a); }
-		inline float round(float a) { return std::roundf(a); }
+		inline double vround(double a) { return std::round(a); }
+		inline float vround(float a) { return std::roundf(a); }
 
-		inline double sqrt(double a) { return ::sqrt(a); }
-		inline float  sqrt(float a) { return ::sqrtf(a); }
-		inline int    sqrt(int a) { return (int)::floor(::sqrt((double)a)); }
+		inline double vsqrt(double a) { return ::sqrt(a); }
+		inline float  vsqrt(float a) { return ::sqrtf(a); }
+		inline int    vsqrt(int a) { return (int)::floor(::sqrt((double)a)); }
 
 		// Fused Multiply-Add		[y = a * b + c]
-		ANY(TType)
-			inline TType fmadd(const TType &a, const TType &b, const TType &c) { return a * b + c; }
+		ANY(TType) TRI_FUNC(TType, vfmadd) { BODY(a * b + c); }
 		
 		// Fused Multiply-Subtract	[y = a * b - c]
-		ANY(TType)
-			inline TType fmsub(const TType &a, const TType &b, const TType &c) { return a * b - c; }
+		ANY(TType) TRI_FUNC(TType, vfmsub) { BODY(a * b - c); }
 
-		ANY(TType)
-			inline TType clamp(const TType& val, const TType& minval, const TType& maxval) { return min(max(val, minval), maxval); }
+		// Clamp: min(max(val, minval), maxval)
+		ANY(TType) TRI_FUNC(TType, vclamp) { BODY(vmin(vmax(a, b), c)); }
+			
 	};
 };
 #endif

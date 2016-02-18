@@ -30,7 +30,7 @@ namespace paranoise { namespace module {
 			{
 				// Compute weight for each frequency.
 				spectralWeights[i] = std::powf(freq, -h);
-				freq freq *= lacunarity;
+				freq *= lacunarity;
 			}
 		}
 

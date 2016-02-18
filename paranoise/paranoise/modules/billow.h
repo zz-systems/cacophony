@@ -43,7 +43,7 @@ namespace paranoise { namespace module {
 				// final result.
 				signal = GradientCoherentNoise3D(n, seed + currentOctave, quality);
 
-				signal = fmsub(2.0f, paranoise::parallel::abs(signal), 1.0f);
+				signal = fmsub(2.0f, parallel::abs(signal), 1.0f);
 				value += signal * curPersistence;
 
 				// Prepare the next octave.

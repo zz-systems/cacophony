@@ -29,10 +29,11 @@ namespace paranoise { namespace module {
 
 			auto _coords = coords * frequency;
 
-			Vector3<TInt> cube{
-				(TInt)_coords.x - sel(_coords.x > 0, consts<TInt>::zero(), consts<TInt>::one()),
-				(TInt)_coords.y - sel(_coords.y > 0, consts<TInt>::zero(), consts<TInt>::one()),
-				(TInt)_coords.z - sel(_coords.z > 0, consts<TInt>::zero(), consts<TInt>::one())
+			Vector3<TInt> cube
+			{
+				static_cast<TInt>(_coords.x) - sel(_coords.x > 0, consts<TInt>::zero(), consts<TInt>::one()),
+				static_cast<TInt>(_coords.y) - sel(_coords.y > 0, consts<TInt>::zero(), consts<TInt>::one()),
+				static_cast<TInt>(_coords.z) - sel(_coords.z > 0, consts<TInt>::zero(), consts<TInt>::one())
 			};
 
 			TReal value, absDist, minDist = static_cast<TInt>(std::numeric_limits<int>::max());

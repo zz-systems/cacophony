@@ -24,13 +24,13 @@ namespace paranoise { namespace examples {
 
 	gradient1D granite_grad =
 	{
-		{ -1.0000, color_rgb(0,   0,   0, 255) },
+		{ -1.01, color_rgb(0,   0,   0, 255) },
 		{ -0.9375, color_rgb(0,   0,   0, 255) },
 		{ -0.8750, color_rgb(216, 216, 242, 255) },
 		{ 0.0000, color_rgb(191, 191, 191, 255) },
 		{ 0.5000, color_rgb(210, 116, 125, 255) },
 		{ 0.7500, color_rgb(210, 113,  98, 255) },
-		{ 1.0000, color_rgb(255, 176, 192, 255) }
+		{ 1.01, color_rgb(255, 176, 192, 255) }
 	};
 
 }}

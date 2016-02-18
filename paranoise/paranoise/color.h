@@ -51,8 +51,8 @@ namespace paranoise { namespace util {
 					break;
 			}
 
-			auto i0 = parallel::clamp(index - 1, 0, (int)colors.size() - 1);
-			auto i1 = parallel::clamp(index,     0, (int)colors.size() - 1);
+			auto i0 = parallel::vclamp(index - 1, 0, (int)colors.size() - 1);
+			auto i1 = parallel::vclamp(index,     0, (int)colors.size() - 1);
 
 			if (i0 == i1)
 				return colors[i1].second;

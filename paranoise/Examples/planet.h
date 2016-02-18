@@ -175,12 +175,12 @@ namespace paranoise { namespace examples {
 		//    less than the output value from the continent-with-ranges module, so
 		//    in this case, the output value from the scaled-carver module is
 		//    selected.
-		Module<TReal> baseContinentDef_mi = [=](const auto& c) { return paranoise::parallel::min(baseContinentDef_sb(c), baseContinentDef_cu(c, baseContinentDef_pe0)); };
+		Module<TReal> baseContinentDef_mi = [=](const auto& c) { return vmin(baseContinentDef_sb(c), baseContinentDef_cu(c, baseContinentDef_pe0)); };
 
 		// 6: [Clamped-continent module]: Finally, a clamp module modifies the
 		//    carved-continent module to ensure that the output value of this
 		//    subgroup is between -1.0 and 1.0.
-		Module<TReal> baseContinentDef_cl = [=](const auto& c) { return clamp<TReal>(baseContinentDef_mi(c), -1.0, 1.0); };
+		Module<TReal> baseContinentDef_cl = [=](const auto& c) { return vclamp<TReal>(baseContinentDef_mi(c), -1.0, 1.0); };
 
 		// 7: [Base-continent-definition subgroup]: Caches the output value from the
 		//    clamped-continent module.

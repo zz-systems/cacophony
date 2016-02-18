@@ -33,8 +33,8 @@ namespace paranoise { namespace module {
 		{
 			using VReal = Vector3<TReal>;
 
-			TReal	value = 0,
-				currentPersistence = 1;
+			TReal	value = 0.0f,
+				currentPersistence = 1.0f;
 
 			auto _coords = c * frequency;
 

@@ -86,18 +86,18 @@ namespace paranoise { namespace scheduler {
 	template<>
 	inline Vector3<float4> build_coords(float x, float y)
 	{
-		return Vector3<float4> {
-			float4(x, x + 1.0f, x + 2.0f, x + 3.0f),
+		return Vector3<float4>(
+			float4(x, x, x, x) + float4(0.0f, 1.0f, 2.0f, 3.0f),
 				float4(y),
-				0
-		};
+				0.0f
+		);
 	}
 
 	template<>
 	inline Vector3<float8> build_coords(float x, float y)
 	{
 		return Vector3<float8> {
-			float8(x, x + 1.0f, x + 2.0f, x + 3.0f, x + 4.0f, x + 5.0f, x + 6.0f, x + 7.0f),
+			float8(x, x, x, x, x, x, x, x) + float8(0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f),
 				float8(y),
 				0
 		};
@@ -129,6 +129,21 @@ namespace paranoise { namespace scheduler {
 		};
 	}
 	using vector2D = std::vector<std::vector<float>>;
+
+	/*template <typename TReal>
+	inline void stream_result(float* stride, int x, const TReal &r);*/
+
+	//template <>
+	inline void stream_result(float* stride, int x, const float4 &r)
+	{
+		_mm_stream_ps(stride + x, r.val);
+	}
+
+	//template <>
+	inline void stream_result(float* stride, int x, const float &r)
+	{
+		stride[x] = r;
+	}
 
 	SIMD_ENABLE_F(TReal)
 	auto schedule2D(const Module<TReal>& source, const Transformer<TReal>& transform, const scheduler_settings& settings)
@@ -164,14 +179,7 @@ namespace paranoise { namespace scheduler {
 				{
 					auto coords = transform(build_coords<TReal>(x, y));
 					auto r = source(coords);
-					auto chunk = extract(r);
-					//auto r = extract(chunk);
-					
-					for (int i = 0; i < word; i++)
-					{
-						stride[x + i] = chunk[i];
-					}
-					
+					stream_result(stride, x, r);
 				}//lock.unlock();
 			}
 			);
@@ -188,14 +196,7 @@ namespace paranoise { namespace scheduler {
 				{
 					auto coords = transform(build_coords<TReal>(x, y));
 					auto r = source(coords);
-					auto chunk = extract(r);
-					//auto r = extract(chunk);
-
-					//memcpy(stride + x, chunk, word);
-					for (int i = 0; i < word; i++)
-					{
-						stride[x + i] = chunk[i];
-					}
+					stream_result(stride, x, r);
 
 				}//lock.unlock();
 			};

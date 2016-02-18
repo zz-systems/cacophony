@@ -6,12 +6,12 @@
 
 namespace paranoise {	namespace parallel {
 
-	union float8;
-	union int8;
+	struct float8;
+	struct int8;
 
-	ALIGN(32) union double4 {
+	ALIGN(32) struct double4 {
 		__m256d val;
-		double values[4];
+		/*double values[4];*/
 
 		double4() = default;
 		double4(const float& rhs)		{ val = _mm256_set1_pd(rhs); }
@@ -40,10 +40,10 @@ namespace paranoise {	namespace parallel {
 	inline double4 operator ~(const double4& a)						{ return _mm256_andnot_pd	(a.val, a.val); }
 
 
-	inline double4 min(const double4& a, const double4& b)			{ return _mm256_min_pd		(a.val, b.val); }
-	inline double4 max(const double4& a, const double4& b)			{ return _mm256_max_pd		(a.val, b.val); }
+	inline double4 vmin(const double4& a, const double4& b)			{ return _mm256_min_pd		(a.val, b.val); }
+	inline double4 vmax(const double4& a, const double4& b)			{ return _mm256_max_pd		(a.val, b.val); }
 
-	inline double4 sqrt(const double4& a)						{	 return _mm256_sqrt_pd		(a.val); }
+	inline double4 vsqrt(const double4& a)						{	 return _mm256_sqrt_pd		(a.val); }
 }}
 
 #endif

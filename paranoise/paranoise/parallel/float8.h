@@ -6,22 +6,18 @@
 
 namespace paranoise {	namespace parallel {
 
-	union int8;
-	union double4;
+	struct int8;
+	struct double4;
 
-	ALIGN(32) union float8 {
+	ALIGN(32) struct float8 {
 		__m256 val;
-		float values[8];
 
 		float8() = default;
 		float8(const float& rhs)	{ val = _mm256_set1_ps(rhs); }
 
-		float8(const uint8& _0, const uint8& _1, const uint8& _2, const uint8& _3, 
-			const uint8& _4, const uint8& _5, const uint8& _6, const uint8& _7) { val = _mm256_cvtepi32_ps(_mm256_set_epi32(_7, _6, _5, _4,_3, _2, _1, _0)); }
-		float8(const int32& _0, const int32& _1, const int32& _2, const int32& _3, 
-			const int32& _4, const int32& _5, const int32& _6, const int32& _7){ val = _mm256_cvtepi32_ps(_mm256_set_epi32(_7, _6, _5, _4, _3, _2, _1, _0)); }
-		float8(const float& _0, const float& _1, const float& _2, const float& _3,
-			const float& _4, const float& _5, const float& _6, const float& _7) { val = _mm256_set_ps(_7, _6, _5, _4, _3, _2, _1, _0); }
+		float8(VARGS8(uint8))		{ val = _mm256_cvtepi32_ps(_mm256_set_epi32(VPASS8)); }
+		float8(VARGS8(int))			{ val = _mm256_cvtepi32_ps(_mm256_set_epi32(VPASS8)); }
+		float8(VARGS8(float))		{ val = _mm256_set_ps(VPASS8); }
 
 		float8(const __m256& rhs)	{ val = rhs; }
 		float8(const __m256i& rhs)	{ val = _mm256_cvtepi32_ps(rhs); }
@@ -38,35 +34,41 @@ namespace paranoise {	namespace parallel {
 	const auto sign1all08 = create_mask<float8>(0x8000'0000);
 	const auto sign0all18 = create_mask<float8>(0x7FFF'FFFF);
 
-	inline float8 operator +(const float8& a, const float8& b) { return _mm256_add_ps		(a.val, b.val); }
-	inline float8 operator -(const float8& a, const float8& b) { return _mm256_sub_ps		(a.val, b.val); }
-	inline float8 operator *(const float8& a, const float8& b) { return _mm256_mul_ps		(a.val, b.val); }
-	inline float8 operator /(const float8& a, const float8& b) { return _mm256_div_ps		(a.val, b.val); }
+	// Arithmetic =====================================================================================================
+	BIN_OP(float8, +)	{ BIN_BODY(_mm256_add_ps); }
+	BIN_OP(float8, -)	{ BIN_BODY(_mm256_sub_ps); }
+	BIN_OP(float8, *)	{ BIN_BODY(_mm256_mul_ps); }
+	BIN_OP(float8, /)	{ BIN_BODY(_mm256_div_ps); }
+	UN_OP(float8, -)	{ BODY(_mm256_sub_ps(_mm256_setzero_ps(), a.val)); }
 
-	inline float8 operator >(const float8& a, const float8& b) { return _mm256_cmp_ps		(a.val, b.val, _CMP_GT_OQ); }
-	inline float8 operator <(const float8& a, const float8& b) { return _mm256_cmp_ps		(a.val, b.val, _CMP_LT_OQ); }
-	inline float8 operator==(const float8& a, const float8& b) { return _mm256_cmp_ps		(a.val, b.val, _CMP_EQ_OQ); }
+	// Comparison =====================================================================================================
+	BIN_OP(float8, >)	{ TRI_BODY_O(_mm256_cmp_ps, _CMP_GT_OQ); }
+	BIN_OP(float8, <)	{ TRI_BODY_O(_mm256_cmp_ps, _CMP_LT_OQ); }
+	BIN_OP(float8,==)	{ TRI_BODY_O(_mm256_cmp_ps, _CMP_EQ_OQ); }
 
-	inline float8 operator -(const float8& a)				   { return _mm256_sub_ps(_mm256_set1_ps(0.0), a.val); }
-	inline float8 operator ~(const float8& a)				   { return _mm256_andnot_ps(a.val, a.val); }
-	inline float8 operator |(const float8& a, const float8& b) { return _mm256_or_ps		(a.val, b.val); }
-	inline float8 operator &(const float8& a, const float8& b) { return _mm256_and_ps		(a.val, b.val); }
-	inline float8 operator ^(const float8& a, const float8& b) { return _mm256_xor_ps		(a.val, b.val); }
+	// Bitwise ========================================================================================================
+	UN_OP(float8, ~)	{ UN_BODY_D(_mm256_andnot_ps); }
+	BIN_OP(float8, |)	{ BIN_BODY(_mm256_or_ps); }
+	BIN_OP(float8, &)	{ BIN_BODY(_mm256_and_ps); }
+	BIN_OP(float8, ^)	{ BIN_BODY(_mm256_xor_ps); }
 	
-	UNFUNC(float8, abs) {
-		return a & sign0all18;//_mm_and_ps(_mm_castsi128_ps(_mm_set1_epi32(0x7FFF'FFFF)), a.val);
-	}
+	// Special functions ==============================================================================================
+	// Branchless select
+	TRI_FUNC(float8, vsel) { TRI_BODY_R(_mm256_blendv_ps); }
+	// Fused multiply-add
+	TRI_FUNC(float8, vfmadd) { TRI_BODY(_mm256_fmadd_ps); }
+	// Fused multiply-subtract
+	TRI_FUNC(float8, vfmsub) { TRI_BODY(_mm256_fmsub_ps); }
+
+	// Mathematical functions =========================================================================================
+	UN_FUNC(float8,  vabs)  { BODY(a & sign0all18); }
 	
-	inline float8 min(const float8& a, const float8& b)		{ return _mm256_min_ps		(a.val, b.val); }
-	inline float8 max(const float8& a, const float8& b)		{ return _mm256_max_ps		(a.val, b.val); }	
+	BIN_FUNC(float8, vmin)  { BIN_BODY(_mm256_min_ps); }
+	BIN_FUNC(float8, vmax)  { BIN_BODY(_mm256_max_ps); }	
+	UN_FUNC(float8,  vsqrt) { UN_BODY(_mm256_sqrt_ps); }
 
-	inline float8 sqrt(const float8& a)						{ return _mm256_sqrt_ps		(a.val); }
 
-	inline float8 sel(const float8& mask, const float8 &a, const float8 &b) { return _mm256_blendv_ps(b.val, a.val, mask.val); }
-	inline float8 fmadd(const float8 &a, const float8 &b, const float8 &c) { return _mm256_fmadd_ps(a.val, b.val, c.val); }
-	inline float8 fmsub(const float8 &a, const float8 &b, const float8 &c) { return _mm256_fmsub_ps(a.val, b.val, c.val); }
-
-	inline float8 floor(const float8& a) {
+	inline float8 vfloor(const float8& a) {
 		auto v0 = _mm256_setzero_si256();
 		auto v1 = _mm256_cmpeq_epi32(v0, v0);
 		auto ji = _mm256_srli_epi32(v1, 25);
@@ -78,7 +80,7 @@ namespace paranoise {	namespace parallel {
 		return _mm256_sub_ps(fi, j);
 	}
 
-	inline float8 ceil(const float8& a) {
+	inline float8 vceil(const float8& a) {
 		auto v0 = _mm256_setzero_si256();
 		auto v1 = _mm256_cmpeq_epi32(v0, v0);
 		auto ji = _mm256_srli_epi32(v1, 25);
@@ -90,7 +92,7 @@ namespace paranoise {	namespace parallel {
 		return _mm256_add_ps(fi, j);
 	}
 
-	inline float8 round(const float8 &a) {
+	inline float8 vround(const float8 &a) {
 		auto v0 = _mm256_setzero_ps();             //generate the highest value &lt; 2
 		auto v1 = _mm256_cmp_ps(v0, v0, _CMP_EQ_OS);
 		auto vNearest2 = *(__m256*)&_mm256_srli_epi32(*(__m256i*)&v1, 2);
@@ -103,6 +105,9 @@ namespace paranoise {	namespace parallel {
 		auto r = _mm256_add_ps(aTrunc, rmd2Trunc);
 		return r;
 	}
+
+	
+
 }}
 
 #endif
