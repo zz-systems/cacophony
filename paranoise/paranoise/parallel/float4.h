@@ -92,17 +92,19 @@ namespace paranoise { namespace parallel {
 	// Square root
 	UN_FUNC(float4, vsqrt) { BODY(_mm_mul_ps(a.val, _mm_rsqrt_ps(a.val))); }//*/  { UN_BODY(_mm_sqrt_ps); }
 
+	UN_FUNC(float4, vtrunc) { BODY(static_cast<float4>(static_cast<int4>(a))); }
+
 	// Floor
 	UN_FUNC(float4, vfloor)
 	{
-		auto fi = static_cast<float4>(static_cast<int4>(a));
+		auto fi = vtrunc(a);
 		return vsel(fi > a, fi - static_cast<float4>(one()), fi);//- (fi > a) & j;
 	}
 
 	// Ceil
 	UN_FUNC(float4, vceil)
 	{
-		auto fi = static_cast<float4>(static_cast<int4>(a));
+		auto fi = vtrunc(a);
 		return vsel(fi < a, fi + static_cast<float4>(one()), fi);
 	}
 
