@@ -43,7 +43,7 @@ namespace paranoise { namespace module {
 				// final result.
 				signal = GradientCoherentNoise3D(n, seed + currentOctave, quality);
 
-				signal = fmsub(2.0f, parallel::abs(signal), 1.0f);
+				signal = vfmsub(fastload<TReal>::_2(), vabs(signal), fastload<TReal>::_1());
 				value += signal * curPersistence;
 
 				// Prepare the next octave.
@@ -51,7 +51,7 @@ namespace paranoise { namespace module {
 				curPersistence *= persistence;
 			}
 
-			value += (TReal)0.5f;
+			value += 0.5f;
 
 			return value;
 		}

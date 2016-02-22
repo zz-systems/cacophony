@@ -4,13 +4,14 @@
 
 //#include "parallel/x87compat.h"
 
+
+#include <iostream>
+
+
+#include "parallel/all.h"
 #include "interpolation.h"
 #include "vectortable.h"
 #include "vector.h"
-
-#include <iostream>
-#include <functional>
-#include "parallel/all.h"
 
 #define NOISE_VERSION 2
 
@@ -113,15 +114,21 @@ namespace paranoise {	namespace generators {
 			return s;
 		}		
 	}
-	
-	FORCEINLINE Vector3<float4> gatherRandoms(int4 index)
+	template<typename featuremask>
+	FORCEINLINE Vector3<float4<featuremask>> gatherRandoms(int4<featuremask> index)
 	{		
+		//_mm_prefetch
+		auto a0 = random_vectors<float>::values + _mm_extract_epi32(index.val, 0);
+		auto a1 = random_vectors<float>::values + _mm_extract_epi32(index.val, 1);
+		auto a2 = random_vectors<float>::values + _mm_extract_epi32(index.val, 2);
+		auto a3 = random_vectors<float>::values + _mm_extract_epi32(index.val, 3);		
+
 		//auto vvi = extract(index);
 		//_mm_prefetch()
-		auto rv0 = _mm_load_ps(random_vectors<float>::values + _mm_extract_epi32(index.val, 0));
-		auto rv1 = _mm_load_ps(random_vectors<float>::values + _mm_extract_epi32(index.val, 1));
-		auto rv2 = _mm_load_ps(random_vectors<float>::values + _mm_extract_epi32(index.val, 2));
-		auto rv3 = _mm_load_ps(random_vectors<float>::values + _mm_extract_epi32(index.val, 3));
+		auto rv0 = _mm_load_ps(a0);
+		auto rv1 = _mm_load_ps(a1);
+		auto rv2 = _mm_load_ps(a2);
+		auto rv3 = _mm_load_ps(a3);
 		
 		_MM_TRANSPOSE4_PS(rv0, rv1, rv2, rv3)
 
@@ -158,7 +165,7 @@ namespace paranoise {	namespace generators {
 
 		auto grad = gatherRandoms(vi);	
 
-		return dot(grad, diff) * 2.12f;
+		return dot(grad, diff) * static_cast<TReal>(2.12f);
 
 		//return dot(grad, diff) * 2.12f;
 	}
@@ -219,14 +226,14 @@ namespace paranoise {	namespace generators {
 	SIMD_ENABLE(TReal, TInt)
 	TReal IntValueNoise3D(const Vector3<TInt>& c, const TInt seed)
 	{
-		TInt n = (SEED_NOISE_GEN<TInt>() * seed + dot(NOISE_GEN<TInt>(), c)) & 0x7fffffff;
+		TInt n = (SEED_NOISE_GEN<TInt>() * seed + dot(NOISE_GEN<TInt>(), c)) & static_cast<TInt>(0x7fffffff);
 
 		auto k = static_cast<TReal>(n ^ (n >> 13));
 
 		//return (n * (n * n * 60493 + 19990303) + 1376312589) & 0x7fffffff;
 		auto kk = k * k;
-		auto m = vfmadd(kk, 1087.0f, 2749.0f);
-		return clamp_int32(vfmadd(k, m, 3433.0f));
+		auto m = vfmadd(kk, static_cast<TReal>(1087.0f), static_cast<TReal>(2749.0f));
+		return clamp_int32(vfmadd(k, m, static_cast<TReal>(3433.0f)));
 	}
 
 	SIMD_ENABLE(TReal, TInt)
@@ -239,7 +246,7 @@ namespace paranoise {	namespace generators {
 				//static_cast<TReal>(IntValueNoise3D(c, seed)), 
 				IntValueNoise3D<TReal, TInt>(c, seed),
 				valuenoise_adjust<TReal>(), 
-				consts<TReal>::one());
+				fastload<TReal>::_1());
 	}
 
 	SIMD_ENABLE(TReal, TInt)

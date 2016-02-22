@@ -1,30 +1,32 @@
 #pragma once
+//#define PROFILE
+#ifndef PROFILE
 
-#include "../paranoise/modules/all.h"
-#include "../paranoise/parallel/all.h"
-#include "../paranoise/scheduler.h"
+#include "lib/CImg-1.6.9/CImg.h"
+
+#endif
+
+#include "run.h"
+#include <chrono>
+#include <ppl.h>
+
+
+#include <functional>
+#include <memory>
+#include <vector>
 #include "../paranoise/color.h"
 
-using namespace paranoise;
-using namespace paranoise::parallel;
-using namespace paranoise::module;
-using namespace paranoise::scheduler;
-using namespace paranoise::util;
-
-using namespace std;
-using namespace std::placeholders;
-
-using namespace std::chrono;
-
 namespace paranoise { namespace examples {
+	using namespace std;
 
-	//SIMD_ENABLE(TReal, TInt)
-	void run(const int w, const int h,
-			const std::function<std::shared_ptr<std::vector<float>>(void)>& vector_algorithm,
-			const std::function<std::shared_ptr<std::vector<float>>(void)>& scalar_algorithm,
-			const gradient1D& gradient)
+	inline void run(const int w, const int h,
+		const function<shared_ptr<vector<float>>(void)>& vector_algorithm,
+		const function<shared_ptr<vector<float>>(void)>& scalar_algorithm,
+		const util::gradient1D& gradient)
 	{
-			
+		using namespace std;
+		using namespace chrono;
+
 		//PreFetchCacheLine()
 #ifndef PROFILE
 		cout << endl << "Normal: " << endl;
@@ -40,25 +42,26 @@ namespace paranoise { namespace examples {
 #endif
 		cout << endl << "Parachute/Paranoise:" << endl;
 		auto simd_t1 = high_resolution_clock::now();
-		
+
 		auto result1 = *vector_algorithm();
 
 		auto simd_t2 = high_resolution_clock::now();
 		auto simd_duration = duration_cast<milliseconds>(simd_t2 - simd_t1).count();
 
 		cout << "PARACHUTE (optimized code + compiler optimization): " << simd_duration << "ms" << endl;
+#ifndef PROFILE
 		cout << "Speedup : " << (double)sisd_duration / simd_duration << endl << endl;
-
+#endif
 		cout << "Minval SIMD: " << *min_element(begin(result1), end(result1)) << endl << endl;
-		cout << "Maxval SIMD: " << *max_element(begin(result1), end(result1)) << endl << endl;
+		cout << "Maxval SIMD: " << *max_element(begin(result1), end(result1)) << endl << endl;		
 
+#ifndef PROFILE
 		cout << "Minval SISD: " << *min_element(begin(result2), end(result2)) << endl << endl;
 		cout << "Maxval SISD: " << *max_element(begin(result2), end(result2)) << endl << endl;
 
-#ifndef PROFILE
 		cimg_library::CImg<uint8> img1(w, h, 1, 3), img2(w, h, 1, 3);
 
-		parallel_for(0, w * h, [&](const auto i)
+		Concurrency::parallel_for(0, w * h, [&](const auto i)
 			//for (int i = 0; i < v.size(); i++)	
 		{
 			int x = i % w;

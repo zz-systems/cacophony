@@ -15,9 +15,9 @@ namespace paranoise { namespace module {
 		Vector3<TReal> power;
 
 		Matrix3x3<TReal> dinput = {
-			Vector3<TReal>{ 12414.0f, 65124.0f, 31337.0f } / (Vector3<TReal>) 65536.0f,
-			Vector3<TReal>{ 26519.0f, 18128.0f, 60493.0f } / (Vector3<TReal>) 65536.0f,
-			Vector3<TReal>{ 53820.0f, 11213.0f, 44845.0f } / (Vector3<TReal>) 65536.0f
+			Vector3<TReal>(12414.0f, 65124.0f, 31337.0f) / Vector3<TReal>(65536.0f),
+			Vector3<TReal>(26519.0f, 18128.0f, 60493.0f) / Vector3<TReal>(65536.0f),
+			Vector3<TReal>(53820.0f, 11213.0f, 44845.0f) / Vector3<TReal>(65536.0f)
 		};
 
 		turbulence(float power = 1.0, int roughness = 3, float frequency = 1.0, float lacunarity = 2.0, float persistence = 0.5, int seed = 0, Quality quality = Quality::Standard)

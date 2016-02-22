@@ -3,20 +3,26 @@
 #define PARANOISE_INTRINSIC_M128F_H
 
 #include "base.h"
+#include "../capabiliy.h"
 
 namespace paranoise { namespace parallel {
+	template<typename featuremask>
 	struct int4;
-	struct double2;
-		
-	ALIGN(16) struct float4 {
-		__m128 val;
+
+	
+	//struct double2;
+#define _float4 float4<featuremask> 
+#define _int4 int4<featuremask>
+
+	template<typename featuremask>
+	struct ALIGN(16) float4 {
+		__m128 val;		
 
 		float4() = default;
-		float4(const float &rhs) {
+		float4(const float rhs) {
 			float c[4] = { rhs, rhs, rhs, rhs };
 			val = _mm_load_ps(c);
 		}	
-		
 
 		float4(const float* rhs) : val(_mm_load_ps(rhs)) {}
 
@@ -28,9 +34,19 @@ namespace paranoise { namespace parallel {
 		float4(const __m128i& rhs)	{ val = _mm_cvtepi32_ps(rhs); }
 		float4(const __m128d& rhs)	{ val = _mm_cvtpd_ps(rhs); }
 
-		float4(const float4&	rhs);
-		float4(const int4&	rhs);
-		float4(const double2&	rhs);		
+		float4(const _float4&	rhs);
+		float4(const _int4&	rhs);
+		//float4(const double2&	rhs);
+
+
+		BIN_OP_STUB(+, _float4, float)
+		BIN_OP_STUB(-, _float4, float)
+		BIN_OP_STUB(*, _float4, float)
+		BIN_OP_STUB(/ , _float4, float)		
+
+		BIN_OP_STUB(>, _float4, float)
+		BIN_OP_STUB(<, _float4, float)
+		BIN_OP_STUB(== , _float4, float)
 	};
 	
 	inline auto ones()
@@ -55,75 +71,163 @@ namespace paranoise { namespace parallel {
 	}
 
 	// Arithmetic =====================================================================================================
-	BIN_OP(float4, +) { BIN_BODY(_mm_add_ps); }
-	BIN_OP(float4, -) { BIN_BODY(_mm_sub_ps); }
-	BIN_OP(float4, *) { BIN_BODY(_mm_mul_ps); }
-	BIN_OP(float4, / ) { BODY(_mm_mul_ps(a.val, _mm_rcp_ps(b.val))); }//*/ { BIN_BODY(_mm_div_ps); }
-
-	UN_OP(float4, -) { BODY(_mm_xor_ps(a.val, _mm_castsi128_ps(sign1all0()))); }//*/return _mm_sub_ps(_mm_set1_ps(0.0), a.val); }
+	
+	// Add
+	FEATURE_BIN_OP(+, _float4, _dispatcher::has_sse)
+	{
+		BIN_BODY(_mm_add_ps);
+	}	
+	// Sub
+	FEATURE_BIN_OP(-, _float4, _dispatcher::has_sse)
+	{
+		BIN_BODY(_mm_sub_ps);
+	}
+	// Mul
+	FEATURE_BIN_OP(*, _float4, _dispatcher::has_sse)
+	{
+		BIN_BODY(_mm_mul_ps);
+	}
+	// Fast division
+	FEATURE_BIN_OP(/, _float4, _dispatcher::has_sse)
+	{
+		BODY(_mm_mul_ps(a.val, _mm_rcp_ps(b.val))); //*/ { BIN_BODY(_mm_div_ps); }	
+	}
+	// Negate 
+	FEATURE_UN_OP(-, _float4, _dispatcher::has_sse)
+	{
+		BODY(_mm_xor_ps(a.val, _mm_castsi128_ps(sign1all0())));
+	}
 
 	// Comparison =====================================================================================================	
-	BIN_OP(float4, > )	{ BIN_BODY(_mm_cmpgt_ps); }
-	BIN_OP(float4, < )	{ BIN_BODY(_mm_cmplt_ps); }
-	BIN_OP(float4, == ) { BIN_BODY(_mm_cmpeq_ps); }	
+	// Greater than
+	FEATURE_BIN_OP(>, _float4, _dispatcher::has_sse)
+	{
+		BIN_BODY(_mm_cmpgt_ps);
+	}
+	// Less than
+	FEATURE_BIN_OP(<, _float4, _dispatcher::has_sse)
+	{
+		BIN_BODY(_mm_cmplt_ps);
+	}
+	//SIMD_FEATURE(_float4::has_sse)
+	FEATURE_BIN_OP(==, _float4, _dispatcher::has_sse)
+	{
+		BIN_BODY(_mm_cmpeq_ps);
+	}
 	
 	// Bitwise ========================================================================================================
-	UN_OP(float4, ~) { BODY(_mm_andnot_ps(a.val, _mm_castsi128_ps(ones()))); }
+	// Bitwise NOT
+	FEATURE_UN_OP(~, _float4, _dispatcher::has_sse)
+	{
+		BODY(_mm_andnot_ps(a.val, _mm_castsi128_ps(ones())));
+	}
 
-	BIN_OP(float4, &) { BIN_BODY(_mm_and_ps); }
-	BIN_OP(float4, |) { BIN_BODY(_mm_or_ps);  }
-	BIN_OP(float4, ^) { BIN_BODY(_mm_xor_ps); }
+	// Bitwise AND
+	FEATURE_BIN_OP(&, _float4, _dispatcher::has_sse)
+	{
+		BIN_BODY(_mm_and_ps);
+	}
+
+	// Bitwise OR
+	FEATURE_BIN_OP(|, _float4, _dispatcher::has_sse)
+	{
+		BIN_BODY(_mm_or_ps);
+	}
+
+	// Bitwise XOR
+	FEATURE_BIN_OP(^, _float4, _dispatcher::has_sse)
+	{
+		BIN_BODY(_mm_xor_ps);
+	}
 	
 	// Special functions ==============================================================================================
-	// Branchless select
-	TRI_FUNC(float4, vsel) { TRI_BODY_R(_mm_blendv_ps); }
+	// SSE > 4.1 Branchless select
+	FEATURE_TRI_FUNC(vsel, _float4, _dispatcher::has_sse41)
+	{
+		TRI_BODY_R(_mm_blendv_ps);
+	}
+
+	// SSE < 4.1 branchless select
+	FEATURE_TRI_FUNC(vsel, _float4, !_dispatcher::has_sse41 && _dispatcher::has_sse)
+	{
+		BODY(a /* mask */ & b | ~a & c);
+	}
+
 	// Fused multiply-add
-	TRI_FUNC(float4, vfmadd) { TRI_BODY(_mm_fmadd_ps); }
+	FEATURE_TRI_FUNC(vfmadd, _float4, _dispatcher::has_fma)
+	{
+		TRI_BODY(_mm_fmadd_ps);
+	}
 	// Fused multipl-subtract
-	TRI_FUNC(float4, vfmsub) { TRI_BODY(_mm_fmsub_ps); }
+	FEATURE_TRI_FUNC(vfmsub, _float4, _dispatcher::has_fma)
+	{
+		TRI_BODY(_mm_fmsub_ps);
+	}
 
 	// Mathematical functions =========================================================================================
-	// Absolute
-	UN_FUNC(float4, vabs) { BODY(_mm_and_ps(a.val, _mm_castsi128_ps(sign0all1()))); }
-	// Minimum
-	BIN_FUNC(float4, vmin)	{ BIN_BODY(_mm_min_ps); }
+	// Absolute value
+	FEATURE_UN_FUNC(vabs, _float4, _dispatcher::has_sse)
+	{
+		// According to IEEE 754 standard: sign bit is the first bit => set to 0
+		BODY(_mm_and_ps(a.val, _mm_castsi128_ps(sign0all1())));
+	}
+
+	// Minimum value
+	FEATURE_BIN_FUNC(vmin, _float4, _dispatcher::has_sse)
+	{
+		BIN_BODY(_mm_min_ps);
+	}
+
 	// Maximum
-	BIN_FUNC(float4, vmax)	{ BIN_BODY(_mm_max_ps); }	
-	// Square root
-	UN_FUNC(float4, vsqrt) { BODY(_mm_mul_ps(a.val, _mm_rsqrt_ps(a.val))); }//*/  { UN_BODY(_mm_sqrt_ps); }
-
-	UN_FUNC(float4, vtrunc) { BODY(static_cast<float4>(static_cast<int4>(a))); }
-
-	// Floor
-	UN_FUNC(float4, vfloor)
+	FEATURE_BIN_FUNC(vmax, _float4, _dispatcher::has_sse)
 	{
-		auto fi = vtrunc(a);
-		return vsel(fi > a, fi - static_cast<float4>(one()), fi);//- (fi > a) & j;
+		BIN_BODY(_mm_max_ps);
 	}
 
-	// Ceil
-	UN_FUNC(float4, vceil)
+	// Fast square root
+	FEATURE_UN_FUNC(vsqrt, _float4, _dispatcher::has_sse)
 	{
-		auto fi = vtrunc(a);
-		return vsel(fi < a, fi + static_cast<float4>(one()), fi);
+		BODY(_mm_mul_ps(a.val, _mm_rsqrt_ps(a.val)));
+	}//*/  { UN_BODY(_mm_sqrt_ps); }
+		
+	// Rounding =======================================================================================================
+
+	// Truncate float to *.0
+	FEATURE_UN_FUNC(vtrunc, _float4, _dispatcher::has_sse)
+	{
+		BODY(static_cast<_float4>(static_cast<int4<featuremask>>(a)));
 	}
 
-	// Round
-	UN_FUNC(float4, vround)
+	// Floor value
+	FEATURE_UN_FUNC(vfloor, _float4, _dispatcher::has_sse)
 	{
-		auto v0 = _mm_setzero_ps();             //generate the highest value < 2
-		auto v1 = _mm_cmpeq_ps(v0, v0);
-		auto vNearest2 = *(__m128*)&_mm_srli_epi32(*(__m128i*)&v1, 2);
-		auto i = _mm_cvttps_epi32(a.val);
-		auto aTrunc = _mm_cvtepi32_ps(i);        // truncate a
-		auto rmd = _mm_sub_ps(a.val, aTrunc);        // get remainder
-		auto rmd2 = _mm_mul_ps(rmd, vNearest2); // mul remainder by near 2 will yield the needed offset
-		auto rmd2i = _mm_cvttps_epi32(rmd2);    // after being truncated of course
-		auto rmd2Trunc = _mm_cvtepi32_ps(rmd2i);
-		auto r = _mm_add_ps(aTrunc, rmd2Trunc);
+		auto fi = vtrunc(a);
+		return vsel(fi > a, fi - static_cast<_float4>(one()), fi);
+	}
 
-		return r;
+	// Ceil value
+	FEATURE_UN_FUNC(vceil, _float4, _dispatcher::has_sse)
+	{
+		auto fi = vtrunc(a);
+		return vsel(fi < a, fi + static_cast<_float4>(one()), fi);
+	}
+
+	// Round value
+	FEATURE_UN_FUNC(vround, _float4, _dispatcher::has_sse)
+	{
+		//generate the highest value < 2		
+		auto vNearest2 = _mm_castsi128_ps(_mm_srli_epi32(ones(), 2));
+		auto aTrunc = vtrunc(a);
+
+		auto rmd = a - aTrunc;        // get remainder
+		auto rmd2 = rmd * vNearest2;  // mul remainder by near 2 will yield the needed offset
+
+		auto rmd2Trunc = vtrunc(rmd2); // after being truncated of course
+
+		return aTrunc + rmd2Trunc;
 	}	
+		
+	
 }}
 
 #endif

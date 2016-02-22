@@ -74,26 +74,26 @@ namespace paranoise { namespace scheduler {
 	}
 
 	SIMD_ENABLE_F(TReal)
-		inline Vector3<TReal> build_coords(float x, float y)
+	inline Vector3<TReal> build_coords(float x, float y)
 	{
 		return Vector3<TReal> {
 			TReal(x),
 			TReal(y),
-			0
+			static_cast<TReal>(0.0f)
 		};
 	}
-
-	template<>
-	inline Vector3<float4> build_coords(float x, float y)
+	
+	template<typename featuremask, enable_if_t<is_integral<featuremask>::value, featuremask>>	
+	inline Vector3<float4<featuremask>> build_coords(float x, float y)
 	{
-		return Vector3<float4>(
-			float4(x, x, x, x) + float4(0.0f, 1.0f, 2.0f, 3.0f),
-				float4(y),
+		return Vector3<float4<featuremask>>(
+			float4<featuremask>(x, x, x, x) + float4<featuremask>(0.0f, 1.0f, 2.0f, 3.0f),
+			float4<featuremask>(y),
 				0.0f
 		);
 	}
 
-	template<>
+	/*template<>
 	inline Vector3<float8> build_coords(float x, float y)
 	{
 		return Vector3<float8> {
@@ -101,7 +101,7 @@ namespace paranoise { namespace scheduler {
 				float8(y),
 				0
 		};
-	}
+	}*/
 
 	/*if (word == 4)
 	{
@@ -133,8 +133,8 @@ namespace paranoise { namespace scheduler {
 	/*template <typename TReal>
 	inline void stream_result(float* stride, int x, const TReal &r);*/
 
-	//template <>
-	inline void stream_result(float* stride, int x, const float4 &r)
+	template <typename featuremask>
+	inline void stream_result(float* stride, int x, const float4<featuremask> &r)
 	{
 		_mm_stream_ps(stride + x, r.val);
 	}
@@ -147,32 +147,20 @@ namespace paranoise { namespace scheduler {
 
 	SIMD_ENABLE_F(TReal)
 	auto schedule2D(const Module<TReal>& source, const Transformer<TReal>& transform, const scheduler_settings& settings)
-	{
-		
+	{		
 		int word = sizeof(TReal) >> 2;
-
 		auto d = settings.dimensions;
-
-		auto result = std::make_shared<std::vector<float>>(d.x * d.y * d.z);
-	/*	result->resize(d.y);
-		for (int y = 0; y < d.y; y++)
-			result->at(y).resize(d.x);*/
-
-		//result->resize(d.x * d.y * d.z);
-
-		//auto extent = settings.bounds._1 - settings.bounds._0;
-		//auto delta	= extent / d;
-		//auto cur	= settings.bounds._0;
-		std::mutex lock;
-
+		auto result = std::make_shared<std::vector<float>>(d.x * d.y * d.z);					
 		
+		
+
 		if (settings.use_threads)
 		{
 			//for (auto y = 0; y < d.y; y++)			
 			parallel_for(0, d.y, [&](const auto y)
 			{
-				_MM_SET_ROUNDING_MODE(_MM_ROUND_TOWARD_ZERO);
-
+				_MM_SET_ROUNDING_MODE(_MM_ROUND_TOWARD_ZERO);				
+				
 				auto stride = &result->at(y * d.x);
 
 				for (auto x = 0; x < d.x; x += word)
@@ -198,7 +186,7 @@ namespace paranoise { namespace scheduler {
 					auto r = source(coords);
 					stream_result(stride, x, r);
 
-				}//lock.unlock();
+				}
 			};
 		}
 

@@ -31,14 +31,14 @@ namespace paranoise { namespace module {
 
 			Vector3<TInt> cube
 			{
-				static_cast<TInt>(_coords.x) - sel(_coords.x > 0, consts<TInt>::zero(), consts<TInt>::one()),
-				static_cast<TInt>(_coords.y) - sel(_coords.y > 0, consts<TInt>::zero(), consts<TInt>::one()),
-				static_cast<TInt>(_coords.z) - sel(_coords.z > 0, consts<TInt>::zero(), consts<TInt>::one())
+				static_cast<TInt>(_coords.x) - vsel(_coords.x > 0.0f, fastload<TInt>::_0(), fastload<TInt>::_1()),
+				static_cast<TInt>(_coords.y) - vsel(_coords.y > 0.0f, fastload<TInt>::_0(), fastload<TInt>::_1()),
+				static_cast<TInt>(_coords.z) - vsel(_coords.z > 0.0f, fastload<TInt>::_0(), fastload<TInt>::_1())
 			};
 
-			TReal value, absDist, minDist = static_cast<TInt>(std::numeric_limits<int>::max());
+			TReal value, absDist, minDist = std::numeric_limits<int>::max();
 
-			Vector3<TReal> candidate = { 0, 0, 0 };
+			Vector3<TReal> candidate( 0.0f, 0.0f, 0.0f);
 			Vector3<TReal> cur, pos, dist;
 
 			// Inside each unit cube, there is a seed point at a random position.  Go
@@ -67,28 +67,28 @@ namespace paranoise { namespace module {
 						//select_candidate(absDist, pos, minDist, candidate);
 						auto mask = absDist < minDist;
 
-						candidate.x = sel(mask, pos.x, candidate.x);
-						candidate.y = sel(mask, pos.y, candidate.y);
-						candidate.z = sel(mask, pos.z, candidate.z);
+						candidate.x = vsel(mask, pos.x, candidate.x);
+						candidate.y = vsel(mask, pos.y, candidate.y);
+						candidate.z = vsel(mask, pos.z, candidate.z);
 
-						minDist = sel(mask, absDist, minDist);
+						minDist = vsel(mask, absDist, minDist);
 					}
 				}
 			}
 
+			auto noise = ValueNoise3D<TReal, TInt>(candidate, _seed.x);
+
 			if (this->enableDistance)
 			{
 				auto diff		= candidate - _coords;
-				auto absDiff	= paranoise::parallel::sqrt(dot(diff, diff));
+				auto absDiff	= vsqrt(dot(diff, diff));
 
 				// value =  absDiff * sqrt3 - 1
-				value = fmsub(absDiff, consts<TReal>::sqrt3(), consts<TReal>::one());
-			}
-
-			auto noise = ValueNoise3D<TReal, TInt>(candidate, _seed.x);
+				value = vfmsub(absDiff, consts<TReal>::sqrt3(), fastload<TReal>::_1());
+			}			
 
 			// return settings.displacement * noise + value
-			return fmadd(this->displacement, noise, value);
+			return vfmadd(this->displacement, noise, value);
 		}
 
 		//inline operator (Module<TReal>)() {	return operator(); }

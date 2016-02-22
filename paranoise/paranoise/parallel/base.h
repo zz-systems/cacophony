@@ -21,15 +21,20 @@ namespace paranoise { namespace parallel {
 	ANY(TType) inline TType &operator *=(TType& a, const TType& b) { a = (a * b); return a; }
 	ANY(TType) inline TType &operator /=(TType& a, const TType& b) { a = (a / b); return a; }
 
-	//ANY2(TType1, TType2) inline TType1 &operator +=(TType1& a, const TType2& b) { a = (a + b); return a; }
-	//ANY2(TType1, TType2) inline TType1 &operator -=(TType1& a, const TType2& b) { a = (a - b); return a; }
-	//ANY2(TType1, TType2) inline TType1 &operator *=(TType1& a, const TType2& b) { a = (a * b); return a; }
-	//ANY2(TType1, TType2) inline TType1 &operator /=(TType1& a, const TType2& b) { a = (a / b); return a; }
+	ANY2(TType1, TType2) inline TType1 &operator +=(TType1& a, const TType2& b) { a = (a + static_cast<TType1>(b)); return a; }
+	ANY2(TType1, TType2) inline TType1 &operator -=(TType1& a, const TType2& b) { a = (a - static_cast<TType1>(b)); return a; }
+	ANY2(TType1, TType2) inline TType1 &operator *=(TType1& a, const TType2& b) { a = (a * static_cast<TType1>(b)); return a; }
+	ANY2(TType1, TType2) inline TType1 &operator /=(TType1& a, const TType2& b) { a = (a / static_cast<TType1>(b)); return a; }
 
 	//ANY(TType) inline TType &operator !=(TType& a, const TType& b) { a = ~(a == b); return a; }
+	
 	ANY(TType) inline TType &operator &=(TType& a, const TType& b) { a = (a & b); return a; }
 	ANY(TType) inline TType &operator |=(TType& a, const TType& b) { a = (a | b); return a; }
 	ANY(TType) inline TType &operator ^=(TType& a, const TType& b) { a = (a ^ b); return a; }
+
+	ANY2(TType1, TType2) inline TType1 &operator &=(TType1& a, const TType2& b) { a = (a & static_cast<TType1>(b)); return a; }
+	ANY2(TType1, TType2) inline TType1 &operator |=(TType1& a, const TType2& b) { a = (a | static_cast<TType1>(b)); return a; }
+	ANY2(TType1, TType2) inline TType1 &operator ^=(TType1& a, const TType2& b) { a = (a ^ static_cast<TType1>(b)); return a; }
 
 	ANY(TType) inline TType operator >>=(TType& a, int amount) { a = a >> amount; return a; }
 	ANY(TType) inline TType operator <<=(TType& a, int amount) { a = a << amount; return a; }

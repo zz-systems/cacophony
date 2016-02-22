@@ -162,7 +162,7 @@ namespace paranoise { namespace examples {
 		// 4: [Scaled-carver module]: This scale/bias module scales the output
 		//    value from the carver module such that it is usually near 1.0.  This
 		//    is required for step 5.
-		Module<TReal> baseContinentDef_sb = [=](const auto&c) { return baseContinentDef_pe1(c) * 0.375 + 0.625; };
+		Module<TReal> baseContinentDef_sb = [=](const auto&c) { return baseContinentDef_pe1(c) * static_cast<TReal>(0.375f) + static_cast<TReal>(0.625f); };
 
 		// 5: [Carved-continent module]: This minimum-value module carves out chunks
 		//    from the continent-with-ranges module.  It does this by ensuring that
