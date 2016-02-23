@@ -80,8 +80,7 @@ namespace paranoise { namespace parallel {
 	FEATURE_BIN_OP(&, _int4, _dispatcher::has_sse)	{ BIN_BODY(_mm_and_si128); }
 	FEATURE_BIN_OP(^, _int4, _dispatcher::has_sse)	{ BIN_BODY(_mm_xor_si128); }
 	
-	FEATURE_SHIFT_OP(>>, _int4, _dispatcher::has_sse)	{ return _mm_srli_epi32		(a.val, sa); }
-	
+	FEATURE_SHIFT_OP(>>, _int4, _dispatcher::has_sse)	{ return _mm_srli_epi32		(a.val, sa); }	
 	
 	FEATURE_SHIFT_OP(<<, _int4, _dispatcher::has_sse) { return _mm_slli_epi32(a.val, sa); }
 		

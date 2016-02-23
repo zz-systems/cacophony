@@ -47,28 +47,30 @@ namespace paranoise { namespace parallel {
 		BIN_OP_STUB(>, _float4, float)
 		BIN_OP_STUB(<, _float4, float)
 		BIN_OP_STUB(== , _float4, float)
+
+		static inline auto ones()
+		{
+			auto t = _mm_setzero_si128();
+			return _mm_cmpeq_epi32(t, t);
+		}
+
+		static inline auto one()
+		{
+			return _mm_srli_epi32(ones(), 31);
+		}
+
+		static inline auto sign1all0()
+		{
+			return _mm_slli_epi32(ones(), 31);
+		}
+
+		static inline auto sign0all1()
+		{
+			return _mm_srli_epi32(ones(), 1);
+		}
 	};
 	
-	inline auto ones()
-	{
-		auto t = _mm_setzero_si128();
-		return _mm_cmpeq_epi32(t, t);
-	}
-
-	inline auto one()
-	{
-		return _mm_srli_epi32(ones(), 31);
-	}
-
-	inline auto sign1all0()
-	{
-		return _mm_slli_epi32(ones(), 31);
-	}
-
-	inline auto sign0all1()
-	{
-		return _mm_srli_epi32(ones(), 1);
-	}
+	
 
 	// Arithmetic =====================================================================================================
 	
@@ -95,7 +97,7 @@ namespace paranoise { namespace parallel {
 	// Negate 
 	FEATURE_UN_OP(-, _float4, _dispatcher::has_sse)
 	{
-		BODY(_mm_xor_ps(a.val, _mm_castsi128_ps(sign1all0())));
+		BODY(_mm_xor_ps(a.val, _mm_castsi128_ps(_float4::sign1all0())));
 	}
 
 	// Comparison =====================================================================================================	
@@ -195,28 +197,28 @@ namespace paranoise { namespace parallel {
 	// Truncate float to *.0
 	FEATURE_UN_FUNC(vtrunc, _float4, _dispatcher::has_sse)
 	{
-		BODY(static_cast<_float4>(static_cast<int4<featuremask>>(a)));
+		BODY(static_cast<_float4>(static_cast<_int4>(a)));
 	}
 
 	// Floor value
 	FEATURE_UN_FUNC(vfloor, _float4, _dispatcher::has_sse)
 	{
 		auto fi = vtrunc(a);
-		return vsel(fi > a, fi - static_cast<_float4>(one()), fi);
+		return vsel(fi > a, fi - static_cast<_float4>(_float4::one()), fi);
 	}
 
 	// Ceil value
 	FEATURE_UN_FUNC(vceil, _float4, _dispatcher::has_sse)
 	{
 		auto fi = vtrunc(a);
-		return vsel(fi < a, fi + static_cast<_float4>(one()), fi);
+		return vsel(fi < a, fi + static_cast<_float4>(_float4::one()), fi);
 	}
 
 	// Round value
 	FEATURE_UN_FUNC(vround, _float4, _dispatcher::has_sse)
 	{
 		//generate the highest value < 2		
-		auto vNearest2 = _mm_castsi128_ps(_mm_srli_epi32(ones(), 2));
+		auto vNearest2 = _mm_castsi128_ps(_mm_srli_epi32(_float4::ones(), 2));
 		auto aTrunc = vtrunc(a);
 
 		auto rmd = a - aTrunc;        // get remainder
@@ -225,9 +227,7 @@ namespace paranoise { namespace parallel {
 		auto rmd2Trunc = vtrunc(rmd2); // after being truncated of course
 
 		return aTrunc + rmd2Trunc;
-	}	
-		
-	
+	}
 }}
 
 #endif
