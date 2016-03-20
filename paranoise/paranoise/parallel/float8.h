@@ -21,6 +21,8 @@ namespace paranoise {	namespace parallel {
 		float8() = default;
 		float8(const float& rhs)	{ val = _mm256_set1_ps(rhs); }
 
+		float8(const float* rhs) : val(_mm256_load_ps(rhs)) {}
+
 		float8(VARGS8(uint8))		{ val = _mm256_cvtepi32_ps(_mm256_set_epi32(VPASS8)); }
 		float8(VARGS8(int))			{ val = _mm256_cvtepi32_ps(_mm256_set_epi32(VPASS8)); }
 		float8(VARGS8(float))		{ val = _mm256_set_ps(VPASS8); }
@@ -33,29 +35,42 @@ namespace paranoise {	namespace parallel {
 		float8(const _int8&	rhs);
 		//float8(const double4&	rhs);
 
+		BIN_OP_STUB(+, _float8, float)
+		BIN_OP_STUB(-, _float8, float)
+		BIN_OP_STUB(*, _float8, float)
+		BIN_OP_STUB(/ , _float8, float)
+
+		BIN_OP_STUB(>, _float8, float)
+		BIN_OP_STUB(<, _float8, float)
+		BIN_OP_STUB(== , _float8, float)
+
+
+		explicit inline operator bool()
+		{
+			return _mm256_test_all_ones(_mm256_castps_si256(this->val));
+		}
+
 		static inline auto ones()
 		{
-			auto t = _mm_setzero_si128();
-			return _mm_cmpeq_epi32(t, t);
+			auto t = _mm256_setzero_si256();
+			return _mm256_cmpeq_epi32(t, t);
 		}
 
 		static inline auto one()
 		{
-			return _mm_srli_epi32(ones(), 31);
+			return _mm256_srli_epi32(ones(), 31);
 		}
 
 		static inline auto sign1all0()
 		{
-			return _mm_slli_epi32(ones(), 31);
+			return _mm256_slli_epi32(ones(), 31);
 		}
 
 		static inline auto sign0all1()
 		{
-			return _mm_srli_epi32(ones(), 1);
+			return _mm256_srli_epi32(ones(), 1);
 		}
-	};
-
-	
+	};	
 
 	// Arithmetic =====================================================================================================
 	FEATURE_BIN_OP(+, _float8, _dispatcher::has_avx)	
@@ -101,7 +116,7 @@ namespace paranoise {	namespace parallel {
 	// Bitwise ========================================================================================================
 	FEATURE_UN_OP(~, _float8, _dispatcher::has_avx)	
 	{
-		UN_BODY_D(_mm256_andnot_ps);
+		BODY(_mm256_xor_ps(a.val, _mm256_cmp_ps(_mm256_setzero_ps(), _mm256_setzero_ps(), _CMP_EQ_OQ)));
 	}
 
 	FEATURE_BIN_OP(|, _float8, _dispatcher::has_avx)
@@ -110,6 +125,21 @@ namespace paranoise {	namespace parallel {
 	}
 
 	FEATURE_BIN_OP(&, _float8, _dispatcher::has_avx)
+	{
+		BIN_BODY(_mm256_and_ps);
+	}
+
+	FEATURE_UN_OP(!, _float8, _dispatcher::has_avx)
+	{
+		BODY(~a);
+	}
+
+	FEATURE_BIN_OP(|| , _float8, _dispatcher::has_avx)
+	{
+		BIN_BODY(_mm256_or_ps);
+	}
+
+	FEATURE_BIN_OP(&&, _float8, _dispatcher::has_avx)
 	{
 		BIN_BODY(_mm256_and_ps);
 	}
@@ -140,7 +170,7 @@ namespace paranoise {	namespace parallel {
 	// Mathematical functions =========================================================================================
 	FEATURE_UN_FUNC(vabs, _float8, _dispatcher::has_avx)  
 	{
-		BODY(a & _float8::sign0all1());
+		BODY(_mm256_and_ps(a.val, _mm256_castsi256_ps(_float8::sign0all1())));
 	}
 	
 	FEATURE_BIN_FUNC(vmin, _float8, _dispatcher::has_avx)  
@@ -161,36 +191,25 @@ namespace paranoise {	namespace parallel {
 	// Truncate float to *.0
 	FEATURE_UN_FUNC(vtrunc, _float8, _dispatcher::has_avx && _dispatcher::has_avx2)
 	{
-		BODY(static_cast<_float8>(static_cast<_int8>(a)));
+		BODY(_mm256_round_ps(a.val, _MM_FROUND_TO_ZERO));
 	}
 
 	// Floor value
 	FEATURE_UN_FUNC(vfloor, _float8, _dispatcher::has_avx && _dispatcher::has_avx2)
 	{
-		auto fi = vtrunc(a);
-		return vsel(fi > a, fi - static_cast<_float8>(_float8::one()), fi);
+		BODY(_mm256_round_ps(a.val, _MM_FROUND_TO_NEG_INF));		
 	}
 
 	// Ceil value
 	FEATURE_UN_FUNC(vceil, _float8, _dispatcher::has_avx && _dispatcher::has_avx2)
 	{
-		auto fi = vtrunc(a);
-		return vsel(fi < a, fi + static_cast<_float8>(_float8::one()), fi);
+		BODY(_mm256_round_ps(a.val, _MM_FROUND_TO_POS_INF));
 	}
 
 	// Round value
 	FEATURE_UN_FUNC(vround, _float4, _dispatcher::has_avx)
 	{
-		//generate the highest value < 2		
-		auto vNearest2 = _mm256_castsi256_ps(_mm256_srli_epi32(_float4::ones(), 2));
-		auto aTrunc = vtrunc(a);
-
-		auto rmd = a - aTrunc;        // get remainder
-		auto rmd2 = rmd * vNearest2;  // mul remainder by near 2 will yield the needed offset
-
-		auto rmd2Trunc = vtrunc(rmd2); // after being truncated of course
-
-		return aTrunc + rmd2Trunc;
+		BODY(_mm256_round_ps(a.val, _MM_FROUND_TO_NEAREST_INT));
 	}
 
 

@@ -20,8 +20,7 @@ namespace paranoise { namespace parallel {
 
 		float4() = default;
 		float4(const float rhs) {
-			float c[4] = { rhs, rhs, rhs, rhs };
-			val = _mm_load_ps(c);
+			val = _mm_set1_ps(rhs);
 		}	
 
 		float4(const float* rhs) : val(_mm_load_ps(rhs)) {}
@@ -47,6 +46,12 @@ namespace paranoise { namespace parallel {
 		BIN_OP_STUB(>, _float4, float)
 		BIN_OP_STUB(<, _float4, float)
 		BIN_OP_STUB(== , _float4, float)
+
+		//template<enable_if_t<_dispatcher::has_sse, bool>>
+		explicit inline operator bool()
+		{
+			return _mm_test_all_ones(_mm_castps_si128(this->val));
+		}
 
 		static inline auto ones()
 		{
@@ -89,11 +94,19 @@ namespace paranoise { namespace parallel {
 	{
 		BIN_BODY(_mm_mul_ps);
 	}
-	// Fast division
-	FEATURE_BIN_OP(/, _float4, _dispatcher::has_sse)
+
+	// division
+	FEATURE_BIN_OP(/, _float4, _dispatcher::has_sse && !_dispatcher::use_fast_float)
 	{
-		BODY(_mm_mul_ps(a.val, _mm_rcp_ps(b.val))); //*/ { BIN_BODY(_mm_div_ps); }	
+		{ BIN_BODY(_mm_div_ps); }	
 	}
+
+	// Fast division (lower precision!)
+	FEATURE_BIN_OP(/ , _float4, _dispatcher::has_sse && _dispatcher::use_fast_float)
+	{
+		BODY(_mm_mul_ps(a.val, _mm_rcp_ps(b.val)));
+	}
+
 	// Negate 
 	FEATURE_UN_OP(-, _float4, _dispatcher::has_sse)
 	{
@@ -120,8 +133,13 @@ namespace paranoise { namespace parallel {
 	// Bitwise ========================================================================================================
 	// Bitwise NOT
 	FEATURE_UN_OP(~, _float4, _dispatcher::has_sse)
+	{		
+		BODY(_mm_xor_ps(a.val, _mm_castsi128_ps(_float4::ones())));
+	}
+	
+	FEATURE_UN_OP(!, _float4, _dispatcher::has_sse)
 	{
-		BODY(_mm_andnot_ps(a.val, _mm_castsi128_ps(ones())));
+		BODY(~a);
 	}
 
 	// Bitwise AND
@@ -132,6 +150,18 @@ namespace paranoise { namespace parallel {
 
 	// Bitwise OR
 	FEATURE_BIN_OP(|, _float4, _dispatcher::has_sse)
+	{
+		BIN_BODY(_mm_or_ps);
+	}
+
+	// Bitwise AND
+	FEATURE_BIN_OP(&&, _float4, _dispatcher::has_sse)
+	{
+		BIN_BODY(_mm_and_ps);
+	}
+
+	// Bitwise OR
+	FEATURE_BIN_OP(|| , _float4, _dispatcher::has_sse)
 	{
 		BIN_BODY(_mm_or_ps);
 	}
@@ -171,7 +201,7 @@ namespace paranoise { namespace parallel {
 	FEATURE_UN_FUNC(vabs, _float4, _dispatcher::has_sse)
 	{
 		// According to IEEE 754 standard: sign bit is the first bit => set to 0
-		BODY(_mm_and_ps(a.val, _mm_castsi128_ps(sign0all1())));
+		BODY(_mm_and_ps(a.val, _mm_castsi128_ps(_float4::sign0all1())));
 	}
 
 	// Minimum value
@@ -186,11 +216,17 @@ namespace paranoise { namespace parallel {
 		BIN_BODY(_mm_max_ps);
 	}
 
-	// Fast square root
-	FEATURE_UN_FUNC(vsqrt, _float4, _dispatcher::has_sse)
+	// Normal square root
+	FEATURE_UN_FUNC(vsqrt, _float4, _dispatcher::has_sse && !_dispatcher::use_fast_float)
+	{
+		UN_BODY(_mm_sqrt_ps);
+	}
+
+	// Fast square root (lower precision!)
+	FEATURE_UN_FUNC(vsqrt, _float4, _dispatcher::has_sse && _dispatcher::use_fast_float)
 	{
 		BODY(_mm_mul_ps(a.val, _mm_rsqrt_ps(a.val)));
-	}//*/  { UN_BODY(_mm_sqrt_ps); }
+	}
 		
 	// Rounding =======================================================================================================
 
@@ -201,21 +237,39 @@ namespace paranoise { namespace parallel {
 	}
 
 	// Floor value
-	FEATURE_UN_FUNC(vfloor, _float4, _dispatcher::has_sse)
+	FEATURE_UN_FUNC(vfloor, _float4, _dispatcher::has_sse41)
+	{
+		BODY(_mm_round_ps(a.val, _MM_FROUND_FLOOR));
+	}
+
+	// Ceil value
+	FEATURE_UN_FUNC(vceil, _float4, _dispatcher::has_sse41)
+	{
+		BODY(_mm_round_ps(a.val, _MM_FROUND_CEIL));
+	}
+
+	// Round value
+	FEATURE_UN_FUNC(vround, _float4, _dispatcher::has_sse41)
+	{
+		BODY(_mm_round_ps(a.val, _MM_FROUND_TO_NEAREST_INT));
+	}
+
+	// Floor value
+	FEATURE_UN_FUNC(vfloor, _float4, !_dispatcher::has_sse41 && _dispatcher::has_sse)
 	{
 		auto fi = vtrunc(a);
 		return vsel(fi > a, fi - static_cast<_float4>(_float4::one()), fi);
 	}
 
 	// Ceil value
-	FEATURE_UN_FUNC(vceil, _float4, _dispatcher::has_sse)
+	FEATURE_UN_FUNC(vceil, _float4, !_dispatcher::has_sse41 && _dispatcher::has_sse)
 	{
 		auto fi = vtrunc(a);
 		return vsel(fi < a, fi + static_cast<_float4>(_float4::one()), fi);
 	}
 
 	// Round value
-	FEATURE_UN_FUNC(vround, _float4, _dispatcher::has_sse)
+	FEATURE_UN_FUNC(vround, _float4, !_dispatcher::has_sse41 && _dispatcher::has_sse)
 	{
 		//generate the highest value < 2		
 		auto vNearest2 = _mm_castsi128_ps(_mm_srli_epi32(_float4::ones(), 2));

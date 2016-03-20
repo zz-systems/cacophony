@@ -48,7 +48,7 @@ namespace paranoise { namespace parallel {
 
 	FEATURE_BIN_OP(/ , _int8, _dispatcher::has_sse)
 	{
-		BODY(_mm_div_ps(static_cast<_float8>(a).val, static_cast<_float8>(b).val));
+		BODY(_mm256_div_ps(static_cast<_float8>(a).val, static_cast<_float8>(b).val));
 	}	
 
 	FEATURE_FUNC(vsel, _int8, _dispatcher::has_avx2)
@@ -57,7 +57,7 @@ namespace paranoise { namespace parallel {
 		BODY(_mm256_blendv_epi8(c.val, b.val, _mm256_castps_si256(a.val)));
 	}
 
-	FEATURE_FUNC(vsel, _float8, _dispatcher::has_avx2)
+	FEATURE_FUNC(vsel, _float8, _dispatcher::has_avx)
 		(const _int8 a, const _float8 b, const _float8 c)
 	{
 		BODY(_mm256_blendv_ps(c.val, b.val, _mm256_castsi256_ps(a.val)));

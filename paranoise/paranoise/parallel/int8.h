@@ -25,6 +25,10 @@ namespace paranoise {	namespace parallel {
 		int8() = default;
 		int8(const int32& rhs)		{ val = _mm256_set1_epi32(rhs); }
 
+		int8(VARGS8(uint8))			{ val = _mm256_set_epi32(VPASS8); }
+		int8(VARGS8(int))			{ val = _mm256_set_epi32(VPASS8); }
+		int8(VARGS8(float))			{ val = _mm256_cvtps_epi32(_mm256_set_ps(VPASS8)); }
+
 		int8(const __m256& rhs)		{ val = _mm256_cvtps_epi32(rhs); }
 		int8(const __m256i& rhs)	{ val = rhs; }
 		int8(const __m256d& rhs)	{ val = _mm256_castsi128_si256(_mm256_cvtpd_epi32(rhs)); }
@@ -32,7 +36,21 @@ namespace paranoise {	namespace parallel {
 		int8(const _float8&	rhs);
 		int8(const _int8&	rhs);
 		//int8(const double4&	rhs);
-	};
+
+		BIN_OP_STUB(+, _int8, int)
+		BIN_OP_STUB(-, _int8, int)
+		BIN_OP_STUB(*, _int8, int)
+		BIN_OP_STUB(/ , _int8, int)
+
+		BIN_OP_STUB(>, _int8, int)
+		BIN_OP_STUB(<, _int8, int)
+		BIN_OP_STUB(== , _int8, int)
+
+		explicit inline operator bool()
+		{
+			return _mm256_test_all_ones(this->val);
+		}
+	};	
 
 	FEATURE_BIN_OP(+, _int8, _dispatcher::has_avx2)
 	{
@@ -46,33 +64,32 @@ namespace paranoise {	namespace parallel {
 
 	FEATURE_BIN_OP(*, _int8, _dispatcher::has_avx2)
 	{
-		BIN_BODY(_mm256_mul_epi32);
+		BIN_BODY(_mm256_mullo_epi32);
 	}	
 
 	FEATURE_UN_OP(-, _int8, _dispatcher::has_avx2)
 	{
-		BODY(_mm256_sub_epi32(_mm256_set1_epi32(0), a.val));
+		BODY(_mm256_sub_epi32(_mm256_setzero_si256(), a.val));
 	}
 	
-
 	FEATURE_BIN_OP(>, _int8, _dispatcher::has_avx2)
 	{
-		BIN_BODY(_mm256_cmpgt_epi32)
+		BIN_BODY(_mm256_cmpgt_epi32);
 	}
 
 	FEATURE_BIN_OP(<, _int8, _dispatcher::has_avx2)
 	{
-		BIN_BODY(_mm256_cmpgt_epi32)
+		BIN_BODY_R(_mm256_cmpgt_epi32);
 	}
 
 	FEATURE_BIN_OP(==, _int8, _dispatcher::has_avx2)
 	{
-		BIN_BODY(_mm256_cmpeq_epi32)
+		BIN_BODY(_mm256_cmpeq_epi32);
 	}
 
 	FEATURE_UN_OP(~, _int8, _dispatcher::has_avx2)
 	{
-		BIN_BODY(_mm256_andnot_si256);
+		BODY(_mm256_xor_si256(a.val, _mm256_cmpeq_epi32(_mm256_setzero_si256(), _mm256_setzero_si256())));
 	}
 
 	FEATURE_BIN_OP(|, _int8, _dispatcher::has_avx2)
@@ -81,6 +98,21 @@ namespace paranoise {	namespace parallel {
 	}
 
 	FEATURE_BIN_OP(&, _int8, _dispatcher::has_avx2)
+	{
+		BIN_BODY(_mm256_and_si256);
+	}
+
+	FEATURE_UN_OP(!, _int8, _dispatcher::has_avx2)
+	{
+		BODY(~a);
+	}
+
+	FEATURE_BIN_OP(|| , _int8, _dispatcher::has_avx2)
+	{
+		BIN_BODY(_mm256_or_si256);
+	}
+
+	FEATURE_BIN_OP(&&, _int8, _dispatcher::has_avx2)
 	{
 		BIN_BODY(_mm256_and_si256);
 	}
@@ -103,6 +135,7 @@ namespace paranoise {	namespace parallel {
 	// SSE 4.1 branchless select
 	FEATURE_TRI_FUNC(vsel, _int8, _dispatcher::has_avx2)
 	{
+		//BODY(_mm256_blend_epi32(c.val, b.val, _mm256_movemask_epi8(a.val)));
 		TRI_BODY_R(_mm256_blendv_epi8);
 	}
 }}

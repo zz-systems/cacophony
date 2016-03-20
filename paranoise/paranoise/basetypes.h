@@ -24,7 +24,7 @@ namespace paranoise {
 #define ALIGN(bytes) __declspec(align(bytes))
 #define FORCEINLINE __forceinline
 
-// define checked floating and integral type to use on SIMD-enabled functions/types. 
+	// define checked floating and integral type to use on SIMD-enabled functions/types. 
 #define SIMD_ENABLE(floatType, intType) \
 	template<	typename floatType	= std::enable_if<std::is_floating_point<floatType>::value, floatType>::type, \
 				typename intType	= std::enable_if<std::is_integral<intType>::value, intType>::type>
@@ -48,7 +48,8 @@ namespace paranoise {
 inline friend const type operator op(const convertable a)	{ return op static_cast<type>(a); }		
 
 #define BIN_OP_STUB(op, type, convertable) \
-inline friend const type operator op(const type a, const convertable b) { return a op static_cast<type>(b); }
+inline friend const type operator op(const type a, const convertable b) { return a op static_cast<type>(b); } \
+inline friend const type operator op(const convertable a, const type &b) { return static_cast<type>(a) op b; }
 
 #define FUNC(name, type) inline type name()
 
@@ -151,7 +152,7 @@ FEATURE(TType, condition) name(const TType a, const TType b, const TType c)
 	namespace parallel {
 
 		ANY(TProcess)
-			inline TProcess vsel(const bool &condition, const TProcess &choice1, const TProcess &choice2)
+		inline TProcess vsel(const bool condition, const TProcess &choice1, const TProcess &choice2)
 		{
 			return condition ? choice1 : choice2;
 		}
@@ -168,7 +169,7 @@ FEATURE(TType, condition) name(const TType a, const TType b, const TType c)
 		SIMD_ENABLE_F(TReal)
 			inline TReal clamp_int32(const TReal &val)
 		{
-			return vclamp(val, (TReal)-1073741824.0f, (TReal)1073741824.0f);
+			return vclamp<TReal>(val, -1073741824.0, 1073741824.0);
 		}
 
 		template<typename T, typename U>
@@ -209,7 +210,6 @@ FEATURE(TType, condition) name(const TType a, const TType b, const TType c)
 
 		// Clamp: min(max(val, minval), maxval)
 		ANY(TType) TRI_FUNC(vclamp, TType) { BODY(vmin(vmax(a, b), c)); }
-
 	};
 };
 #endif

@@ -15,8 +15,8 @@ namespace paranoise { namespace module {
 		Matrix3x3<TReal> rot;
 		Vector3<float>  angles;
 
-		rotate() : rotate_settings({ 0, 0, 0 }) {}
-		rotate(Vector3<float> angles) : angles(angles)
+		rotate() : rotate({ 0.0f, 0.0f, 0.0f }) {}
+		rotate(const Vector3<float> &angles) : angles(angles)
 		{
 			auto cos = Vector3<TReal>( ::cos(angles.x), ::cos(angles.y), ::cos(angles.z) );
 			auto sin = Vector3<TReal>( ::sin(angles.x), ::sin(angles.y), ::sin(angles.z) );
@@ -26,10 +26,15 @@ namespace paranoise { namespace module {
 			rot._2 = Vector3<TReal>{-sin.y * cos.x,							sin.x,				cos.y * cos.x						   };
 		}
 
-		inline TReal operator()(const Vector3<TReal>& coords, const Module<TReal>& source)
+		rotate(const rotate<TReal, TInt> &rhs): rotate(rhs.angles)
+		{}
+
+		inline TReal operator()(const Vector3<TReal>& coords, const Module<TReal>& source) const
 		{
 			return source(rot * coords);
 		}
+
+		//inline operator Module<TReal>() const { return [this](const auto &c) { return this->operator()(c); }; }
 	};
 
 	// inline operator (Module<TReal>)() { return operator(); }

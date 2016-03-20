@@ -28,8 +28,10 @@ namespace paranoise { namespace parallel
 		CAPABILITY_AVX2		= 1 << 8,
 		CAPABILITY_AVX512	= 1 << 9,
 
-		CAPABILITY_OPENCL	= 1 << 10,
-		CAPABILITY_FPGA		= 1 << 11
+		CAPABILITY_FASTFLOAT = 1 << 10,
+
+		CAPABILITY_OPENCL	= 1 << 11,
+		CAPABILITY_FPGA		= 1 << 12
 	};
 	
 	
@@ -79,15 +81,33 @@ namespace paranoise { namespace parallel
 			//}
 		}
 		
-
 		bool hasFlag(const capabilities c) const
 		{
 			return this->feature_flags & c;
 		}
 
-		void setFlag(const capabilities c)
+		void setFlag(const capabilities c, bool enable)
 		{
-			this->feature_flags |= c;
+			this->feature_flags = (feature_flags & ~(c)) | (enable & c);
+		}
+
+		bool hasAVX2() const
+		{
+			return hasFlag(CAPABILITY_AVX1) && hasFlag(CAPABILITY_AVX2);
+		}
+		
+		bool hasSSE4() const
+		{
+			return hasFlag(CAPABILITY_SSE42) || hasFlag(CAPABILITY_SSE41);
+		}
+		bool hasSSE4FMA() const
+		{
+			return hasSSE4() && (hasFlag(CAPABILITY_FMA3) || hasFlag(CAPABILITY_FMA4));
+		}
+		
+		bool hasSSE() const
+		{
+			return hasFlag(CAPABILITY_SSE3) && hasFlag(CAPABILITY_SSE2);
 		}
 
 		friend ostream& operator<<(ostream& os, const system_info& dt);
@@ -124,7 +144,8 @@ namespace paranoise { namespace parallel
 		static constexpr bool has_sse42		= (features() & CAPABILITY_SSE42);
 		static constexpr bool has_avx		= (features() & CAPABILITY_AVX1);
 		static constexpr bool has_avx2		= (features() & CAPABILITY_AVX2);
-		static constexpr bool has_avx512	= (features() & CAPABILITY_AVX512);		
+		static constexpr bool has_avx512	= (features() & CAPABILITY_AVX512);	
+		static constexpr bool use_fast_float = (features() & CAPABILITY_FASTFLOAT);
 	};
 #define _dispatcher dispatcher<featuremask>
 

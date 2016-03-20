@@ -73,53 +73,40 @@ namespace paranoise { namespace scheduler {
 		return result;
 	}
 
-	SIMD_ENABLE_F(TReal)
+	/*template<typename TReal>
 	inline Vector3<TReal> build_coords(float x, float y)
 	{
 		return Vector3<TReal> {
 			TReal(x),
 			TReal(y),
-			static_cast<TReal>(0.0f)
+			TReal(0.0f)
 		};
-	}
+	}*/
 	
-	template<typename featuremask, enable_if_t<is_integral<featuremask>::value, featuremask>>	
-	inline Vector3<float4<featuremask>> build_coords(float x, float y)
+	//template<typename TReal, typename featuremask, enable_if_t<is_same<TReal, _float4>::value, TReal>>
+	template<typename featuremask>
+	inline Vector3<_float4> build_coords(_float4 x, _float4 y)
 	{
-		return Vector3<float4<featuremask>>(
-			float4<featuremask>(x, x, x, x) + float4<featuremask>(0.0f, 1.0f, 2.0f, 3.0f),
-			float4<featuremask>(y),
-				0.0f
+		return Vector3<_float4>(
+			x + _float4(0, 1, 2, 3),
+			y,
+			fastload<_float4>::_0()
 		);
 	}
 
-	/*template<>
-	inline Vector3<float8> build_coords(float x, float y)
+	//template<typename TReal, typename featuremask, enable_if_t<is_same<TReal, _float8>::value, TReal>>
+	template<typename featuremask>
+	inline Vector3<_float8> build_coords(_float8 x, _float8 y)
 	{
-		return Vector3<float8> {
-			float8(x, x, x, x, x, x, x, x) + float8(0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f),
-				float8(y),
-				0
-		};
-	}*/
-
-	/*if (word == 4)
-	{
-		float _x = x;
-
-		coords.x = TReal(_x, _x + 1.0f, _x + 2.0f, _x + 3.0f);
-		coords.y = (TReal)y;
-	}*/
-	/*else if (word == 8)
-	{
-	coords = Vector3<TReal>{
-	TReal(x, x + 1, x + 2, x + 3, x + 4, x + 5, x + 6, x + 7),
-	TReal(y),
-	TReal(z)
-	};
-	}*/
-
-	template<>
+		return Vector3<_float8>(
+			x + _float8(0, 1, 2, 3, 4, 5, 6, 7),
+			y,
+			fastload<_float8>::_0()
+		);
+	}
+	
+	//template<typename TReal, typename featuremask, enable_if_t<is_same<TReal, float>::value, TReal>>
+	//template<>
 	inline Vector3<float> build_coords(float x, float y)
 	{
 		return Vector3<float> {
@@ -134,9 +121,15 @@ namespace paranoise { namespace scheduler {
 	inline void stream_result(float* stride, int x, const TReal &r);*/
 
 	template <typename featuremask>
-	inline void stream_result(float* stride, int x, const float4<featuremask> &r)
+	inline void stream_result(float* stride, int x, const _float4 &r)
 	{
 		_mm_stream_ps(stride + x, r.val);
+	}
+
+	template <typename featuremask>
+	inline void stream_result(float* stride, int x, const _float8 &r)
+	{
+		_mm256_stream_ps(stride + x, r.val);
 	}
 
 	//template <>
@@ -148,29 +141,28 @@ namespace paranoise { namespace scheduler {
 	SIMD_ENABLE_F(TReal)
 	auto schedule2D(const Module<TReal>& source, const Transformer<TReal>& transform, const scheduler_settings& settings)
 	{		
-		int word = sizeof(TReal) >> 2;
+		int word = dim<TReal>();
 		auto d = settings.dimensions;
-		auto result = std::make_shared<std::vector<float>>(d.x * d.y * d.z);					
+		auto result = make_shared<vector<float>>(d.x * d.y * d.z);					
 		
-		
-
 		if (settings.use_threads)
 		{
-			//for (auto y = 0; y < d.y; y++)			
 			parallel_for(0, d.y, [&](const auto y)
 			{
 				_MM_SET_ROUNDING_MODE(_MM_ROUND_TOWARD_ZERO);				
-				
+								
 				auto stride = &result->at(y * d.x);
 
 				for (auto x = 0; x < d.x; x += word)
 				{
-					auto coords = transform(build_coords<TReal>(x, y));
+					auto coords = transform(build_coords(
+						static_cast<TReal>(x), 
+						static_cast<TReal>(y)));
+
 					auto r = source(coords);
 					stream_result(stride, x, r);
-				}//lock.unlock();
-			}
-			);
+				}
+			});
 		}
 		else
 		{
@@ -182,10 +174,11 @@ namespace paranoise { namespace scheduler {
 
 				for (auto x = 0; x < d.x; x += word)
 				{
-					auto coords = transform(build_coords<TReal>(x, y));
+					auto coords = transform(build_coords(
+						static_cast<TReal>(x), 
+						static_cast<TReal>(y)));
 					auto r = source(coords);
 					stream_result(stride, x, r);
-
 				}
 			};
 		}

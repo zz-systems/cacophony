@@ -60,6 +60,8 @@ namespace paranoise {	namespace generators {
 #endif
 		
 	namespace detail {
+		using namespace parallel;
+
 		// Create a unit-length cube aligned along an integer boundary.  This cube
 		// surrounds the input point.
 		SIMD_ENABLE(TReal, TInt)
@@ -114,9 +116,22 @@ namespace paranoise {	namespace generators {
 			return s;
 		}		
 	}
+	SIMD_ENABLE(TReal, TInt)
+		FORCEINLINE TReal grad(TInt hash, const Vector3<TReal> &coords)
+	{
+		auto h = hash & fastload<TInt>::_15();
+		auto u = vsel(h < fastload<TInt>::_8(), coords.x, coords.y);
+		auto v = vsel(h < fastload<TInt>::_4(), coords.y, vsel(h == 12 || h == 14, coords.x, coords.z));
+
+		return static_cast<TReal>(
+			vsel((h & fastload<TInt>::_1()) == fastload<TInt>::_0(), u, -u) + 
+			vsel((h & fastload<TInt>::_2()) == fastload<TInt>::_0(), v, -v)
+			);
+	}	
+
 	template<typename featuremask>
-	FORCEINLINE Vector3<float4<featuremask>> gatherRandoms(int4<featuremask> index)
-	{		
+	FORCEINLINE Vector3<_float4> gatherRandoms(_int4 index)
+	{				
 		//_mm_prefetch
 		auto a0 = random_vectors<float>::values + _mm_extract_epi32(index.val, 0);
 		auto a1 = random_vectors<float>::values + _mm_extract_epi32(index.val, 1);
@@ -130,13 +145,108 @@ namespace paranoise {	namespace generators {
 		auto rv2 = _mm_load_ps(a2);
 		auto rv3 = _mm_load_ps(a3);
 		
-		_MM_TRANSPOSE4_PS(rv0, rv1, rv2, rv3)
+		//_MM_TRANSPOSE4_PS(rv0, rv1, rv2, rv3)
 
+		__m128 _Tmp3, _Tmp2, _Tmp1, _Tmp0;                          
+		
+		_Tmp0 = _mm_shuffle_ps((rv0), (rv1), 0x44);          
+		_Tmp2 = _mm_shuffle_ps((rv0), (rv1), 0xEE);
+		_Tmp1 = _mm_shuffle_ps((rv2), (rv3), 0x44);          
+		_Tmp3 = _mm_shuffle_ps((rv2), (rv3), 0xEE);
+		
 		return {			
+			_mm_shuffle_ps(_Tmp0, _Tmp1, 0x88), //rv0,
+			_mm_shuffle_ps(_Tmp0, _Tmp1, 0xDD), //rv1,
+			_mm_shuffle_ps(_Tmp2, _Tmp3, 0x88) //rv2,
+		};
+	}
+
+	FEATURE_FUNC(gatherRandoms, Vector3<_float8>, _dispatcher::has_avx)
+		 (_int8 index)
+	{		
+		//index.val = _mm256_permute2f128_si256(index.val, index.val, 1);
+		//index.val = _mm256_permutevar8x32_epi32(index.val, _int8(7, 6, 5, 4, 3, 2, 1, 0).val);
+		////index.val = _mm256_permute2x128_si256(x, 5);
+		auto ix = index;
+		auto iy = index + 1;
+		auto iz = index + 2;
+		
+		return {
+			_mm256_i32gather_ps(random_vectors<float>::values, ix.val, sizeof(float)),
+			_mm256_i32gather_ps(random_vectors<float>::values, iy.val, sizeof(float)),
+			_mm256_i32gather_ps(random_vectors<float>::values, iz.val, sizeof(float)),
+		};
+
+		//int i[8];
+
+		//_mm256_store_si256(reinterpret_cast<__m256i*>(i), index.val);
+		////auto i = _mm256_packus_epi32(index.val, index.val);
+		//
+		////_mm_prefetch
+		//auto a0 = random_vectors<float>::values + i[7];//_mm_extract_epi16(i, 0);
+		//auto a1 = random_vectors<float>::values + i[6];//_mm_extract_epi16(i, 1);
+		//auto a2 = random_vectors<float>::values + i[5];//_mm_extract_epi16(i, 2);
+		//auto a3 = random_vectors<float>::values + i[4];//_mm_extract_epi16(i, 3);
+
+		//auto a4 = random_vectors<float>::values + i[3];//_mm_extract_epi16(i, 4);
+		//auto a5 = random_vectors<float>::values + i[2];//_mm_extract_epi16(i, 5);
+		//auto a6 = random_vectors<float>::values + i[1];//_mm_extract_epi16(i, 6);
+		//auto a7 = random_vectors<float>::values + i[0];//_mm_extract_epi16(i, 7);
+
+		//////auto vvi = extract(index);
+		//////_mm_prefetch()
+		//auto rv0 = _mm_load_ps(a0);
+		//auto rv1 = _mm_load_ps(a1);
+		//auto rv2 = _mm_load_ps(a2);
+		//auto rv3 = _mm_load_ps(a3);
+
+		//_MM_TRANSPOSE4_PS(rv0, rv1, rv2, rv3)
+
+		//auto rv4 = _mm_load_ps(a4);
+		//auto rv5 = _mm_load_ps(a5);
+		//auto rv6 = _mm_load_ps(a6);
+		//auto rv7 = _mm_load_ps(a7);
+
+		//_MM_TRANSPOSE4_PS(rv4, rv5, rv6, rv7)
+
+		//return{
+		//	_mm256_set_m128(rv0, rv4),
+		//	_mm256_set_m128(rv1, rv5),
+		//	_mm256_set_m128(rv2, rv6)
+		//};
+
+		//auto __t0 = _mm256_unpacklo_ps(rv0, rv1);
+		//auto __t1 = _mm256_unpackhi_ps(rv0, rv1);
+		//auto __t2 = _mm256_unpacklo_ps(rv2, rv3);
+		//auto __t3 = _mm256_unpackhi_ps(rv2, rv3);
+		//auto __t4 = _mm256_unpacklo_ps(rv4, rv5);
+		//auto __t5 = _mm256_unpackhi_ps(rv4, rv5);
+		//auto __t6 = _mm256_unpacklo_ps(rv6, rv7);
+		//auto __t7 = _mm256_unpackhi_ps(rv6, rv7);
+
+		//auto __tt0 = _mm256_shuffle_ps(__t0, __t2, _MM_SHUFFLE(1, 0, 1, 0));
+		//auto __tt1 = _mm256_shuffle_ps(__t0, __t2, _MM_SHUFFLE(3, 2, 3, 2));
+		//auto __tt2 = _mm256_shuffle_ps(__t1, __t3, _MM_SHUFFLE(1, 0, 1, 0));
+		//auto __tt3 = _mm256_shuffle_ps(__t1, __t3, _MM_SHUFFLE(3, 2, 3, 2));
+		//auto __tt4 = _mm256_shuffle_ps(__t4, __t6, _MM_SHUFFLE(1, 0, 1, 0));
+		//auto __tt5 = _mm256_shuffle_ps(__t4, __t6, _MM_SHUFFLE(3, 2, 3, 2));
+		//auto __tt6 = _mm256_shuffle_ps(__t5, __t7, _MM_SHUFFLE(1, 0, 1, 0));
+		//auto __tt7 = _mm256_shuffle_ps(__t5, __t7, _MM_SHUFFLE(3, 2, 3, 2));
+
+		//rv0 = _mm256_permute2f128_ps(__tt0, __tt4, 0x20);
+		//rv1 = _mm256_permute2f128_ps(__tt1, __tt5, 0x20);
+		//rv2 = _mm256_permute2f128_ps(__tt2, __tt6, 0x20);
+		////rv3 = _mm256_permute2f128_ps(__tt3, __tt7, 0x20);
+		//rv4 = _mm256_permute2f128_ps(__tt0, __tt4, 0x31);
+		/*rv2 = _mm256_permute2f128_ps(__tt1, __tt5, 0x31);
+		rv1 = _mm256_permute2f128_ps(__tt2, __tt6, 0x31);
+		rv0 = _mm256_permute2f128_ps(__tt3, __tt7, 0x31);*/
+
+		/*return{
 			rv0,
 			rv1,
 			rv2,
-		};
+		};*/
 	}
 
 	FORCEINLINE Vector3<float> gatherRandoms(int index)
@@ -163,9 +273,10 @@ namespace paranoise {	namespace generators {
 		vi &= (TInt) 0xFF;	
 		vi <<= 2;
 
-		auto grad = gatherRandoms(vi);	
+		auto gradients = gatherRandoms(vi);	
+		
 
-		return dot(grad, diff) * static_cast<TReal>(2.12f);
+		return dot(gradients, diff) * static_cast<TReal>(2.12f);
 
 		//return dot(grad, diff) * 2.12f;
 	}
@@ -237,7 +348,7 @@ namespace paranoise {	namespace generators {
 	}
 
 	SIMD_ENABLE(TReal, TInt)
-	FORCEINLINE TReal ValueNoise3D(const Vector3<TInt>& c, const TInt seed)
+	TReal ValueNoise3D(const Vector3<TInt>& c, const TInt seed)
 	{
 		// 1 - noise / 1073741824.0 => noise * (-1 / 1073741824.0) + 1
 

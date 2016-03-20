@@ -2,7 +2,9 @@
 //#define PROFILE
 #ifndef PROFILE
 
+#pragma warning(push, 0)
 #include "lib/CImg-1.6.9/CImg.h"
+#pragma warning(pop)
 
 #endif
 

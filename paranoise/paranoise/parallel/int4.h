@@ -43,14 +43,31 @@ namespace paranoise { namespace parallel {
 
 		/*UN_OP_STUB(int4<featuremask>, int, ~)
 		UN_OP_STUB(int4<featuremask>, int, -)*/
+
+		//FEATURE(_int4, _dispatcher::has_sse)
+		//template<enable_if_t<_dispatcher::has_sse, bool>>
+		explicit inline operator bool()
+		{
+			return _mm_test_all_ones(this->val);
+		}
 	};		
 
 	
-	FEATURE_BIN_OP(+, _int4, _dispatcher::has_sse) { BIN_BODY(_mm_add_epi32); }
+	
+	FEATURE_BIN_OP(+, _int4, _dispatcher::has_sse)
+	{
+		BIN_BODY(_mm_add_epi32);
+	}
 
-	FEATURE_BIN_OP(-, _int4, _dispatcher::has_sse) { BIN_BODY(_mm_sub_epi32); }
+	FEATURE_BIN_OP(-, _int4, _dispatcher::has_sse)
+	{
+		BIN_BODY(_mm_sub_epi32);
+	}
 
-	FEATURE_BIN_OP(*, _int4, _dispatcher::has_sse41) { BIN_BODY(_mm_mullo_epi32); }
+	FEATURE_BIN_OP(*, _int4, _dispatcher::has_sse41)
+	{
+		BIN_BODY(_mm_mullo_epi32);
+	}
 	
 	FEATURE_BIN_OP(*, _int4, !_dispatcher::has_sse41 && _dispatcher::has_sse)
 	{
@@ -62,31 +79,82 @@ namespace paranoise { namespace parallel {
 	// yet to implement
 	
 	
-	FEATURE_BIN_OP(>, _int4, _dispatcher::has_sse)	{ BIN_BODY(_mm_cmpgt_epi32); }
+	FEATURE_BIN_OP(>, _int4, _dispatcher::has_sse)
+	{
+		BIN_BODY(_mm_cmpgt_epi32);
+	}
 	
-	FEATURE_BIN_OP(<, _int4, _dispatcher::has_sse)	{ BIN_BODY(_mm_cmplt_epi32); }
+	FEATURE_BIN_OP(<, _int4, _dispatcher::has_sse)
+	{
+		BIN_BODY(_mm_cmplt_epi32);
+	}
 
 	
-	FEATURE_BIN_OP(==, _int4, _dispatcher::has_sse)	{ BIN_BODY(_mm_cmpeq_epi32); }
+	FEATURE_BIN_OP(==, _int4, _dispatcher::has_sse)
+	{
+		BIN_BODY(_mm_cmpeq_epi32);
+	}
 
 	
-	FEATURE_UN_OP(~, _int4, _dispatcher::has_sse)		{ UN_BODY_D(_mm_andnot_si128); }
+	FEATURE_UN_OP(~, _int4, _dispatcher::has_sse)
+	{
+		BODY(_mm_xor_si128(a.val, _mm_cmpeq_epi32(_mm_setzero_si128(), _mm_setzero_si128())));
+	}
+	FEATURE_UN_OP(!, _int4, _dispatcher::has_sse)
+	{
+		BODY(~a);
+	}
 	
-	FEATURE_UN_OP(-, _int4, _dispatcher::has_sse)		{ BODY(_mm_sub_epi32(_mm_setzero_si128(), a.val)); }
+	FEATURE_UN_OP(-, _int4, _dispatcher::has_sse)
+	{
+		BODY(_mm_sub_epi32(_mm_setzero_si128(), a.val));
+	}
 
 	
-	FEATURE_BIN_OP(|, _int4, _dispatcher::has_sse)	{ BIN_BODY(_mm_or_si128); }
+	FEATURE_BIN_OP(|, _int4, _dispatcher::has_sse)
+	{
+		BIN_BODY(_mm_or_si128);
+	}
 	
-	FEATURE_BIN_OP(&, _int4, _dispatcher::has_sse)	{ BIN_BODY(_mm_and_si128); }
-	FEATURE_BIN_OP(^, _int4, _dispatcher::has_sse)	{ BIN_BODY(_mm_xor_si128); }
+	FEATURE_BIN_OP(&, _int4, _dispatcher::has_sse)
+	{
+		BIN_BODY(_mm_and_si128);
+	}
+
+	FEATURE_BIN_OP(|| , _int4, _dispatcher::has_sse)
+	{
+		BIN_BODY(_mm_or_si128);
+	}
+
+	FEATURE_BIN_OP(&&, _int4, _dispatcher::has_sse)
+	{
+		BIN_BODY(_mm_and_si128);
+	}
+
+	FEATURE_BIN_OP(^, _int4, _dispatcher::has_sse)
+	{
+		BIN_BODY(_mm_xor_si128);
+	}
 	
-	FEATURE_SHIFT_OP(>>, _int4, _dispatcher::has_sse)	{ return _mm_srli_epi32		(a.val, sa); }	
+	FEATURE_SHIFT_OP(>>, _int4, _dispatcher::has_sse)
+	{
+		return _mm_srli_epi32		(a.val, sa);
+	}	
 	
-	FEATURE_SHIFT_OP(<<, _int4, _dispatcher::has_sse) { return _mm_slli_epi32(a.val, sa); }
+	FEATURE_SHIFT_OP(<<, _int4, _dispatcher::has_sse)
+	{
+		return _mm_slli_epi32(a.val, sa);
+	}
 		
-	FEATURE_BIN_FUNC(vmin, _int4, _dispatcher::has_sse)		{ BIN_BODY(_mm_min_epi32); }
+	FEATURE_BIN_FUNC(vmin, _int4, _dispatcher::has_sse)
+	{
+		BIN_BODY(_mm_min_epi32);
+	}
 	
-	FEATURE_BIN_FUNC(vmax, _int4, _dispatcher::has_sse)		{ BIN_BODY(_mm_max_epi32); }
+	FEATURE_BIN_FUNC(vmax, _int4, _dispatcher::has_sse)
+	{
+		BIN_BODY(_mm_max_epi32);
+	}
 	
 	// SSE 4.1 branchless select
 	FEATURE_TRI_FUNC(vsel, _int4, _dispatcher::has_sse41)

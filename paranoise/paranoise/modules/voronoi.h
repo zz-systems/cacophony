@@ -38,7 +38,7 @@ namespace paranoise { namespace module {
 
 			TReal value, absDist, minDist = std::numeric_limits<int>::max();
 
-			Vector3<TReal> candidate( 0.0f, 0.0f, 0.0f);
+			Vector3<TReal> candidate;//(0.0f, 0.0f, 0.0f);
 			Vector3<TReal> cur, pos, dist;
 
 			// Inside each unit cube, there is a seed point at a random position.  Go
@@ -76,7 +76,12 @@ namespace paranoise { namespace module {
 				}
 			}
 
-			auto noise = ValueNoise3D<TReal, TInt>(candidate, _seed.x);
+			auto noise = ValueNoise3D<TReal, TInt>(
+			Vector3<TInt>(
+				vfloor(candidate.x),
+				vfloor(candidate.y),
+				vfloor(candidate.z)
+			), _seed.x);
 
 			if (this->enableDistance)
 			{
@@ -85,7 +90,11 @@ namespace paranoise { namespace module {
 
 				// value =  absDiff * sqrt3 - 1
 				value = vfmsub(absDiff, consts<TReal>::sqrt3(), fastload<TReal>::_1());
-			}			
+			}	
+			else
+			{
+				value = fastload<TReal>::_0();
+			}
 
 			// return settings.displacement * noise + value
 			return vfmadd(this->displacement, noise, value);

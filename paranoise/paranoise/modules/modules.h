@@ -4,9 +4,10 @@
 
 #include <assert.h>
 #include <map>
-
+#include <unordered_map>
 #include "../basetypes.h"
 #include "perlin.h"
+#include "../parallel/all.h"
 #include "../noisegenerators.h"
 #include "../parallel/x87compat.h"
 
@@ -48,14 +49,14 @@ namespace paranoise { namespace module {
 	SIMD_ENABLE_F(TReal)
 	inline TReal scale_output(const Vector3<TReal>& coords, const TReal& scale, Module<TReal> source)
 	{
-		return source(coords) * factor;
+		return source(coords) * scale;
 	}
 
 	// Scale the source module's output and add a bias
 	SIMD_ENABLE_F(TReal)
 	inline TReal scale_output_biased(const Vector3<TReal>& coords, const TReal& scale, const TReal& bias, Module<TReal> source)
 	{
-		return source(coords) * factor + bias;
+		return source(coords) * scale + bias;
 	}
 
 	// generate points on concentric spheres
@@ -76,17 +77,13 @@ namespace paranoise { namespace module {
 	// generate points on cylinders
 	SIMD_ENABLE_F(TReal)
 	inline TReal cylinders(const Vector3<TReal>& coords, const TReal& frequency)
-	{
-		auto _coords = coords;
-		_coords.x *= frequency;
-		_coords.z *= frequency;
-		
-		auto distFromCenter			= sqrt(_coords.x * _coords.x + _coords.z * _coords.z);
-		auto distFromSmallerSphere	= distFromCenter - floor(distFromCenter);
-		auto distFromLargerSphere	= (TReal)1.0f - distFromSmallerSphere;
-		auto nearestDist			= min(distFromSmallerSphere, distFromLargerSphere);
+	{		
+		auto distFromCenter			= vsqrt(coords.x * coords.x + coords.z * coords.z) * frequency;
+		auto distFromSmallerSphere	= distFromCenter - vfloor(distFromCenter);
+		auto distFromLargerSphere	= fastload<TReal>::_1() - distFromSmallerSphere;
+		auto nearestDist			= vmin(distFromSmallerSphere, distFromLargerSphere);
 
-		return 1.0f - (nearestDist * 4.0f); // Puts it in the -1.0 to +1.0 range.
+		return fastload<TReal>::_1() - (nearestDist * fastload<TReal>::_4()); // Puts it in the -1.0 to +1.0 range.
 	}
 
 	SIMD_ENABLE_F(TReal)
@@ -113,7 +110,7 @@ namespace paranoise { namespace module {
 	{
 		return [source](const Vector3<TReal>& coords)
 		{
-			static std::map<Vector3<TReal>, TReal> cache;
+			static unordered_map<Vector3<TReal>, TReal> cache;
 			
 			return cache.count(coords) > 0 
 				? cache[coords]
