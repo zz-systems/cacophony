@@ -22,6 +22,7 @@ namespace paranoise { namespace module {
 
 		TReal spectralWeights[30];
 		ridged_multifractal(float frequency = 1.0, float lacunarity = 2.0, int seed = 0, int octaves = 6)
+			: seed(seed), octaves(octaves)
 		{
 			float	h		= 1.0, 
 					freq	= 1.0;
@@ -52,11 +53,11 @@ namespace paranoise { namespace module {
 				// Get the coherent-noise value.
 				signal = GradientCoherentNoise3D<TReal, TInt>(
 					clamp_int32<TReal>(_coords),
-					(settings.seed + currentOctave) & 0xffffffff,
-					settings.quality);
+					(seed + currentOctave) & 0xffffffff,
+					quality);
 
 				// Make the ridges.
-				signal = paranoise::parallel::abs(signal);
+				signal = vabs(signal);
 				signal = offset - signal;
 
 				// Square the signal to increase the sharpness of the ridges.
@@ -69,13 +70,13 @@ namespace paranoise { namespace module {
 
 				// Weight successive contributions by the previous signal.
 				weight = signal * gain;
-				weight = clamp<TReal>(weight, 0.0, 1.0);
+				weight = vclamp<TReal>(weight, 0.0, 1.0);
 
 				// Add the signal to the output value.
-				value += (signal * settings.spectralWeights[currentOctave]);
+				value += (signal * spectralWeights[currentOctave]);
 
 				// Go to the next octave.
-				_coords *= Vector3<TReal>(settings.lacunarity);
+				_coords *= Vector3<TReal>(lacunarity);
 			}
 
 			return (value * 1.25f) - 1.0f;

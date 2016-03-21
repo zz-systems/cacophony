@@ -22,11 +22,11 @@ namespace paranoise { namespace parallel {
 		__m128i val;
 
 		int4() = default;
-		int4(const int rhs)		{ val = _mm_set1_epi32(rhs); }
+		int4(const int rhs)			: val(_mm_set1_epi32(rhs)) {}
 
-		int4(const __m128& rhs)		{ val = _mm_cvtps_epi32(rhs); }
-		int4(const __m128i& rhs)	{ val = rhs; }
-		int4(const __m128d& rhs)	{ val = _mm_cvtpd_epi32(rhs); }
+		int4(const __m128& rhs)		: val(_mm_cvtps_epi32(rhs)) {}
+		int4(const __m128i& rhs)	: val(rhs) {}
+		int4(const __m128d& rhs)	: val(_mm_cvtpd_epi32(rhs)) {}
 
 		int4(const _int4& rhs);
 		int4(const _float4& rhs);
@@ -37,9 +37,18 @@ namespace paranoise { namespace parallel {
 		BIN_OP_STUB(*, _int4, int)
 		BIN_OP_STUB(/, _int4, int)
 
+		BIN_OP_STUB(&, _int4, int)
+		BIN_OP_STUB(&&, _int4, int)
+		BIN_OP_STUB(|, _int4, int)
+		BIN_OP_STUB(||, _int4, int)
+		BIN_OP_STUB(^, _int4, int)
+		
+
 		BIN_OP_STUB(>, _int4, int)
 		BIN_OP_STUB(<, _int4, int)
 		BIN_OP_STUB(==, _int4, int)
+
+
 
 		/*UN_OP_STUB(int4<featuremask>, int, ~)
 		UN_OP_STUB(int4<featuremask>, int, -)*/

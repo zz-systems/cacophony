@@ -9,6 +9,8 @@ namespace paranoise { namespace constants
 {
 	using namespace parallel;
 	
+#define EVALUATED_CONST(type, name, value) \
+	static type name() { return value; }
 
 	ANY(TType)
 	struct consts
@@ -21,7 +23,8 @@ namespace paranoise { namespace constants
 	ANY(TType)
 	struct fastload
 	{
-		static TType _0()		{ return 0; }
+		EVALUATED_CONST(TType, _0, 0);
+		
 
 		static TType ones()		{ return 0xFFFF'FFFF; }
 		static TType intmin()	{ return 0x8000'0001; }
@@ -54,121 +57,121 @@ namespace paranoise { namespace constants
 	}
 
 	template<typename featuremask>
-	struct fastload<int4<featuremask>>
+	struct fastload<_int4>
 	{
-		static int4<featuremask> _0()	  { return _mm_setzero_si128(); }
-		static int4<featuremask> ones()	  { return _0() == _0(); }
-		static int4<featuremask> intmin() { return -(ones >> 1); }
-		static int4<featuremask> intmax() { return ones() >> 1; }
+		static _int4 _0()	  { return _mm_setzero_si128(); }
+		static _int4 ones()	  { return _0() == _0(); }
+		static _int4 intmin() { return -(ones >> 1); }
+		static _int4 intmax() { return ones() >> 1; }
 
-		static int4<featuremask> _1() { return ones() >> 31; }
-		static int4<featuremask> _2() { return ones() >> 31 << 1; }
-		static int4<featuremask> _3() { return ones() >> 30; }
-		static int4<featuremask> _4() { return ones() >> 31 << 2; }
-		static int4<featuremask> _5() { return _4() + _1(); }
-		static int4<featuremask> _6() { return ones() >> 30 << 2; }
-		static int4<featuremask> _7() { return ones() >> 29; }
-		static int4<featuremask> _8() { return ones() >> 31 << 3; }
+		static _int4 _1() { return ones() >> 31; }
+		static _int4 _2() { return ones() >> 31 << 1; }
+		static _int4 _3() { return ones() >> 30; }
+		static _int4 _4() { return ones() >> 31 << 2; }
+		static _int4 _5() { return _4() + _1(); }
+		static _int4 _6() { return ones() >> 30 << 1; }
+		static _int4 _7() { return ones() >> 29; }
+		static _int4 _8() { return ones() >> 31 << 3; }
 
-		static int4<featuremask> _9()  { return _8() + _1(); }
-		static int4<featuremask> _10() { return _8() + _2(); }
-		static int4<featuremask> _11() { return _8() + _3(); }
-		static int4<featuremask> _12() { return _8() + _4(); }
-		static int4<featuremask> _13() { return _8() + _5(); }
-		static int4<featuremask> _14() { return _8() + _6(); }
-		static int4<featuremask> _15() { return ones() >> 28; }
+		static _int4 _9()  { return _8() + _1(); }
+		static _int4 _10() { return _8() + _2(); }
+		static _int4 _11() { return _8() + _3(); }
+		static _int4 _12() { return _8() + _4(); }
+		static _int4 _13() { return _8() + _5(); }
+		static _int4 _14() { return _8() + _6(); }
+		static _int4 _15() { return ones() >> 28; }
 
-		static int4<featuremask> sign1all0() { return ones() << 31; }
-		static int4<featuremask> sign0all1() { return ones() >> 1; }
+		static _int4 sign1all0() { return ones() << 31; }
+		static _int4 sign0all1() { return ones() >> 1; }
 	};
 
 	template<typename featuremask>
-	struct fastload<float4<featuremask>>
+	struct fastload<_float4>
 	{
-		static float4<featuremask> _0()  { return static_cast<float4<featuremask>>(fastload<int4<featuremask>>::_0()); }
-		static float4<featuremask> ones() { return _mm_castsi128_ps(fastload<int4<featuremask>>::ones().val); }
+		static _float4 _0()  { return static_cast<_float4>(fastload<_int4>::_0()); }
+		static _float4 ones() { return _mm_castsi128_ps(fastload<_int4>::ones().val); }
 
-		static float4<featuremask>  intmin() { return -(ones >> 1); }
-		static float4<featuremask>  intmax() { return ones() >> 1; }
+		static _float4  intmin() { return -(ones >> 1); }
+		static _float4  intmax() { return ones() >> 1; }
 
-		static float4<featuremask> _1() { return static_cast<float4<featuremask>>(fastload<int4<featuremask>>::_1()); }
-		static float4<featuremask> _2() { return static_cast<float4<featuremask>>(fastload<int4<featuremask>>::_2()); }
-		static float4<featuremask> _3() { return static_cast<float4<featuremask>>(fastload<int4<featuremask>>::_3()); }
-		static float4<featuremask> _4() { return static_cast<float4<featuremask>>(fastload<int4<featuremask>>::_4()); }
-		static float4<featuremask> _5() { return static_cast<float4<featuremask>>(fastload<int4<featuremask>>::_5()); }
-		static float4<featuremask> _6() { return static_cast<float4<featuremask>>(fastload<int4<featuremask>>::_6()); }
-		static float4<featuremask> _7() { return static_cast<float4<featuremask>>(fastload<int4<featuremask>>::_7()); }
-		static float4<featuremask> _8() { return static_cast<float4<featuremask>>(fastload<int4<featuremask>>::_8()); }
+		static _float4 _1() { return static_cast<_float4>(fastload<_int4>::_1()); }
+		static _float4 _2() { return static_cast<_float4>(fastload<_int4>::_2()); }
+		static _float4 _3() { return static_cast<_float4>(fastload<_int4>::_3()); }
+		static _float4 _4() { return static_cast<_float4>(fastload<_int4>::_4()); }
+		static _float4 _5() { return static_cast<_float4>(fastload<_int4>::_5()); }
+		static _float4 _6() { return static_cast<_float4>(fastload<_int4>::_6()); }
+		static _float4 _7() { return static_cast<_float4>(fastload<_int4>::_7()); }
+		static _float4 _8() { return static_cast<_float4>(fastload<_int4>::_8()); }
 
-		static float4<featuremask> _9()	{ return static_cast<float4<featuremask>>(fastload<int4<featuremask>>::_9()); }
-		static float4<featuremask> _10() { return static_cast<float4<featuremask>>(fastload<int4<featuremask>>::_10()); }
-		static float4<featuremask> _11() { return static_cast<float4<featuremask>>(fastload<int4<featuremask>>::_11()); }
-		static float4<featuremask> _12() { return static_cast<float4<featuremask>>(fastload<int4<featuremask>>::_12()); }
-		static float4<featuremask> _13() { return static_cast<float4<featuremask>>(fastload<int4<featuremask>>::_13()); }
-		static float4<featuremask> _14() { return static_cast<float4<featuremask>>(fastload<int4<featuremask>>::_14()); }
-		static float4<featuremask> _15() { return static_cast<float4<featuremask>>(fastload<int4<featuremask>>::_15()); }
+		static _float4 _9()	{ return static_cast<_float4>(fastload<_int4>::_9()); }
+		static _float4 _10() { return static_cast<_float4>(fastload<_int4>::_10()); }
+		static _float4 _11() { return static_cast<_float4>(fastload<_int4>::_11()); }
+		static _float4 _12() { return static_cast<_float4>(fastload<_int4>::_12()); }
+		static _float4 _13() { return static_cast<_float4>(fastload<_int4>::_13()); }
+		static _float4 _14() { return static_cast<_float4>(fastload<_int4>::_14()); }
+		static _float4 _15() { return static_cast<_float4>(fastload<_int4>::_15()); }
 
-		static float4<featuremask> sign1all0() { return _mm_castsi128_ps(fastload<int4<featuremask>>::sign1all0().val); }
-		static float4<featuremask> sign0all1() { return _mm_castsi128_ps(fastload<int4<featuremask>>::sign0all1().val); }
+		static _float4 sign1all0() { return _mm_castsi128_ps(fastload<_int4>::sign1all0().val); }
+		static _float4 sign0all1() { return _mm_castsi128_ps(fastload<_int4>::sign0all1().val); }
 	};
 
 	template<typename featuremask>
-	struct fastload<int8<featuremask>>
+	struct fastload<_int8>
 	{
-		static int8<featuremask> _0() { return _mm256_setzero_si256(); }
-		static int8<featuremask> ones() { return _0() == _0(); }
-		static int8<featuremask> intmin() { return -(ones >> 1); }
-		static int8<featuremask> intmax() { return ones() >> 1; }
+		static _int8 _0() { return _mm256_setzero_si256(); }
+		static _int8 ones() { return _0() == _0(); }
+		static _int8 intmin() { return -(ones >> 1); }
+		static _int8 intmax() { return ones() >> 1; }
 
-		static int8<featuremask> _1() { return ones() >> 31; }
-		static int8<featuremask> _2() { return ones() >> 31 << 1; }
-		static int8<featuremask> _3() { return ones() >> 30; }
-		static int8<featuremask> _4() { return ones() >> 31 << 2; }
-		static int8<featuremask> _5() { return _4() + _1(); }
-		static int8<featuremask> _6() { return ones() >> 30 << 2; }
-		static int8<featuremask> _7() { return ones() >> 29; }
-		static int8<featuremask> _8() { return ones() >> 31 << 3; }
+		static _int8 _1() { return ones() >> 31; }
+		static _int8 _2() { return ones() >> 31 << 1; }
+		static _int8 _3() { return ones() >> 30; }
+		static _int8 _4() { return ones() >> 31 << 2; }
+		static _int8 _5() { return _4() + _1(); }
+		static _int8 _6() { return ones() >> 30 << 1; }
+		static _int8 _7() { return ones() >> 29; }
+		static _int8 _8() { return ones() >> 31 << 3; }
 
-		static int8<featuremask> _9() { return _8() + _1(); }
-		static int8<featuremask> _10() { return _8() + _2(); }
-		static int8<featuremask> _11() { return _8() + _3(); }
-		static int8<featuremask> _12() { return _8() + _4(); }
-		static int8<featuremask> _13() { return _8() + _5(); }
-		static int8<featuremask> _14() { return _8() + _6(); }
-		static int8<featuremask> _15() { return ones() >> 28; }
+		static _int8 _9() { return _8() + _1(); }
+		static _int8 _10() { return _8() + _2(); }
+		static _int8 _11() { return _8() + _3(); }
+		static _int8 _12() { return _8() + _4(); }
+		static _int8 _13() { return _8() + _5(); }
+		static _int8 _14() { return _8() + _6(); }
+		static _int8 _15() { return ones() >> 28; }
 
-		static int8<featuremask> sign1all0() { return ones() << 31; }
-		static int8<featuremask> sign0all1() { return ones() >> 1; }
+		static _int8 sign1all0() { return ones() << 31; }
+		static _int8 sign0all1() { return ones() >> 1; }
 	};
 
 	template<typename featuremask>
-	struct fastload<float8<featuremask>>
+	struct fastload<_float8>
 	{
-		static float8<featuremask> _0() { return static_cast<float8<featuremask>>(fastload<int8<featuremask>>::_0()); }
-		static float8<featuremask> ones() { return _mm_castsi128_ps(fastload<int8<featuremask>>::ones().val); }
+		static _float8 _0() { return static_cast<_float8>(fastload<_int8>::_0()); }
+		static _float8 ones() { return _mm_castsi128_ps(fastload<_int8>::ones().val); }
 
-		static float8<featuremask>  intmin() { return -(ones >> 1); }
-		static float8<featuremask>  intmax() { return ones() >> 1; }
+		static _float8  intmin() { return -(ones >> 1); }
+		static _float8  intmax() { return ones() >> 1; }
 
-		static float8<featuremask> _1() { return static_cast<float8<featuremask>>(fastload<int8<featuremask>>::_1()); }
-		static float8<featuremask> _2() { return static_cast<float8<featuremask>>(fastload<int8<featuremask>>::_2()); }
-		static float8<featuremask> _3() { return static_cast<float8<featuremask>>(fastload<int8<featuremask>>::_3()); }
-		static float8<featuremask> _4() { return static_cast<float8<featuremask>>(fastload<int8<featuremask>>::_4()); }
-		static float8<featuremask> _5() { return static_cast<float8<featuremask>>(fastload<int8<featuremask>>::_5()); }
-		static float8<featuremask> _6() { return static_cast<float8<featuremask>>(fastload<int8<featuremask>>::_6()); }
-		static float8<featuremask> _7() { return static_cast<float8<featuremask>>(fastload<int8<featuremask>>::_7()); }
-		static float8<featuremask> _8() { return static_cast<float8<featuremask>>(fastload<int8<featuremask>>::_8()); }
+		static _float8 _1() { return static_cast<_float8>(fastload<_int8>::_1()); }
+		static _float8 _2() { return static_cast<_float8>(fastload<_int8>::_2()); }
+		static _float8 _3() { return static_cast<_float8>(fastload<_int8>::_3()); }
+		static _float8 _4() { return static_cast<_float8>(fastload<_int8>::_4()); }
+		static _float8 _5() { return static_cast<_float8>(fastload<_int8>::_5()); }
+		static _float8 _6() { return static_cast<_float8>(fastload<_int8>::_6()); }
+		static _float8 _7() { return static_cast<_float8>(fastload<_int8>::_7()); }
+		static _float8 _8() { return static_cast<_float8>(fastload<_int8>::_8()); }
 
-		static float8<featuremask> _9() { return static_cast<float8<featuremask>>(fastload<int8<featuremask>>::_9()); }
-		static float8<featuremask> _10() { return static_cast<float8<featuremask>>(fastload<int8<featuremask>>::_10()); }
-		static float8<featuremask> _11() { return static_cast<float8<featuremask>>(fastload<int8<featuremask>>::_11()); }
-		static float8<featuremask> _12() { return static_cast<float8<featuremask>>(fastload<int8<featuremask>>::_12()); }
-		static float8<featuremask> _13() { return static_cast<float8<featuremask>>(fastload<int8<featuremask>>::_13()); }
-		static float8<featuremask> _14() { return static_cast<float8<featuremask>>(fastload<int8<featuremask>>::_14()); }
-		static float8<featuremask> _15() { return static_cast<float8<featuremask>>(fastload<int8<featuremask>>::_15()); }
+		static _float8 _9() { return static_cast<_float8>(fastload<_int8>::_9()); }
+		static _float8 _10() { return static_cast<_float8>(fastload<_int8>::_10()); }
+		static _float8 _11() { return static_cast<_float8>(fastload<_int8>::_11()); }
+		static _float8 _12() { return static_cast<_float8>(fastload<_int8>::_12()); }
+		static _float8 _13() { return static_cast<_float8>(fastload<_int8>::_13()); }
+		static _float8 _14() { return static_cast<_float8>(fastload<_int8>::_14()); }
+		static _float8 _15() { return static_cast<_float8>(fastload<_int8>::_15()); }
 
-		static float8<featuremask> sign1all0() { return _mm_castsi128_ps(fastload<int8<featuremask>>::sign1all0().val); }
-		static float8<featuremask> sign0all1() { return _mm_castsi128_ps(fastload<int8<featuremask>>::sign0all1().val); }
+		static _float8 sign1all0() { return _mm_castsi128_ps(fastload<_int8>::sign1all0().val); }
+		static _float8 sign0all1() { return _mm_castsi128_ps(fastload<_int8>::sign0all1().val); }
 	};
 }}
 

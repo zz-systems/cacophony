@@ -19,21 +19,22 @@ namespace paranoise { namespace parallel {
 		__m128 val;		
 
 		float4() = default;
-		float4(const float rhs) {
-			val = _mm_set1_ps(rhs);
-		}	
+		
+		float4(const int rhs)		: val(_mm_set1_ps(rhs)) {}
+		float4(const float rhs)		: val(_mm_set1_ps(rhs)) {}
+		float4(const double rhs)	: val(_mm_set1_ps(rhs)) {}
 
-		float4(const float* rhs) : val(_mm_load_ps(rhs)) {}
+		float4(const float* rhs)	: val(_mm_load_ps(rhs)) {}
 
-		float4(VARGS4(uint8))	{ val = _mm_cvtepi32_ps(_mm_set_epi32(VPASS4)); }
-		float4(VARGS4(int32))	{ val = _mm_cvtepi32_ps(_mm_set_epi32(VPASS4)); }
-		float4(VARGS4(float))	{ val = _mm_set_ps(VPASS4); }
+		float4(VARGS4(uint8))		: val(_mm_cvtepi32_ps(_mm_set_epi32(VPASS4))) {}
+		float4(VARGS4(int32))		: val(_mm_cvtepi32_ps(_mm_set_epi32(VPASS4))) {}
+		float4(VARGS4(float))		: val(_mm_set_ps(VPASS4)) {}
 
-		float4(const __m128& rhs)	{ val = rhs; }
-		float4(const __m128i& rhs)	{ val = _mm_cvtepi32_ps(rhs); }
-		float4(const __m128d& rhs)	{ val = _mm_cvtpd_ps(rhs); }
+		float4(const __m128& rhs)	: val(rhs) { }
+		float4(const __m128i& rhs)	: val(_mm_cvtepi32_ps(rhs)) {}
+		float4(const __m128d& rhs)	: val(_mm_cvtpd_ps(rhs)) {}
 
-		float4(const _float4&	rhs);
+		float4(const _float4& rhs);
 		float4(const _int4&	rhs);
 		//float4(const double2&	rhs);
 
@@ -42,6 +43,12 @@ namespace paranoise { namespace parallel {
 		BIN_OP_STUB(-, _float4, float)
 		BIN_OP_STUB(*, _float4, float)
 		BIN_OP_STUB(/ , _float4, float)		
+
+		BIN_OP_STUB(&, _float4, float)
+		BIN_OP_STUB(&&, _float4, float)
+		BIN_OP_STUB(|, _float4, float)
+		BIN_OP_STUB(||, _float4, float)
+		BIN_OP_STUB(^, _float4, float)
 
 		BIN_OP_STUB(>, _float4, float)
 		BIN_OP_STUB(<, _float4, float)

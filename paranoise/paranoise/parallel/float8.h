@@ -19,17 +19,20 @@ namespace paranoise {	namespace parallel {
 		__m256 val;
 
 		float8() = default;
-		float8(const float& rhs)	{ val = _mm256_set1_ps(rhs); }
 
-		float8(const float* rhs) : val(_mm256_load_ps(rhs)) {}
+		float8(const int rhs)		: val(_mm256_set1_ps(rhs)) {}
+		float8(const float rhs)		: val(_mm256_set1_ps(rhs)) {}
+		float8(const double rhs)	: val(_mm256_set1_ps(rhs)) {}		
 
-		float8(VARGS8(uint8))		{ val = _mm256_cvtepi32_ps(_mm256_set_epi32(VPASS8)); }
-		float8(VARGS8(int))			{ val = _mm256_cvtepi32_ps(_mm256_set_epi32(VPASS8)); }
-		float8(VARGS8(float))		{ val = _mm256_set_ps(VPASS8); }
+		float8(const float* rhs)	: val(_mm256_load_ps(rhs)) {}
 
-		float8(const __m256& rhs)	{ val = rhs; }
-		float8(const __m256i& rhs)	{ val = _mm256_cvtepi32_ps(rhs); }
-		float8(const __m256d& rhs)	{ val = _mm256_castps128_ps256(_mm256_cvtpd_ps(rhs)); }
+		float8(VARGS8(uint8))		: val(_mm256_cvtepi32_ps(_mm256_set_epi32(VPASS8))) {}
+		float8(VARGS8(int))			: val(_mm256_cvtepi32_ps(_mm256_set_epi32(VPASS8))) {}
+		float8(VARGS8(float))		: val(_mm256_set_ps(VPASS8)) {}
+
+		float8(const __m256& rhs)	: val(rhs) {}
+		float8(const __m256i& rhs)	: val(_mm256_cvtepi32_ps(rhs)) {}
+		float8(const __m256d& rhs)	: val(_mm256_castps128_ps256(_mm256_cvtpd_ps(rhs))) {}
 
 		float8(const _float8&	rhs);
 		float8(const _int8&	rhs);
@@ -40,6 +43,12 @@ namespace paranoise {	namespace parallel {
 		BIN_OP_STUB(*, _float8, float)
 		BIN_OP_STUB(/ , _float8, float)
 
+		BIN_OP_STUB(&, _float8, float)
+		BIN_OP_STUB(&&, _float8, float)
+		BIN_OP_STUB(|, _float8, float)
+		BIN_OP_STUB(||, _float8, float)
+		BIN_OP_STUB(^, _float8, float)
+		
 		BIN_OP_STUB(>, _float8, float)
 		BIN_OP_STUB(<, _float8, float)
 		BIN_OP_STUB(== , _float8, float)
@@ -82,6 +91,7 @@ namespace paranoise {	namespace parallel {
 	{
 		BIN_BODY(_mm256_sub_ps);
 	}
+
 	FEATURE_BIN_OP(*, _float8, _dispatcher::has_avx)
 	{
 		BIN_BODY(_mm256_mul_ps); 

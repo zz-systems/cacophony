@@ -24,7 +24,7 @@ namespace paranoise {
 #define ALIGN(bytes) __declspec(align(bytes))
 #define FORCEINLINE __forceinline
 
-	// define checked floating and integral type to use on SIMD-enabled functions/types. 
+// define checked floating and integral type to use on SIMD-enabled functions/types. 
 #define SIMD_ENABLE(floatType, intType) \
 	template<	typename floatType	= std::enable_if<std::is_floating_point<floatType>::value, floatType>::type, \
 				typename intType	= std::enable_if<std::is_integral<intType>::value, intType>::type>

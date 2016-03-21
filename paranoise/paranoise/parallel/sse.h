@@ -37,26 +37,17 @@ namespace paranoise { namespace parallel {
 	inline double2::double2(const double2& rhs) : double2(rhs.val) { }	*/
 
 	ANY(featuremask)
-	inline int* extract(_int4 src)
+	inline int32* extract(_int4 &src)
 	{
-		return reinterpret_cast<int*>(src.val);
+		return src.val.m128i_i32;
 	}
 
 	ANY(featuremask)
-		inline float* extract(_float4 src)
+		inline float* extract(_float4 &src)
 	{		
-		return reinterpret_cast<float*>(src.val);		
+		return src.val.m128_f32;		
 	}
-
-	inline int* extract(int &src)
-	{
-		return &src;
-	}
-
-	inline float* extract(float &src)
-	{
-		return &src;
-	}
+	
 	// Integer SQRT =============================================================================================	
 	FEATURE_FUNC(vsqrt, _int4, _dispatcher::has_sse)
 		(const _int4 a)

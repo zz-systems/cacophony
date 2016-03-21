@@ -9,10 +9,11 @@ namespace paranoise { namespace module {
 	using namespace generators;
 	using namespace x87compat;
 
-	SIMD_ENABLE_F(TReal)
+	SIMD_ENABLE(TReal, TInt)
 	struct select
 	{
-		float edgeFalloff = 0.0, lowerBound = -1.0, upperBound = 1.0;
+		float edgeFalloff = 0.0;
+		TReal lowerBound = -1.0, upperBound = 1.0;
 		
 		select(float edgeFalloff = 0.0, float lowerBound = -1.0, float upperBound = 1.0)
 			: edgeFalloff(edgeFalloff), lowerBound(lowerBound), upperBound(upperBound)
@@ -22,53 +23,88 @@ namespace paranoise { namespace module {
 		{
 			auto cv = controller(coords);
 			auto r0 = a(coords);
-			auto r1 = b(coords);
-
+			auto r1 = b(coords);			
+					
 			if (edgeFalloff > 0.0)
 			{
+				// Path for vectorized code
+				
 				// condition vectors
-				// if(cv < settings.lowerBound - settings.edgeFalloff) ...
-				auto mask4 = (cv < (settings.lowerBound - settings.edgeFalloff));
-				// if(cv < settings.lowerBound + settings.edgeFalloff) ...
-				auto mask3 = (cv < (settings.lowerBound + settings.edgeFalloff));
-				// if(cv < settings.upperBound - settings.edgeFalloff) ...
-				auto mask2 = (cv < (settings.upperBound - settings.edgeFalloff));
-				// if(cv < settings.upperBound + settings.edgeFalloff) ...
-				auto mask1 = (cv < (settings.upperBound + settings.edgeFalloff));
+				// if(cv < lowerBound - edgeFalloff) ...
+				auto mask4 = (cv < (lowerBound - edgeFalloff));
+				// if(cv < lowerBound + edgeFalloff) ...
+				auto mask3 = (cv < (lowerBound + edgeFalloff));
+				// if(cv < upperBound - edgeFalloff) ...
+				auto mask2 = (cv < (upperBound - edgeFalloff));
+				// if(cv < upperBound + edgeFalloff) ...
+				auto mask1 = (cv < (upperBound + edgeFalloff));
 				// else
-				auto mask0 = ~(mask4 | mask3 | mask2 | mask1);
+				auto mask0 = !(mask4 || mask3 || mask2 || mask1);
 
 				// calculation vectors
-				auto r0s4 = mask4 & r0;
-				auto rs3 = mask3 & interpolate_bounds(r0, r1, cv, settings.lowerBound, settings.edgeFalloff);
-				auto r1s2 = mask2 & r1;
-				auto rs1 = mask1 & interpolate_bounds(r1, r0, cv, settings.upperBound, settings.edgeFalloff);
-				auto r0s0 = mask0 & r0;
+				auto result = mask4 && r0;
+				result |= mask3 & interpolate_bounds(r0, r1, cv, lowerBound, edgeFalloff);
+				result |= mask2 & r1;
+				result |= mask1 & interpolate_bounds(r1, r0, cv, upperBound, edgeFalloff);
+				result |= mask0 & r0;
 
 				// merge results
-				result = r0s0 | rs1 | r1s2 | rs3 | r0s4;
+				return result;
 			}
 			else
 			{
-				auto mask = (cv < lowerBound) | (cv > upperBound);
+				auto mask = (cv < lowerBound) || (cv > upperBound);
 
-				return (mask & r0) | (~mask & r1);
+				return vsel(mask, r0, r1);
 			}
 		}
-
 	private:
-		inline TReal interpolate_bounds(const Vector3<TReal>& from,
-			const Vector3<TReal>& to,
-			const Vector3<TReal>& control,
-			TReal bound, TReal edgeFalloff)
+		inline TReal interpolate_bounds(const TReal& from,
+			const TReal& to,
+			const TReal& control,
+			TReal bound, TReal edgeFalloff) const
 		{
 			auto lowerCurve = bound - edgeFalloff;
 			auto upperCurve = bound + edgeFalloff;
+
 			auto sc = scurve3((control - lowerCurve) / (upperCurve - lowerCurve));
 			return lerp(from, to, sc);
 		}
 	};
 
+
+	// path for scalar code
+	template<>
+	inline float select<float, int>::operator()(const Vector3<float>& coords, const Module<float>& a, const Module<float>& b, const Module<float>& controller) const
+	{
+		auto cv = controller(coords);
+		auto r0 = a(coords);
+		auto r1 = b(coords);
+
+		if (edgeFalloff > 0.0)
+		{			
+			// condition vectors
+			if (cv < lowerBound - edgeFalloff)
+				return r0;
+
+			if (cv < lowerBound + edgeFalloff)
+				return interpolate_bounds(r0, r1, cv, lowerBound, edgeFalloff);
+
+			if (cv < upperBound - edgeFalloff)
+				return r1;
+
+			if (cv < upperBound + edgeFalloff)
+				return interpolate_bounds(r1, r0, cv, upperBound, edgeFalloff);
+
+			return r0;			
+		}
+		else
+		{
+			auto mask = (cv < lowerBound) || (cv > upperBound);
+
+			return vsel(mask, r0, r1);
+		}
+	}
 	// inline operator (Module<TReal>)() { return operator(); }
 }}
 #endif

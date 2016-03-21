@@ -12,7 +12,7 @@ using namespace paranoise::parallel;
 
 namespace UnitTest
 {
-
+	using namespace paranoise::test;
 
 
 #define INIT_BIN_TEST_REAL \
@@ -75,15 +75,7 @@ namespace UnitTest
 	
 
 	TEST_CLASS(TestOperations)
-	{
-		using capability_avx		= integral_constant<int, CAPABILITY_AVX1 | CAPABILITY_AVX2 >;
-		using capability_sse4fma	= integral_constant<int, CAPABILITY_SSE2 | CAPABILITY_SSE3 | CAPABILITY_SSE41 | CAPABILITY_FMA3>;
-		using capability_sse4		= integral_constant<int, CAPABILITY_SSE2 | CAPABILITY_SSE3 | CAPABILITY_SSE41>;
-		using capability_sse		= integral_constant<int, CAPABILITY_SSE2 | CAPABILITY_SSE3>;
-		using capability_fpu		= integral_constant<int, CAPABILITY_NONE>;
-
-		using sse_real = static_dispatcher<capability_sse4fma>::real_type;
-		using avx_real = static_dispatcher<capability_avx>::real_type;
+	{		
 	public:
 			
 		TEST_CLASS_INITIALIZE(Init_RefValues)
