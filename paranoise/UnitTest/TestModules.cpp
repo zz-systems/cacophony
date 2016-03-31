@@ -1,109 +1,179 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
-
+#include <sstream>
+#include <algorithm>
+#include <numeric>
+#include <vector>
+#include <functional>
 #include "../paranoise/parallel/all.h"
 #include "../paranoise/modules/all.h"
 #include "../paranoise/scheduler.h"
 #include "util.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
-using namespace paranoise::interpolation;
-using namespace paranoise::parallel;
-using namespace paranoise::module;
-using namespace paranoise::scheduler;
-using namespace paranoise;
-using namespace test;
 
-namespace UnitTest
-{
+
+namespace zzsystems { namespace paranoise { namespace tests {
+	using namespace paranoise;
+	using namespace interpolation;
+	using namespace simdal;
+	using namespace unittest;
+	using namespace modules;
+
+#define PERFORMANCE_SNAPSHOT(target, body)\
+	auto target##_start = chrono::high_resolution_clock::now();\
+	body\
+	auto target##_end = chrono::high_resolution_clock::now();\
+	target.push_back(chrono::duration_cast<chrono::microseconds>(target##_end - target##_start).count())
+
 	TEST_CLASS(TestModules)
 	{
 	public:
 
-		TEST_METHOD(Test_Module_Perlin)
-		{
-			_MM_SET_ROUNDING_MODE(_MM_ROUND_TOWARD_ZERO);
-
+		TEST_METHOD(Test_Module_Perlin_Implementation_Equality)
+		{			
 			perlin<float, int> ref_gen;
 			perlin<sse_real, sse_int> sse_gen;
 			perlin<avx_real, avx_int> avx_gen;
 
-			for (float z = -1; z <= 1; z += 0.25)
-			for (float y = -1; y <= 1; y += 0.25)
-			for (float x = -1; x <= 1; x += 0.25)
-			{
-				auto ref = ref_gen(Vector3<float>(x, y, z));
-
-				AreEqual(ref, sse_gen(Vector3<sse_real>(x, y, z)));
-				AreEqual(ref, avx_gen(Vector3<avx_real>(x, y, z)));
-			}
+			equality_test(
+				[&](const auto& c) { return ref_gen(c); },
+				[&](const auto& c) { return sse_gen(c); },
+				[&](const auto& c) { return avx_gen(c); }
+			);
 		}
 
-		TEST_METHOD(Test_Module_RidgedMultiFractal)
+		TEST_METHOD(Test_Module_Perlin_Performance)
 		{
-			_MM_SET_ROUNDING_MODE(_MM_ROUND_TOWARD_ZERO);
-
 			ridged_multifractal<float, int> ref_gen;
 			ridged_multifractal<sse_real, sse_int> sse_gen;
 			ridged_multifractal<avx_real, avx_int> avx_gen;
 
-			for (float z = -1; z <= 1; z += 0.25)
-			for (float y = -1; y <= 1; y += 0.25)
-			for (float x = -1; x <= 1; x += 0.25)
-			{
-				auto ref = ref_gen(Vector3<float>(x, y, z));
-
-				AreEqual(ref, sse_gen(Vector3<sse_real>(x, y, z)));
-				AreEqual(ref, avx_gen(Vector3<avx_real>(x, y, z)));
-			}
+			performance_test(
+				[&](const auto& c) { return ref_gen(c); },
+				[&](const auto& c) { return sse_gen(c); },
+				[&](const auto& c) { return avx_gen(c); },
+				100
+				);
 		}
 
-		TEST_METHOD(Test_Module_Billow)
+		TEST_METHOD(Test_Module_RidgedMultiFractal_Implementation_Equality)
 		{
-			_MM_SET_ROUNDING_MODE(_MM_ROUND_TOWARD_ZERO);
+			ridged_multifractal<float, int> ref_gen;
+			ridged_multifractal<sse_real, sse_int> sse_gen;
+			ridged_multifractal<avx_real, avx_int> avx_gen;
 
+			equality_test(
+				[&](const auto& c) { return ref_gen(c); },
+				[&](const auto& c) { return sse_gen(c); },
+				[&](const auto& c) { return avx_gen(c); }
+			);
+		}
+
+		TEST_METHOD(Test_Module_RidgedMultiFractal_Performance)
+		{
+			ridged_multifractal<float, int> ref_gen;
+			ridged_multifractal<sse_real, sse_int> sse_gen;
+			ridged_multifractal<avx_real, avx_int> avx_gen;
+
+			performance_test(
+				[&](const auto& c) { return ref_gen(c); },
+				[&](const auto& c) { return sse_gen(c); },
+				[&](const auto& c) { return avx_gen(c); },
+				100
+				);
+		}
+
+		TEST_METHOD(Test_Module_Billow_Implementation_Equality)
+		{
 			billow<float, int> ref_gen;
 			billow<sse_real, sse_int> sse_gen;
 			billow<avx_real, avx_int> avx_gen;
 
-			for (float z = -1; z <= 1; z += 0.25)
-			for (float y = -1; y <= 1; y += 0.25)
-			for (float x = -1; x <= 1; x += 0.25)
-			{
-				auto ref = ref_gen(Vector3<float>(x, y, z));
-
-				AreEqual(ref, sse_gen(Vector3<sse_real>(x, y, z)));
-				AreEqual(ref, avx_gen(Vector3<avx_real>(x, y, z)));
-			}
+			equality_test(
+				[&](const auto& c) { return ref_gen(c); },
+				[&](const auto& c) { return sse_gen(c); },
+				[&](const auto& c) { return avx_gen(c); }
+			);
 		}
 
-		TEST_METHOD(Test_Module_Rotate)
+		TEST_METHOD(Test_Module_Billow_Performance)
 		{
-			_MM_SET_ROUNDING_MODE(_MM_ROUND_TOWARD_ZERO);
+			billow<float, int> ref_gen;
+			billow<sse_real, sse_int> sse_gen;
+			billow<avx_real, avx_int> avx_gen;
 
-			module::rotate<float, int> ref_gen;
-			module::rotate<sse_real, sse_int> sse_gen;
-			module::rotate<avx_real, avx_int> avx_gen;
+			performance_test(
+				[&](const auto& c) { return ref_gen(c); },
+				[&](const auto& c) { return sse_gen(c); },
+				[&](const auto& c) { return avx_gen(c); },
+				100
+			);
+		}
+
+		TEST_METHOD(Test_Module_Voronoi_Implementation_Equality)
+		{
+			voronoi<float, int> ref_gen;
+			voronoi<sse_real, sse_int> sse_gen;
+			voronoi<avx_real, avx_int> avx_gen;
+
+			equality_test(
+				[&](const auto& c) { return ref_gen(c); },
+				[&](const auto& c) { return sse_gen(c); },
+				[&](const auto& c) { return avx_gen(c); }
+			);
+		}
+
+		TEST_METHOD(Test_Module_Voronoi_Performance)
+		{
+			voronoi<float, int> ref_gen;
+			voronoi<sse_real, sse_int> sse_gen;
+			voronoi<avx_real, avx_int> avx_gen;
+
+			performance_test(
+				[&](const auto& c) { return ref_gen(c); },
+				[&](const auto& c) { return sse_gen(c); },
+				[&](const auto& c) { return avx_gen(c); },
+				25
+				);
+		}
+
+		TEST_METHOD(Test_Module_Rotate_Implementation_Equality)
+		{
+			modules::rotate<float, int> ref_gen;
+			modules::rotate<sse_real, sse_int> sse_gen;
+			modules::rotate<avx_real, avx_int> avx_gen;
 
 			Module<float> ref_in	= [](const auto& c) { return 1.0f; };
 			Module<sse_real> sse_in = [](const auto& c) { return 1.0f; };
 			Module<avx_real> avx_in = [](const auto& c) { return 1.0f; };
 
-			for (float z = -1; z <= 1; z += 0.25)
-			for (float y = -1; y <= 1; y += 0.25)
-			for (float x = -1; x <= 1; x += 0.25)
-			{
-				auto ref = ref_gen(Vector3<float>(x, y, z), ref_in);
-
-				AreEqual(ref, sse_gen(Vector3<sse_real>(x, y, z), sse_in));
-				AreEqual(ref, avx_gen(Vector3<avx_real>(x, y, z), avx_in));
-			}
+			equality_test(
+				[&](const auto& c) { return ref_gen(c, ref_in); },
+				[&](const auto& c) { return sse_gen(c, sse_in); },
+				[&](const auto& c) { return avx_gen(c, avx_in); }
+			);
 		}
 
-		TEST_METHOD(Test_Module_Select)
+		TEST_METHOD(Test_Module_Rotate_Performance)
 		{
-			_MM_SET_ROUNDING_MODE(_MM_ROUND_TOWARD_ZERO);
+			modules::rotate<float, int> ref_gen;
+			modules::rotate<sse_real, sse_int> sse_gen;
+			v::rotate<avx_real, avx_int> avx_gen;
 
+			Module<float> ref_in	= [](const auto& c) { return 1.0f; };
+			Module<sse_real> sse_in = [](const auto& c) { return 1.0f; };
+			Module<avx_real> avx_in = [](const auto& c) { return 1.0f; };
+
+			performance_test(
+				[&](const auto& c) { return ref_gen(c, ref_in); },
+				[&](const auto& c) { return sse_gen(c, sse_in); },
+				[&](const auto& c) { return avx_gen(c, avx_in); }
+			);
+		}
+
+		TEST_METHOD(Test_Module_Select_Implementation_Equality)
+		{
 			select<float, int> ref_gen;
 			select<sse_real, sse_int> sse_gen;
 			select<avx_real, avx_int> avx_gen;
@@ -122,21 +192,42 @@ namespace UnitTest
 				avx_b = [](const auto& c) { return 1.0f; },
 				avx_c = [](const auto& c) { return 0.5f; };
 
-			for (float z = -1; z <= 1; z += 0.25)
-			for (float y = -1; y <= 1; y += 0.25)
-			for (float x = -1; x <= 1; x += 0.25)
-			{
-				auto ref = ref_gen(Vector3<float>(x, y, z), ref_a, ref_b, ref_c);
-
-				AreEqual(ref, sse_gen(Vector3<sse_real>(x, y, z), sse_a, sse_b, sse_c));
-				AreEqual(ref, avx_gen(Vector3<avx_real>(x, y, z), avx_a, avx_b, avx_c));
-			}
+			equality_test(
+				[&](const auto& c) { return ref_gen(c, ref_a, ref_b, ref_c); },
+				[&](const auto& c) { return sse_gen(c, sse_a, sse_b, sse_c); },
+				[&](const auto& c) { return avx_gen(c, avx_a, avx_b, avx_c); }
+			);
 		}
 
-		TEST_METHOD(Test_Module_Turbulence)
+		TEST_METHOD(Test_Module_Select_Performance)
 		{
-			_MM_SET_ROUNDING_MODE(_MM_ROUND_TOWARD_ZERO);
+			select<float, int> ref_gen;
+			select<sse_real, sse_int> sse_gen;
+			select<avx_real, avx_int> avx_gen;
 
+			Module<float>
+				ref_a = [](const auto& c) { return -1.0f; },
+				ref_b = [](const auto& c) { return 1.0f; },
+				ref_c = [](const auto& c) { return 0.5f; };
+
+			Module<sse_real>
+				sse_a = [](const auto& c) { return -1.0f; },
+				sse_b = [](const auto& c) { return 1.0f; },
+				sse_c = [](const auto& c) { return 0.5f; };
+			Module<avx_real>
+				avx_a = [](const auto& c) { return -1.0f; },
+				avx_b = [](const auto& c) { return 1.0f; },
+				avx_c = [](const auto& c) { return 0.5f; };
+
+			performance_test(
+				[&](const auto& c) { return ref_gen(c, ref_a, ref_b, ref_c); },
+				[&](const auto& c) { return sse_gen(c, sse_a, sse_b, sse_c); },
+				[&](const auto& c) { return avx_gen(c, avx_a, avx_b, avx_c); }
+			);
+		}
+
+		TEST_METHOD(Test_Module_Turbulence_Implementation_Equality)
+		{
 			turbulence<float, int> ref_gen;
 			turbulence<sse_real, sse_int> sse_gen;
 			turbulence<avx_real, avx_int> avx_gen;
@@ -145,15 +236,105 @@ namespace UnitTest
 			Module<sse_real> sse_in = [](const auto& c) { return 1.0f; };
 			Module<avx_real> avx_in = [](const auto& c) { return 1.0f; };
 
-			for (float z = -1; z <= 1; z += 0.25)
-			for (float y = -1; y <= 1; y += 0.25)
-			for (float x = -1; x <= 1; x += 0.25)
-			{
-				auto ref = ref_gen(Vector3<float>(x, y, z), ref_in);
+			equality_test(
+				[&](const auto& c) { return ref_gen(c, ref_in); },
+				[&](const auto& c) { return sse_gen(c, sse_in); },
+				[&](const auto& c) { return avx_gen(c, avx_in); }
+			);
+		}
 
-				AreEqual(ref, sse_gen(Vector3<sse_real>(x, y, z), sse_in));
-				AreEqual(ref, avx_gen(Vector3<avx_real>(x, y, z), avx_in));
-			}
+		TEST_METHOD(Test_Module_Turbulence_Performance)
+		{
+			turbulence<float, int> ref_gen;
+			turbulence<sse_real, sse_int> sse_gen;
+			turbulence<avx_real, avx_int> avx_gen;
+
+			Module<float> ref_in = [](const auto& c) { return 1.0f; };
+			Module<sse_real> sse_in = [](const auto& c) { return 1.0f; };
+			Module<avx_real> avx_in = [](const auto& c) { return 1.0f; };
+
+			performance_test(
+				[&](const auto& c) { return ref_gen(c, ref_in); },
+				[&](const auto& c) { return sse_gen(c, sse_in); },
+				[&](const auto& c) { return avx_gen(c, avx_in); }
+			);
+		}
+
+
+		TEST_METHOD(Test_Module_Terrace_Implementation_Equality)
+		{
+			terrace<float, int>			ref_gen
+			{
+				{ -2.0, -2.5 },
+				{ -1.0, -1.5 },
+				{ 0.0, 0.0 },
+				{ 1.0, 1.5 },
+				{ 2.0, 5.5 }
+			};
+			terrace<sse_real, sse_int>	sse_gen
+			{
+				{ -2.0, -2.5 },
+				{ -1.0, -1.5 },
+				{ 0.0, 0.0 },
+				{ 1.0, 1.5 },
+				{ 2.0, 5.5 }
+			};
+			terrace<avx_real, avx_int>	avx_gen
+			{
+				{ -2.0, -2.5 },
+				{ -1.0, -1.5 },
+				{ 0.0, 0.0 },
+				{ 1.0, 1.5 },
+				{ 2.0, 5.5 }
+			};
+
+			Module<float> ref_in	= [](const auto& c) { return 1.0f; };
+			Module<sse_real> sse_in = [](const auto& c) { return 1.0f; };
+			Module<avx_real> avx_in = [](const auto& c) { return 1.0f; };
+
+			equality_test(
+				[&](const auto& c) { return ref_gen(c, ref_in); },
+				[&](const auto& c) { return sse_gen(c, sse_in); },
+				[&](const auto& c) { return avx_gen(c, avx_in); }
+			);
+		}
+
+		TEST_METHOD(Test_Module_Terrace_Performance)
+		{
+			terrace<float, int>			ref_gen
+			{
+				{ -2.0, -2.5 },
+				{ -1.0, -1.5 },
+				{ 0.0, 0.0 },
+				{ 1.0, 1.5 },
+				{ 2.0, 5.5 }
+			};
+			terrace<sse_real, sse_int>	sse_gen
+			{
+				{ -2.0, -2.5 },
+				{ -1.0, -1.5 },
+				{ 0.0, 0.0 },
+				{ 1.0, 1.5 },
+				{ 2.0, 5.5 }
+			};
+			terrace<avx_real, avx_int>	avx_gen
+			{
+				{ -2.0, -2.5 },
+				{ -1.0, -1.5 },
+				{ 0.0, 0.0 },
+				{ 1.0, 1.5 },
+				{ 2.0, 5.5 }
+			};
+
+			Module<float> ref_in = [](const auto& c) { return 1.0f; };
+			Module<sse_real> sse_in = [](const auto& c) { return 1.0f; };
+			Module<avx_real> avx_in = [](const auto& c) { return 1.0f; };
+
+			performance_test(
+				[&](const auto& c) { return ref_gen(c, ref_in); },
+				[&](const auto& c) { return sse_gen(c, sse_in); },
+				[&](const auto& c) { return avx_gen(c, avx_in); }
+			);
 		}
 
 		TEST_METHOD(Test_Module_Scheduler)
@@ -166,6 +347,92 @@ namespace UnitTest
 			*/
 
 			Assert::AreEqual(1, 1, std::numeric_limits<float>::epsilon());
+		}
+
+		static void equality_test(Module<float> ref_gen, Module<sse_real> sse_gen, Module<avx_real> avx_gen)
+		{
+			_MM_SET_ROUNDING_MODE(_MM_ROUND_TOWARD_ZERO);
+
+			for (float z = -1; z <= 1; z += 0.25)
+			for (float y = -1; y <= 1; y += 0.25)
+			for (float x = -1; x <= 1; x += 0.25)
+			{	
+				auto ref = ref_gen(Vector3<float>(x, y, z));
+				auto sse = sse_gen(Vector3<sse_real>(x, y, z));
+				auto avx = avx_gen(Vector3<avx_real>(x, y, z));
+					
+				wstringstream sse_feedback;
+				wstringstream avx_feedback;
+
+				sse_feedback << "sse invalid for [" << x << ";" << y << ";" << z << "]";
+				avx_feedback << "avx invalid for [" << x << ";" << y << ";" << z << "]";
+
+				AreEqual(ref, sse, sse_feedback.str().c_str());
+				AreEqual(ref, avx, avx_feedback.str().c_str());
+			}	
+		}
+
+		static void performance_test(Module<float> ref_gen, Module<sse_real> sse_gen, Module<avx_real> avx_gen, size_t iterations = 1000)
+		{
+			_MM_SET_ROUNDING_MODE(_MM_ROUND_TOWARD_ZERO);
+
+			vector<long long> ref_times, sse_times, avx_times;
+
+			PERFORMANCE_SNAPSHOT(ref_times,
+			for (int r = 0; r < iterations; r++)
+			for (float x = -8; x <= 8; x += 0.25)			
+			for (float y = -8; y <= 8; y += 0.25)			
+			for (float z = -8; z <= 8; z += 0.25)
+			{					 
+				ref_gen(Vector3<float>(x, y, z));
+			});
+
+			PERFORMANCE_SNAPSHOT(sse_times,
+			for (int r = 0; r < iterations; r++)
+			for (float x = -8; x <= 8; x += 1.0)
+			{
+				auto _x = sse_real(x, x + 0.25f, x + 0.5f, x + 0.75f);
+
+				for (float y = -8; y <= 8; y += 0.25)
+				{
+					sse_real _y = y;
+
+					for (float z = -8; z <= 8; z += 0.25)
+					{
+						sse_gen(Vector3<sse_real>(_x, _y, z));
+					}
+				}
+			});
+						
+			PERFORMANCE_SNAPSHOT(avx_times,
+			for (int r = 0; r < iterations; r++)
+			for (float x = -8; x <= 8; x += 2.0)
+			{
+				auto _x = avx_real(x, x + 0.25f, x + 0.5f, x + 0.75f, x + 1.0f, x + 1.25f, x + 1.5f, x + 1.75f);
+				
+				for (float y = -8; y <= 8; y += 0.25)
+				{
+					avx_real _y = y;
+
+					for (float z = -8; z <= 8; z += 0.25)
+					{
+						avx_gen(Vector3<avx_real>(_x, _y, z));
+					}
+				}
+			});
+
+			auto	ref_time = accumulate(ref_times.begin(), ref_times.end(), 0) / ref_times.size(),
+					sse_time = accumulate(sse_times.begin(), sse_times.end(), 0) / sse_times.size(),
+					avx_time = accumulate(avx_times.begin(), avx_times.end(), 0) / avx_times.size();
+
+			ostringstream perfstream;
+
+			perfstream
+				<< "ref: " << ref_time << endl
+				<< "sse: " << sse_time << " (" << (double)ref_time / sse_time << ")" << endl
+				<< "avx: " << avx_time << " (" << (double)ref_time / avx_time << ")" << endl;
+
+			Logger::WriteMessage(perfstream.str().c_str());
 		}
 	};
 }

@@ -18,7 +18,7 @@
 #include <vector>
 #include "../paranoise/color.h"
 
-namespace paranoise { namespace examples {
+namespace zzsystems { namespace paranoise { namespace examples {
 	using namespace std;
 
 	inline void run(const int w, const int h,
@@ -61,7 +61,7 @@ namespace paranoise { namespace examples {
 		cout << "Minval SISD: " << *min_element(begin(result2), end(result2)) << endl << endl;
 		cout << "Maxval SISD: " << *max_element(begin(result2), end(result2)) << endl << endl;
 
-		cimg_library::CImg<uint8> img1(w, h, 1, 3), img2(w, h, 1, 3);
+		cimg_library::CImg<uint8_t> img1(w, h, 1, 3), img2(w, h, 1, 3);
 
 		Concurrency::parallel_for(0, w * h, [&](const auto i)
 			//for (int i = 0; i < v.size(); i++)	
@@ -90,4 +90,4 @@ namespace paranoise { namespace examples {
 
 	}
 
-}}
+}}}

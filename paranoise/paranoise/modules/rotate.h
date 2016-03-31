@@ -2,41 +2,40 @@
 #ifndef PARANOISE_MODULES_ROTATE
 #define PARANOISE_MODULES_ROTATE
 
-#include "../noisegenerators.h"
-#include "../parallel/x87compat.h"
+#include "dependencies.h"
 
-namespace paranoise { namespace module {
+namespace zzsystems { namespace paranoise { namespace modules {
+	using namespace simdal;
 	using namespace generators;
-	using namespace x87compat;
+	using namespace util;
 
-	SIMD_ENABLE(TReal, TInt)
-	struct rotate
+	SIMD_ENABLED
+	class rotate : public module_base<vreal, vint>
 	{
-		Matrix3x3<TReal> rot;
+	public:
+		Matrix3x3<vreal> rot;
 		Vector3<float>  angles;
 
 		rotate() : rotate({ 0.0f, 0.0f, 0.0f }) {}
-		rotate(const Vector3<float> &angles) : angles(angles)
+		rotate(const Vector3<float> &angles) : module_base(1), angles(angles)
 		{
-			auto cos = Vector3<TReal>( ::cos(angles.x), ::cos(angles.y), ::cos(angles.z) );
-			auto sin = Vector3<TReal>( ::sin(angles.x), ::sin(angles.y), ::sin(angles.z) );
+			auto cos = Vector3<vreal>( ::cos(angles.x), ::cos(angles.y), ::cos(angles.z) );
+			auto sin = Vector3<vreal>( ::sin(angles.x), ::sin(angles.y), ::sin(angles.z) );
 
-			rot._0 = Vector3<TReal>{ sin.x * sin.y * sin.z + cos.y * cos.z,	cos.x * sin.z,		sin.y * cos.z - cos.y * sin.x * sin.z };
-			rot._1 = Vector3<TReal>{ sin.y * sin.x * cos.z - cos.y * sin.z,	cos.x * cos.z,		-cos.y * sin.x * cos.z - sin.y * sin.z };
-			rot._2 = Vector3<TReal>{-sin.y * cos.x,							sin.x,				cos.y * cos.x						   };
+			rot._0 = Vector3<vreal>{ sin.x * sin.y * sin.z + cos.y * cos.z,	cos.x * sin.z,		sin.y * cos.z - cos.y * sin.x * sin.z };
+			rot._1 = Vector3<vreal>{ sin.y * sin.x * cos.z - cos.y * sin.z,	cos.x * cos.z,		-cos.y * sin.x * cos.z - sin.y * sin.z };
+			rot._2 = Vector3<vreal>{-sin.y * cos.x,							sin.x,				cos.y * cos.x						   };
 		}
 
-		rotate(const rotate<TReal, TInt> &rhs): rotate(rhs.angles)
+		rotate(const rotate<vreal, vint> &rhs): rotate(rhs.angles)
 		{}
 
-		inline TReal operator()(const Vector3<TReal>& coords, const Module<TReal>& source) const
+		MODULE_PROPERTY(source, 0)
+
+		vreal operator()(const Vector3<vreal>& coords) const override
 		{
-			return source(rot * coords);
+			return (*get_source())(rot * coords);
 		}
-
-		//inline operator Module<TReal>() const { return [this](const auto &c) { return this->operator()(c); }; }
 	};
-
-	// inline operator (Module<TReal>)() { return operator(); }
-}}
+}}}
 #endif

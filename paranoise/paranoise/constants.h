@@ -1,13 +1,13 @@
 #pragma once
 #ifndef PARANOISE_CONSTANTS
 #define PARANOISE_CONSTANTS
-#include "basetypes.h"
+
 #include "parallel/all.h"
 
 
-namespace paranoise { namespace constants
+namespace zzsystems { namespace paranoise { namespace constants
 {
-	using namespace parallel;
+	using namespace simdal;
 	
 #define EVALUATED_CONST(type, name, value) \
 	static type name() { return value; }
@@ -23,8 +23,7 @@ namespace paranoise { namespace constants
 	ANY(TType)
 	struct fastload
 	{
-		EVALUATED_CONST(TType, _0, 0);
-		
+		EVALUATED_CONST(TType, _0, 0);		
 
 		static TType ones()		{ return 0xFFFF'FFFF; }
 		static TType intmin()	{ return 0x8000'0001; }
@@ -88,28 +87,28 @@ namespace paranoise { namespace constants
 	template<typename featuremask>
 	struct fastload<_float4>
 	{
-		static _float4 _0()  { return static_cast<_float4>(fastload<_int4>::_0()); }
+		static _float4 _0()  { return fastload<_int4>::_0(); }
 		static _float4 ones() { return _mm_castsi128_ps(fastload<_int4>::ones().val); }
 
 		static _float4  intmin() { return -(ones >> 1); }
 		static _float4  intmax() { return ones() >> 1; }
 
-		static _float4 _1() { return static_cast<_float4>(fastload<_int4>::_1()); }
-		static _float4 _2() { return static_cast<_float4>(fastload<_int4>::_2()); }
-		static _float4 _3() { return static_cast<_float4>(fastload<_int4>::_3()); }
-		static _float4 _4() { return static_cast<_float4>(fastload<_int4>::_4()); }
-		static _float4 _5() { return static_cast<_float4>(fastload<_int4>::_5()); }
-		static _float4 _6() { return static_cast<_float4>(fastload<_int4>::_6()); }
-		static _float4 _7() { return static_cast<_float4>(fastload<_int4>::_7()); }
-		static _float4 _8() { return static_cast<_float4>(fastload<_int4>::_8()); }
+		static _float4 _1() { return fastload<_int4>::_1(); }
+		static _float4 _2() { return fastload<_int4>::_2(); }
+		static _float4 _3() { return fastload<_int4>::_3(); }
+		static _float4 _4() { return fastload<_int4>::_4(); }
+		static _float4 _5() { return fastload<_int4>::_5(); }
+		static _float4 _6() { return fastload<_int4>::_6(); }
+		static _float4 _7() { return fastload<_int4>::_7(); }
+		static _float4 _8() { return fastload<_int4>::_8(); }
 
-		static _float4 _9()	{ return static_cast<_float4>(fastload<_int4>::_9()); }
-		static _float4 _10() { return static_cast<_float4>(fastload<_int4>::_10()); }
-		static _float4 _11() { return static_cast<_float4>(fastload<_int4>::_11()); }
-		static _float4 _12() { return static_cast<_float4>(fastload<_int4>::_12()); }
-		static _float4 _13() { return static_cast<_float4>(fastload<_int4>::_13()); }
-		static _float4 _14() { return static_cast<_float4>(fastload<_int4>::_14()); }
-		static _float4 _15() { return static_cast<_float4>(fastload<_int4>::_15()); }
+		static _float4 _9()	{ return fastload<_int4>::_9(); }
+		static _float4 _10() { return fastload<_int4>::_10(); }
+		static _float4 _11() { return fastload<_int4>::_11(); }
+		static _float4 _12() { return fastload<_int4>::_12(); }
+		static _float4 _13() { return fastload<_int4>::_13(); }
+		static _float4 _14() { return fastload<_int4>::_14(); }
+		static _float4 _15() { return fastload<_int4>::_15(); }
 
 		static _float4 sign1all0() { return _mm_castsi128_ps(fastload<_int4>::sign1all0().val); }
 		static _float4 sign0all1() { return _mm_castsi128_ps(fastload<_int4>::sign0all1().val); }
@@ -147,32 +146,32 @@ namespace paranoise { namespace constants
 	template<typename featuremask>
 	struct fastload<_float8>
 	{
-		static _float8 _0() { return static_cast<_float8>(fastload<_int8>::_0()); }
+		static _float8 _0() { return fastload<_int8>::_0(); }
 		static _float8 ones() { return _mm_castsi128_ps(fastload<_int8>::ones().val); }
 
 		static _float8  intmin() { return -(ones >> 1); }
 		static _float8  intmax() { return ones() >> 1; }
 
-		static _float8 _1() { return static_cast<_float8>(fastload<_int8>::_1()); }
-		static _float8 _2() { return static_cast<_float8>(fastload<_int8>::_2()); }
-		static _float8 _3() { return static_cast<_float8>(fastload<_int8>::_3()); }
-		static _float8 _4() { return static_cast<_float8>(fastload<_int8>::_4()); }
-		static _float8 _5() { return static_cast<_float8>(fastload<_int8>::_5()); }
-		static _float8 _6() { return static_cast<_float8>(fastload<_int8>::_6()); }
-		static _float8 _7() { return static_cast<_float8>(fastload<_int8>::_7()); }
-		static _float8 _8() { return static_cast<_float8>(fastload<_int8>::_8()); }
+		static _float8 _1() { return fastload<_int8>::_1(); }
+		static _float8 _2() { return fastload<_int8>::_2(); }
+		static _float8 _3() { return fastload<_int8>::_3(); }
+		static _float8 _4() { return fastload<_int8>::_4(); }
+		static _float8 _5() { return fastload<_int8>::_5(); }
+		static _float8 _6() { return fastload<_int8>::_6(); }
+		static _float8 _7() { return fastload<_int8>::_7(); }
+		static _float8 _8() { return fastload<_int8>::_8(); }
 
-		static _float8 _9() { return static_cast<_float8>(fastload<_int8>::_9()); }
-		static _float8 _10() { return static_cast<_float8>(fastload<_int8>::_10()); }
-		static _float8 _11() { return static_cast<_float8>(fastload<_int8>::_11()); }
-		static _float8 _12() { return static_cast<_float8>(fastload<_int8>::_12()); }
-		static _float8 _13() { return static_cast<_float8>(fastload<_int8>::_13()); }
-		static _float8 _14() { return static_cast<_float8>(fastload<_int8>::_14()); }
-		static _float8 _15() { return static_cast<_float8>(fastload<_int8>::_15()); }
+		static _float8 _9() { return fastload<_int8>::_9(); }
+		static _float8 _10() { return fastload<_int8>::_10(); }
+		static _float8 _11() { return fastload<_int8>::_11(); }
+		static _float8 _12() { return fastload<_int8>::_12(); }
+		static _float8 _13() { return fastload<_int8>::_13(); }
+		static _float8 _14() { return fastload<_int8>::_14(); }
+		static _float8 _15() { return fastload<_int8>::_15(); }
 
 		static _float8 sign1all0() { return _mm_castsi128_ps(fastload<_int8>::sign1all0().val); }
 		static _float8 sign0all1() { return _mm_castsi128_ps(fastload<_int8>::sign0all1().val); }
 	};
-}}
+}}}
 
 #endif

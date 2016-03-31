@@ -12,4 +12,7 @@
 #include "terrace.h"
 #include "voronoi.h"
 #include "turbulence.h"
+#include "buffer.h"
+#include "cache.h"
+
 #endif

@@ -2,32 +2,30 @@
 #ifndef PARANOISE_MODULES_CURVE
 #define PARANOISE_MODULES_CURVE
 
-#include <map>
-#include <vector>
-#include <algorithm>
+#include "dependencies.h"
 
-#include "../parallel/all.h"
-#include "../noisegenerators.h"
-#include "../parallel/x87compat.h"
-
-namespace paranoise { namespace module {
+namespace zzsystems { namespace paranoise { namespace modules {
+	using namespace simdal;
 	using namespace generators;
-	using namespace parallel;
-	using namespace x87compat;
+	using namespace util;
 
-	SIMD_ENABLE(TReal, TInt)
-	struct curve
+	SIMD_ENABLED
+	class curve : public module_base<vreal, vint>
 	{
-		vector<pair<const TReal, TReal>> points;
+	public:
+		vector<pair<const vreal, vreal>> points;
 
-		curve(const initializer_list<pair<const TReal, TReal>>& lst) : points(lst)
+		MODULE_PROPERTY(source, 0)
+			
+		curve(const initializer_list<pair<const vreal, vreal>>& points) 
+			: module_base(1), points(points)
 		{}
 
-		inline TReal operator()(const Vector3<TReal>& coords, const Module<TReal> &source) const
+		vreal operator()(const Vector3<vreal>& coords) const override
 		{
-			auto val = source(coords);
+			auto val = get_source()(coords);
 			
-			TReal v3, v2, v1, v0, set_value, already_set = fastload<TReal>::_0();
+			vreal v3, v2, v1, v0, set_value, already_set = fastload<vreal>::_0();
 		
 			int i0, i1, i2, i3;
 
@@ -67,8 +65,6 @@ namespace paranoise { namespace module {
 			//return vsel(result == ones, cerp(v0, v1, v2, v3, alpha), result);
 			return cerp(v0, v1, v2, v3, alpha);
 		}
-
-		// inline operator (Module<TReal>)() { return operator(); }
 	};	
-}}
+}}}
 #endif

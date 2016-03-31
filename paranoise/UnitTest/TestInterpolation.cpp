@@ -6,12 +6,11 @@
 #include "util.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
-using namespace paranoise::interpolation;
-using namespace paranoise::parallel;
 
-namespace UnitTest
-{	
-	using namespace paranoise::test;
+namespace zzsystems { namespace paranoise { namespace tests {
+	using namespace interpolation;
+	using namespace simdal;
+	using namespace unittest;
 
 	TEST_CLASS(TestInterpolation)
 	{
@@ -69,4 +68,4 @@ namespace UnitTest
 			}	
 		}
 	};
-}
+}}}

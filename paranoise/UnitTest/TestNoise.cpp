@@ -9,13 +9,14 @@
 #include "util.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
-using namespace paranoise;
-using namespace paranoise::generators;
-using namespace paranoise::parallel;
-using namespace paranoise::test;
 
-namespace UnitTest
-{
+namespace zzsystems { namespace paranoise { namespace tests {
+	using namespace paranoise;
+	using namespace interpolation;
+	using namespace simdal;
+	using namespace unittest;
+	using namespace generators;
+
 	TEST_CLASS(TestNoise)
 	{
 	public:
@@ -140,4 +141,4 @@ namespace UnitTest
 			AreEqual(1 - 1 + 1, z1, L"z1 invalid");
 		}
 	};
-}
+}}}

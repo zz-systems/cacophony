@@ -10,13 +10,12 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 //AreEqual(static_cast<float>	(expected), fastload<float>::name(),	L"scalar float invalid"); 
 //AreEqual(static_cast<int32>	(expected), fastload<int32>::name(),		L"scalar int invalid"); 
 
-using namespace paranoise;
-using namespace interpolation;
-using namespace parallel;
-using namespace test;
 
-namespace UnitTest
-{
+namespace zzsystems { namespace simdal { namespace tests {
+	using namespace paranoise;
+	using namespace interpolation;
+	using namespace simdal;
+	using namespace unittest;
 
 #define VALIDATE_FASTLOAD_VALUE(name, expected) \
 	AreEqual(static_cast<float>	(expected), fastload<float>::name(), L"scalar float invalid");\
@@ -111,4 +110,4 @@ namespace UnitTest
 			VALIDATE_FASTLOAD_VALUE(_15, 15);
 		}
 	};
-}
+}}}

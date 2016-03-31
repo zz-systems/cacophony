@@ -2,12 +2,9 @@
 #ifndef PARANOISE_INTRINSIC_M128I_H
 #define PARANOISE_INTRINSIC_M128I_H
 
-//#include "constants.h"
-#include "base.h"
-#include "../capabiliy.h"
-#define __SSE4_1__
+#include "dependencies.h"
 
-namespace paranoise { namespace parallel {
+namespace zzsystems { namespace simdal {
 
 	//using namespace std;
 
@@ -48,13 +45,6 @@ namespace paranoise { namespace parallel {
 		BIN_OP_STUB(<, _int4, int)
 		BIN_OP_STUB(==, _int4, int)
 
-
-
-		/*UN_OP_STUB(int4<featuremask>, int, ~)
-		UN_OP_STUB(int4<featuremask>, int, -)*/
-
-		//FEATURE(_int4, _dispatcher::has_sse)
-		//template<enable_if_t<_dispatcher::has_sse, bool>>
 		explicit inline operator bool()
 		{
 			return _mm_test_all_ones(this->val);

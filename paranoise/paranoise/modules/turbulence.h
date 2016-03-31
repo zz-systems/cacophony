@@ -2,47 +2,49 @@
 #ifndef PARANOISE_MODULES_TURBULENCE
 #define PARANOISE_MODULES_TURBULENCE
 
-#include "../noisegenerators.h"
+#include "dependencies.h"
 #include "perlin.h"
 
-namespace paranoise { namespace module {
+
+namespace zzsystems { namespace paranoise { namespace modules {
+	using namespace simdal;
 	using namespace generators;
-	using namespace x87compat;
+	using namespace util;
 
-	SIMD_ENABLE(TReal, TInt)
-	struct turbulence : perlin<TReal, TInt>
+	SIMD_ENABLED
+	class turbulence : perlin<vreal, vint>
 	{	
-		Vector3<TReal> power;
+	public:
+		Vector3<vreal> power;
 
-		Matrix3x3<TReal> dinput = {
-			Vector3<TReal>(12414.0f, 65124.0f, 31337.0f) / Vector3<TReal>(65536.0f),
-			Vector3<TReal>(26519.0f, 18128.0f, 60493.0f) / Vector3<TReal>(65536.0f),
-			Vector3<TReal>(53820.0f, 11213.0f, 44845.0f) / Vector3<TReal>(65536.0f)
+		Matrix3x3<vreal> dinput = {
+			Vector3<vreal>(12414.0f, 65124.0f, 31337.0f) / Vector3<vreal>(65536.0f),
+			Vector3<vreal>(26519.0f, 18128.0f, 60493.0f) / Vector3<vreal>(65536.0f),
+			Vector3<vreal>(53820.0f, 11213.0f, 44845.0f) / Vector3<vreal>(65536.0f)
 		};
 
 		turbulence(float power = 1.0, int roughness = 3, float frequency = 1.0, float lacunarity = 2.0, float persistence = 0.5, int seed = 0, Quality quality = Quality::Standard)
-			: perlin<TReal, TInt>(frequency, lacunarity, persistence, seed, roughness, quality),
-			power(power)
+			: perlin<vreal, vint>(frequency, lacunarity, persistence, seed, roughness, quality),
+			module_base(1),	power(power)
 		{}
 
-		turbulence(const turbulence<TReal, TInt>& rhs)
-			: perlin<TReal, TInt>(rhs),
+		turbulence(const turbulence<vreal, vint>& rhs)
+			: perlin<vreal, vint>(rhs),
 			power(rhs.power)
 		{}
 
+		MODULE_PROPERTY(source, 0)
+
 		// Apply turbulence to the source input
-		inline TReal operator()(const Vector3<TReal> &c, const Module<TReal> &source) const
-		{
-			auto distortion = Vector3<TReal>(
-				perlin<TReal, TInt>::operator()(dinput._0 + c),
-				perlin<TReal, TInt>::operator()(dinput._1 + c),
-				perlin<TReal, TInt>::operator()(dinput._2 + c)) * power;
-
-
-			return source(c + distortion);
+		vreal operator()(const Vector3<vreal> &coords) const override
+		{			
+			auto distortion = Vector3<vreal>(
+				perlin<vreal, vint>::operator()(dinput._0 + coords),
+				perlin<vreal, vint>::operator()(dinput._1 + coords),
+				perlin<vreal, vint>::operator()(dinput._2 + coords)) * power;
+			
+			return get_source()(coords + distortion);
 		}
-
-		// inline operator (Module<TReal>)() { return operator(); }
 	};
-}}
+}}}
 #endif

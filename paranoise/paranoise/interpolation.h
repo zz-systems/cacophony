@@ -2,13 +2,11 @@
 #ifndef INTERPOLATION_H
 #define INTERPOLATION_H
 
-//#include "parallel/x87compat.h"
-#include "basetypes.h"
+
 #include "constants.h"
 
-namespace paranoise { namespace interpolation {
+namespace zzsystems { namespace paranoise { namespace interpolation {
 	using namespace constants;
-	//using namespace x87compat;
 	// Cubic ===================================================================================================
 	
 	SIMD_ENABLE_F(TReal)
@@ -20,12 +18,12 @@ namespace paranoise { namespace interpolation {
 		auto q = n0_n1 - p;
 		auto r = n2 - n0;
 
-		auto a² = a * a;
-		auto a³ = a² * a;
+		auto a2 = a * a;
+		auto a3 = a2 * a;
 
-		auto qa² = q * a²;
+		auto qa2 = q * a2;
 
-		return vfmadd(p, a³, qa²) + vfmadd(r, a, n1);
+		return vfmadd(p, a3, qa2) + vfmadd(r, a, n1);
 	}	
 
 	// Linear ==================================================================================================
@@ -63,6 +61,6 @@ namespace paranoise { namespace interpolation {
 		//return (6 * a5) - (15 * a4) + (10 * a3);
 		return vfmsub(fastload<TReal>::_6(), a5, p);
 	}
-}};
+}}};
 
 #endif

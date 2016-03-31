@@ -4,7 +4,7 @@
 
 #include "../basetypes.h"
 
-namespace paranoise { namespace models {
+namespace zzsystems { namespace paranoise { namespace models {
 
 	SIMD_ENABLE_F(TReal)
 	struct line_settings

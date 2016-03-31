@@ -4,10 +4,10 @@
 #include "../paranoise/modules/all.h"
 #include "../paranoise/color.h"
 
-namespace paranoise { namespace examples {
-	using namespace module;
+namespace zzsystems { namespace paranoise { namespace examples {
+	using namespace modules;
 	using namespace util;
-	using namespace parallel;
+	using namespace simdal;
 
 	SIMD_ENABLE(TReal, TInt)
 		Module<TReal> generate_granite()
@@ -35,4 +35,4 @@ namespace paranoise { namespace examples {
 		{ 1.01, color_rgb(255, 176, 192, 255) }
 	};
 
-}}
+}}}

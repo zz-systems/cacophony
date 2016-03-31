@@ -2,12 +2,13 @@
 #ifndef PARANOISE_ALL_H
 #define PARANOISE_ALL_H
 
-#include "base.h"
+#include "dependencies.h"
 #include "sse.h"
 #include "avx.h"
 #include "opencl.h"
 #include "SISD.h"
 
+#include "../vector.h"
 namespace std
 {
 	template <class T>
@@ -18,18 +19,18 @@ namespace std
 	}
 
 	template<typename featuremask>
-	struct hash<paranoise::parallel::_float4>
+	struct hash<zzsystems::simdal::_float4>
 	{
-		typedef paranoise::parallel::_float4 argument_type;
+		typedef zzsystems::simdal::_float4 argument_type;
 		typedef size_t result_type;
 
 		result_type operator()(const argument_type &arg) const
 		{
-			float *v = paranoise::parallel::extract(arg);
+			float *v = zzsystems::simdal::extract(arg);
 
 			result_type result = 0;
 
-			for (int i = 0; i < paranoise::dim<argument_type>(); i++)
+			for (int i = 0; i < zzsystems::simdal::dim<argument_type>(); i++)
 				hash_combine<float>(result, v[i]);
 
 			return result;
@@ -37,9 +38,9 @@ namespace std
 	};
 
 	template<typename featuremask>
-	struct hash<paranoise::parallel::_float8>
+	struct hash<zzsystems::simdal::_float8>
 	{
-		typedef paranoise::parallel::_float8 argument_type;
+		typedef zzsystems::simdal::_float8 argument_type;
 		typedef size_t result_type;
 
 		result_type operator()(const argument_type &arg) const
@@ -48,7 +49,7 @@ namespace std
 
 			result_type result = 0;
 
-			for (int i = 0; i < paranoise::dim<argument_type>(); i++)
+			for (int i = 0; i < zzsystems::simdal::dim<argument_type>(); i++)
 				hash_combine<float>(result, v[i]);
 
 			return result;
@@ -56,9 +57,9 @@ namespace std
 	};
 
 	template<typename T>
-	struct hash<paranoise::util::Vector3<T>>
+	struct hash<zzsystems::paranoise::util::Vector3<T>>
 	{
-		typedef paranoise::util::Vector3<T> argument_type;
+		typedef zzsystems::paranoise::util::Vector3<T> argument_type;
 		typedef size_t result_type;
 
 		result_type operator()(const argument_type &arg) const
@@ -74,7 +75,7 @@ namespace std
 	};
 }
 
-namespace paranoise { namespace parallel {
+namespace zzsystems { namespace simdal {
 	
 	template<typename, typename enable = void>
 	struct static_dispatcher
@@ -112,6 +113,13 @@ namespace paranoise { namespace parallel {
 		typedef _float8 real_type;
 		static constexpr const char* unit_name = "AVX";
 	};	
+
+	template<typename capability>
+	struct simd_traits
+	{
+		typedef typename static_dispatcher<capability>::real_type		vreal;
+		typedef typename static_dispatcher<capability>::integral_type	vint;
+	};
 
 #define SIMD_DISPATCH_TYPES \
 	using vreal = static_dispatcher<capability>::real_type;\

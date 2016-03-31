@@ -4,8 +4,8 @@
 #include "../paranoise/parallel/all.h"
 #include "../paranoise/scheduler.h"
 #include "../paranoise/color.h"
-namespace paranoise { namespace examples {
-	using namespace module;
+namespace zzsystems { namespace paranoise { namespace examples {
+	using namespace modules;
 	using namespace util;
 
 	SIMD_ENABLE(TReal, TInt)
@@ -45,4 +45,4 @@ namespace paranoise { namespace examples {
 		{ 1.0000,	color_rgb(60, 10, 8, 255) },
 		//{ 15000,	color_rgb(30, 5, 4, 255) }
 	};
-}}
+}}}

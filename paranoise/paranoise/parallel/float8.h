@@ -2,10 +2,9 @@
 #ifndef PARANOISE_INTRINSIC_M256F_H
 #define PARANOISE_INTRINSIC_M256F_H
 
-#include "base.h"
-#include "../capabiliy.h"
+#include "dependencies.h"
 
-namespace paranoise {	namespace parallel {
+namespace zzsystems { namespace simdal {
 
 	template<typename featuremask>
 	struct int8;
@@ -26,8 +25,8 @@ namespace paranoise {	namespace parallel {
 
 		float8(const float* rhs)	: val(_mm256_load_ps(rhs)) {}
 
-		float8(VARGS8(uint8))		: val(_mm256_cvtepi32_ps(_mm256_set_epi32(VPASS8))) {}
-		float8(VARGS8(int))			: val(_mm256_cvtepi32_ps(_mm256_set_epi32(VPASS8))) {}
+		float8(VARGS8(uint8_t))		: val(_mm256_cvtepi32_ps(_mm256_set_epi32(VPASS8))) {}
+		float8(VARGS8(int32_t))			: val(_mm256_cvtepi32_ps(_mm256_set_epi32(VPASS8))) {}
 		float8(VARGS8(float))		: val(_mm256_set_ps(VPASS8)) {}
 
 		float8(const __m256& rhs)	: val(rhs) {}
@@ -41,7 +40,7 @@ namespace paranoise {	namespace parallel {
 		BIN_OP_STUB(+, _float8, float)
 		BIN_OP_STUB(-, _float8, float)
 		BIN_OP_STUB(*, _float8, float)
-		BIN_OP_STUB(/ , _float8, float)
+		BIN_OP_STUB(/, _float8, float)
 
 		BIN_OP_STUB(&, _float8, float)
 		BIN_OP_STUB(&&, _float8, float)

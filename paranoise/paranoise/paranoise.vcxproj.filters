@@ -19,12 +19,6 @@
     <Filter Include="Header Files\noise">
       <UniqueIdentifier>{881234eb-b5af-4581-84d8-6e133a30fb21}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\parallel">
-      <UniqueIdentifier>{5285bbc2-9e06-4154-9750-2e000ef9ed87}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\parallel\impl">
-      <UniqueIdentifier>{662496fa-7b8a-47fa-b0c8-9be442a7d612}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\modules\impl">
       <UniqueIdentifier>{1de57c7b-6312-4626-9f36-4748d51b75ef}</UniqueIdentifier>
     </Filter>
@@ -34,63 +28,39 @@
     <Filter Include="Header Files\models">
       <UniqueIdentifier>{c46dd8ba-79ac-4ce1-96df-a48f9e40ea2f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\modules\generators">
+      <UniqueIdentifier>{fede0c56-c59b-4b52-9940-5d15c06a4531}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\modules\modifiers">
+      <UniqueIdentifier>{98cd6b6a-84af-46c8-a486-21e83483d46a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\simdal">
+      <UniqueIdentifier>{5285bbc2-9e06-4154-9750-2e000ef9ed87}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\simdal\impl">
+      <UniqueIdentifier>{662496fa-7b8a-47fa-b0c8-9be442a7d612}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\simdal\impl\sse">
+      <UniqueIdentifier>{3404ae4a-b067-45ef-9979-d6e408e4de23}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\simdal\impl\avx">
+      <UniqueIdentifier>{0a3562f7-f35d-4144-bd9c-13066f258482}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\simdal\impl\opencl">
+      <UniqueIdentifier>{cc4ed744-7e93-48b1-9dc8-0dfb869e5fb8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="scheduler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="parallel\clDouble.h">
-      <Filter>Header Files\parallel\impl</Filter>
-    </ClInclude>
-    <ClInclude Include="parallel\clFloat.h">
-      <Filter>Header Files\parallel\impl</Filter>
-    </ClInclude>
-    <ClInclude Include="parallel\clInt.h">
-      <Filter>Header Files\parallel\impl</Filter>
-    </ClInclude>
-    <ClInclude Include="parallel\x87compat.h">
-      <Filter>Header Files\parallel\impl</Filter>
-    </ClInclude>
-    <ClInclude Include="parallel\avx.h">
-      <Filter>Header Files\parallel</Filter>
-    </ClInclude>
-    <ClInclude Include="parallel\opencl.h">
-      <Filter>Header Files\parallel</Filter>
-    </ClInclude>
-    <ClInclude Include="parallel\sse.h">
-      <Filter>Header Files\parallel</Filter>
-    </ClInclude>
     <ClInclude Include="parallel\all.h">
-      <Filter>Header Files\parallel</Filter>
+      <Filter>Header Files\simdal</Filter>
     </ClInclude>
     <ClInclude Include="parallel\SISD.h">
-      <Filter>Header Files\parallel</Filter>
-    </ClInclude>
-    <ClInclude Include="modules\billow.h">
-      <Filter>Header Files\modules\impl</Filter>
-    </ClInclude>
-    <ClInclude Include="modules\curve.h">
-      <Filter>Header Files\modules\impl</Filter>
+      <Filter>Header Files\simdal</Filter>
     </ClInclude>
     <ClInclude Include="modules\modules.h">
-      <Filter>Header Files\modules\impl</Filter>
-    </ClInclude>
-    <ClInclude Include="modules\perlin.h">
-      <Filter>Header Files\modules\impl</Filter>
-    </ClInclude>
-    <ClInclude Include="modules\ridgedmultifrac.h">
-      <Filter>Header Files\modules\impl</Filter>
-    </ClInclude>
-    <ClInclude Include="modules\rotate.h">
-      <Filter>Header Files\modules\impl</Filter>
-    </ClInclude>
-    <ClInclude Include="modules\select.h">
-      <Filter>Header Files\modules\impl</Filter>
-    </ClInclude>
-    <ClInclude Include="modules\terrace.h">
-      <Filter>Header Files\modules\impl</Filter>
-    </ClInclude>
-    <ClInclude Include="modules\voronoi.h">
       <Filter>Header Files\modules\impl</Filter>
     </ClInclude>
     <ClInclude Include="modules\all.h">
@@ -105,9 +75,6 @@
     <ClInclude Include="vector.h">
       <Filter>Header Files\util</Filter>
     </ClInclude>
-    <ClInclude Include="basetypes.h">
-      <Filter>Header Files\util</Filter>
-    </ClInclude>
     <ClInclude Include="interpolation.h">
       <Filter>Header Files\util</Filter>
     </ClInclude>
@@ -117,38 +84,101 @@
     <ClInclude Include="models\primitives.h">
       <Filter>Header Files\models</Filter>
     </ClInclude>
-    <ClInclude Include="parallel\double2.h">
-      <Filter>Header Files\parallel\impl</Filter>
-    </ClInclude>
-    <ClInclude Include="parallel\float4.h">
-      <Filter>Header Files\parallel\impl</Filter>
-    </ClInclude>
-    <ClInclude Include="parallel\int4.h">
-      <Filter>Header Files\parallel\impl</Filter>
-    </ClInclude>
-    <ClInclude Include="parallel\double4.h">
-      <Filter>Header Files\parallel\impl</Filter>
-    </ClInclude>
-    <ClInclude Include="parallel\float8.h">
-      <Filter>Header Files\parallel\impl</Filter>
-    </ClInclude>
-    <ClInclude Include="parallel\int8.h">
-      <Filter>Header Files\parallel\impl</Filter>
-    </ClInclude>
     <ClInclude Include="mapper.h">
       <Filter>Header Files\util</Filter>
     </ClInclude>
-    <ClInclude Include="modules\turbulence.h">
-      <Filter>Header Files\modules\impl</Filter>
-    </ClInclude>
-    <ClInclude Include="parallel\base.h">
-      <Filter>Header Files\parallel</Filter>
-    </ClInclude>
-    <ClInclude Include="capabiliy.h">
-      <Filter>Header Files\parallel\impl</Filter>
-    </ClInclude>
     <ClInclude Include="constants.h">
       <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="capabilities.h">
+      <Filter>Header Files\simdal\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\buffer.h">
+      <Filter>Header Files\modules\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\cache.h">
+      <Filter>Header Files\modules\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\perlin.h">
+      <Filter>Header Files\modules\generators</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\billow.h">
+      <Filter>Header Files\modules\generators</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\ridgedmultifrac.h">
+      <Filter>Header Files\modules\generators</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\voronoi.h">
+      <Filter>Header Files\modules\generators</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\curve.h">
+      <Filter>Header Files\modules\modifiers</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\rotate.h">
+      <Filter>Header Files\modules\modifiers</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\select.h">
+      <Filter>Header Files\modules\modifiers</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\terrace.h">
+      <Filter>Header Files\modules\modifiers</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\turbulence.h">
+      <Filter>Header Files\modules\modifiers</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\module_base.h">
+      <Filter>Header Files\modules</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\module_wrapper.h">
+      <Filter>Header Files\modules</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\float4.h">
+      <Filter>Header Files\simdal\impl\sse</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\int4.h">
+      <Filter>Header Files\simdal\impl\sse</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\double2.h">
+      <Filter>Header Files\simdal\impl\sse</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\double4.h">
+      <Filter>Header Files\simdal\impl\avx</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\float8.h">
+      <Filter>Header Files\simdal\impl\avx</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\int8.h">
+      <Filter>Header Files\simdal\impl\avx</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\clDouble.h">
+      <Filter>Header Files\simdal\impl\opencl</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\clFloat.h">
+      <Filter>Header Files\simdal\impl\opencl</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\clInt.h">
+      <Filter>Header Files\simdal\impl\opencl</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\avx.h">
+      <Filter>Header Files\simdal\impl\avx</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\sse.h">
+      <Filter>Header Files\simdal\impl\sse</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\opencl.h">
+      <Filter>Header Files\simdal\impl\opencl</Filter>
+    </ClInclude>
+    <ClInclude Include="base.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="generic_operators.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\dependencies.h">
+      <Filter>Header Files\simdal\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\dependencies.h">
+      <Filter>Header Files\modules</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

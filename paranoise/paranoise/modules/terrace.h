@@ -2,71 +2,74 @@
 #ifndef PARANOISE_MODULES_TERRACE
 #define PARANOISE_MODULES_TERRACE
 
-#include <map>
-#include <algorithm>
-#include "../noisegenerators.h"
-#include "../parallel/x87compat.h"
+#include "dependencies.h"
 
-namespace paranoise { namespace module {
+namespace zzsystems { namespace paranoise { namespace modules {
+	using namespace simdal;
 	using namespace generators;
-	using namespace x87compat;
+	using namespace util;
 
-	SIMD_ENABLE(TReal, TInt)
-	struct terrace
+	SIMD_ENABLED
+	class terrace : public module_base<vreal, vint>
 	{
-		std::map<float, double> points;
+	public:
+		vector<pair<const vreal, vreal>> points;
 		bool invert = false;
 
-		terrace(const std::initializer_list<std::pair<const float, float>> &points, bool invert = false)
-			: points(points), invert(invert)
+		terrace(const initializer_list<pair<const vreal, vreal>> &points, bool invert = false)
+			: module_base(1), points(points), invert(invert)
 		{}
 
-		inline TReal operator()(const Vector3<TReal>& coords, const Module<TReal>& source) const
+		MODULE_PROPERTY(source, 0)
+
+		vreal operator()(const Vector3<vreal>& coords) const override
 		{
-			auto cpc = points.count();
+			auto cpc = points.size();
 			assert(cpc >= 4);
 
-			auto val = source(coords);
-			TInt startIndexes;
+			vreal cp1, cp0, set_value, already_set = fastload<vreal>::_0();
 
-			for (int i = 0, auto iter = points.begin(); iter != points.end(); i++, iter++)
+			int i0, i1;
+			auto val = get_source()(coords);
+
+			for (int i = 0; i < points.size(); i++)
 			{
-				startIndexes |= sel(iter->first > val, i, consts<TInt>::zero());
+				// Point > supplied values?
+				set_value = points[i].first > val;
+
+				// Get indeces				
+				i1 = vclamp<int>(i - 1, 0, points.size() - 1);
+				i0 = vclamp<int>(i, 0, points.size() - 1);
+
+				// Set values if not set yet
+				
+				cp1 = vsel(set_value && !already_set, points[i1].second, cp1);
+				cp0 = vsel(set_value && !already_set, points[i0].second, cp0);
+
+				// Fill accumulating mask
+				already_set = already_set || set_value;
+
+				// If all results are set, quit prematurely
+				if (static_cast<bool>(already_set))
+					break;
 			}
 
-			auto i1 = clamp(startIndexes - consts<TInt>::one(), consts<TInt>::zero(), cpc - consts<TInt>::one());
-			auto i0 = clamp(startIndexes, consts<TInt>::zero(), cpc - consts<TInt>::one());
+			// prevent division by zero by adding an offset
+			cp0 = vsel(cp0 == cp1, cp1 + cp0, cp0);
 
-			auto mask = i1 == i2;
-
-			//auto result = (i2 == i1) & 
-			TReal in1, in0, alpha, cp3, cp2, cp1, cp0, result;
-
-			for (int i = 0; i < dim<TReal>(); i++)
-			{
-				in0.values[i] = std::advance(settings.points.begin(), i1.values[i])->first;
-				in1.values[i] = std::advance(settings.points.begin(), i2.values[i])->first;
-
-				cp1.values[i] = std::advance(settings.points.begin(), i1.values[i])->first;
-				cp0.values[i] = std::advance(settings.points.begin(), i0.values[i])->first;
-
-				result.values[i] = std::advance(settings.points.begin(), i1.values[i])->second;
-			}
-
-			alpha = (val - in0) / (in1 - in0);
-
+			// blend results
+			auto alpha = (val - cp0) / (cp1 - cp0);// +numeric_limits<float>::epsilon());
+						
 			if (invert)
 			{
-				alpha = 1.0 - alpha;
+				alpha = fastload<vreal>::_1() - alpha;
 				std::swap(cp0, cp1);
 			}
 
 			alpha *= alpha;
 
-			return sel(mask, result, lerp(cp0, cp1, alpha));
+			return lerp(cp0, cp1, alpha);
 		}
-
-		// inline operator (Module<TReal>)() { return operator(); }
 	};	
-}}
+}}}
 #endif

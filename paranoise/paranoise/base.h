@@ -3,23 +3,9 @@
 #define BASETYPES_H
 
 #include <functional>
-#include "vector.h"
+//#include "vector.h"
 
-namespace paranoise {
-	typedef unsigned	int		uint;
-
-	typedef unsigned	long long	uint64;
-	typedef unsigned	int		uint32;
-	typedef unsigned	short	uint16;
-	typedef unsigned	char	uint8;
-
-	typedef signed		long long	int64;
-	typedef signed		int		int32;
-	typedef signed		short	int16;
-	//typedef signed		char	int8;	
-
-
-	using namespace paranoise::util;
+namespace zzsystems { namespace paranoise {
 
 #define ALIGN(bytes) __declspec(align(bytes))
 #define FORCEINLINE __forceinline
@@ -29,6 +15,9 @@ namespace paranoise {
 	template<	typename floatType	= std::enable_if<std::is_floating_point<floatType>::value, floatType>::type, \
 				typename intType	= std::enable_if<std::is_integral<intType>::value, intType>::type>
 
+#define SIMD_ENABLED \
+	template<	typename vreal	= std::enable_if<std::is_floating_point<vreal>::value, vreal>::type, \
+				typename vint	= std::enable_if<std::is_integral<vint>::value, vint>::type>
 // define checked floating type to use on SIMD-enabled functions/types. 
 #define SIMD_ENABLE_F(floatType) \
 	template<typename floatType = std::enable_if<std::is_floating_point<floatType>::value, floatType>::type>
@@ -40,6 +29,9 @@ namespace paranoise {
 #define ANY(type) template<typename type>
 #define ANY2(type1, type2) template<typename type1, typename type2>
 
+#define ASSIGN_OP(op, type) inline type& operator op(type &a, const type &b)
+#define ASSIGN_OP2(op, type1, type2) inline type1& operator op(type1 &a, const type2 &b)
+
 #define UN_OP(op, type) inline type operator op(const type a)				
 #define BIN_OP(op, type) inline type operator op(const type a, const type b)
 #define SHIFT_OP(op, type) inline type operator op(const type a, const int sa)
@@ -47,15 +39,25 @@ namespace paranoise {
 #define UN_OP_STUB(op, type, convertable) \
 inline friend const type operator op(const convertable a)	{ return op static_cast<type>(a); }		
 
+#define BIN_OP_STUB_AB(op, type, convertable) \
+inline friend type operator op(const type &a, const convertable b) { return a op static_cast<type>(b); }
+
+#define BIN_OP_STUB_BA(op, type, convertable) \
+inline friend type operator op(const convertable a, const type &b) { return static_cast<type>(a) op b; }
+
 #define BIN_OP_STUB(op, type, convertable) \
-inline friend const type operator op(const type a, const convertable b) { return a op static_cast<type>(b); } \
-inline friend const type operator op(const convertable a, const type &b) { return static_cast<type>(a) op b; }
+BIN_OP_STUB_AB(op, type, convertable) \
+BIN_OP_STUB_BA(op, type, convertable)
+
+#define BIN_OP_STUB_ANY(op, type) \
+ANY(convertable) BIN_OP_STUB_AB(op, type, convertable) \
+ANY(convertable) BIN_OP_STUB_BA(op, type, convertable)
 
 #define FUNC(name, type) inline type name()
 
-#define UN_FUNC(name, type) inline type name(const type a)
-#define BIN_FUNC(name, type) inline type name(const type a, const type b)
-#define TRI_FUNC(name, type) inline type name(const type a, const type b, const type c)
+#define UN_FUNC(name, type) inline type name(const type &a)
+#define BIN_FUNC(name, type) inline type name(const type &a, const type &b)
+#define TRI_FUNC(name, type) inline type name(const type &a, const type &b, const type &c)
 
 #define FEATURE(TType, condition) \
 template<typename featuremask>\
@@ -124,47 +126,42 @@ FEATURE(TType, condition) name(const TType a, const TType b, const TType c)
 #define CONSTDEF(TType, name, body) constexpr TType name() { return static_cast<TType>(body); }
 
 
-	SIMD_ENABLE_F(TReal)
-		using Module = std::function<TReal(const Vector3<TReal>&)>;
-
-	SIMD_ENABLE_F(TReal)
-		using Transformer = std::function<Vector3<TReal>(const Vector3<TReal>&)>;
-
 #define SIMD_FEATURE(condition) \
 	template<typename featuremask, typename = std::enable_if<condition, featuremask>::type>
 
-	ANY(TType)
-		inline TType id(const TType &a) { return a; }
-
-	SIMD_ENABLE(TReal, TInt)
-		using SeededModule = std::function<TReal(const Vector3<TReal>&, const TInt& seed)>;
+		ANY(TType)
+			inline TType id(const TType &a) { return a; }
 
 
-	template<typename T>
-	std::function<typename std::enable_if<std::is_function<T>::value, T>::type> make_function(T *t)
-	{
-		return{ t };
+
+		ANY(T)
+			std::function<typename std::enable_if<std::is_function<T>::value, T>::type> make_function(T *t)
+		{
+			return{ t };
+		}
 	}
+};
 
-	template<typename T>
-	constexpr size_t dim() { return sizeof(T) >> 2; }
+namespace zzsystems { namespace simdal
+	{
+		ANY(T)
+			constexpr size_t dim() { return sizeof(T) >> 2; }
 
-	namespace parallel {
 
 		ANY(TProcess)
-		inline TProcess vsel(const bool condition, const TProcess &choice1, const TProcess &choice2)
+			inline TProcess vsel(const bool condition, const TProcess &choice1, const TProcess &choice2)
+		{
+			return vsel<bool, TProcess>(condition, choice1, choice2);
+		}
+
+		ANY2(TCondition, TProcess)
+			inline TProcess vsel(const TCondition condition, const TProcess &choice1, const TProcess &choice2)
 		{
 			return condition ? choice1 : choice2;
 		}
 
-		ANY2(TCondition, TProcess)
-			inline Vector3<TProcess> vsel(const Vector3<TCondition> &condition, const Vector3<TProcess> &choice1, const Vector3<TProcess> &choice2)
-		{
-			return Vector3<TProcess>(
-				sel<TCondition, TProcess>(condition.x, choice1.x, choice2.x),
-				sel<TCondition, TProcess>(condition.y, choice1.y, choice2.y),
-				sel<TCondition, TProcess>(condition.z, choice1.z, choice2.z));
-		}
+
+
 
 		SIMD_ENABLE_F(TReal)
 			inline TReal clamp_int32(const TReal &val)
@@ -172,14 +169,7 @@ FEATURE(TType, condition) name(const TType a, const TType b, const TType c)
 			return vclamp<TReal>(val, -1073741824.0, 1073741824.0);
 		}
 
-		template<typename T, typename U>
-		inline Vector3<T> vtrunc(const Vector3<T> &val) { return Vector3<T>(vtrunc<T, U>(val.x), vtrunc<T, U>(val.y), vtrunc<T, U>(val.z)); }
 
-		template<typename T>
-		inline Vector3<T> clamp_int32(const Vector3<T> &val)
-		{
-			return Vector3<T>(clamp_int32<T>(val.x), clamp_int32<T>(val.y), clamp_int32<T>(val.z));
-		}
 
 		inline double vabs(double a) { return ::fabs(a); }
 		inline float  vabs(float a) { return ::fabsf(a); }
@@ -210,6 +200,6 @@ FEATURE(TType, condition) name(const TType a, const TType b, const TType c)
 
 		// Clamp: min(max(val, minval), maxval)
 		ANY(TType) TRI_FUNC(vclamp, TType) { BODY(vmin(vmax(a, b), c)); }
-	};
-};
+	}
+}
 #endif

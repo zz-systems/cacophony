@@ -5,7 +5,7 @@
 #include "../paranoise/scheduler.h"
 #include "../paranoise/color.h"
 
-namespace paranoise { namespace examples {
+namespace zzsystems { namespace paranoise { namespace examples {
 
 	using namespace util;
 
@@ -153,6 +153,8 @@ namespace paranoise { namespace examples {
 			{ 2.0000f + SEA_LEVEL, 0.500f + SEA_LEVEL },
 		};
 
+		baseContinentDef_cu.set_source(baseContinentDef_pe0);
+
 		// 3: [Carver module]: This higher-frequency Perlin-noise module will be
 		//    used by subsequent noise modules to carve out chunks from the mountain
 		//    ranges within the continent-with-ranges module so that the mountain
@@ -175,7 +177,7 @@ namespace paranoise { namespace examples {
 		//    less than the output value from the continent-with-ranges module, so
 		//    in this case, the output value from the scaled-carver module is
 		//    selected.
-		Module<TReal> baseContinentDef_mi = [=](const auto& c) { return vmin(baseContinentDef_sb(c), baseContinentDef_cu(c, baseContinentDef_pe0)); };
+		Module<TReal> baseContinentDef_mi = [=](const auto& c) { return vmin(baseContinentDef_sb(c), baseContinentDef_cu(c)); };
 
 		// 6: [Clamped-continent module]: Finally, a clamp module modifies the
 		//    carved-continent module to ensure that the output value of this
@@ -186,7 +188,10 @@ namespace paranoise { namespace examples {
 		//    clamped-continent module.
 		//Module<TReal> baseContinentDef = memoize<TReal, TInt>(baseContinentDef_cl);
 
-		return baseContinentDef_cl;
+		buffer<TReal, TInt> buf(baseContinentDef_cl);
+		
+		return buf;
+		//return memoize<TReal, TInt>( baseContinentDef_cl );
 		//return memoize<TReal, TInt>(baseContinentDef_cl);
 	}
 
@@ -206,4 +211,4 @@ namespace paranoise { namespace examples {
 		{ 6144.0 + seaLevelInMeters,		color_rgb(128, 255, 255, 255) },
 		{ 16384.0 + seaLevelInMeters,	color_rgb(0,   0, 255, 255) },
 	};
-}}
+}}}

@@ -2,33 +2,29 @@
 #ifndef PARANOISE_MODULES_BILLOW
 #define PARANOISE_MODULES_BILLOW
 
-#include "../noisegenerators.h"
-#include "../parallel/x87compat.h"
+#include "dependencies.h"
 
-namespace paranoise { namespace module {
+namespace zzsystems { namespace paranoise { namespace modules {
+	using namespace simdal;
 	using namespace generators;
-	using namespace x87compat;
+	using namespace util;
 
-	SIMD_ENABLE(TReal, TInt)
-	struct billow
+	SIMD_ENABLED
+	class billow : public module_base<vreal, vint>
 	{
-		TReal frequency, lacunarity, persistence;
-		Quality quality;
-		TInt seed;
+		vreal frequency, lacunarity, persistence;
+		vint seed;
+				
 		int octaves;
-		
+		Quality quality;
+
 		billow(float frequency = 1.0, float lacunarity = 2.0, float persistence = 0.5, int octaves = 6, int seed = 0, Quality quality = Quality::Standard)
 			: frequency(frequency), lacunarity(lacunarity), persistence(persistence), seed(seed), octaves(octaves), quality(quality)
 		{}
 
-		inline TReal operator()(const Vector3<TReal>& c) const
+		vreal operator()(const Vector3<vreal>& c) const override
 		{
-			using VReal = Vector3<TReal>;
-
-			TReal value = 0.0;
-			TReal signal = 0.0;
-			TReal curPersistence = 1.0;
-			VReal n;
+			vreal value = 0.0, signal = 0.0, curPersistence = 1.0, n;
 
 			auto _coords = c * lacunarity;
 
@@ -43,8 +39,11 @@ namespace paranoise { namespace module {
 				// final result.
 				signal = GradientCoherentNoise3D(n, seed + currentOctave, quality);
 
-				signal = vfmsub(fastload<TReal>::_2(), vabs(signal), fastload<TReal>::_1());
-				value += signal * curPersistence;
+				signal = vfmsub(fastload<vreal>::_2(), vabs(signal), fastload<vreal>::_1());
+
+				//value += signal * curPersistence;
+				value = vfmadd(signal, curPersistence, value);
+				
 
 				// Prepare the next octave.
 				_coords *= lacunarity;
@@ -55,10 +54,8 @@ namespace paranoise { namespace module {
 
 			return value;
 		}
-
-		// inline operator (Module<TReal>)() { return operator(); }
 	};
 
 	
-}}
+}}}
 #endif

@@ -14,8 +14,8 @@
 #include "../paranoise/parallel/all.h"
 #include "../paranoise/scheduler.h"
 
-namespace paranoise { namespace examples {
-	using namespace parallel;
+namespace zzsystems { namespace paranoise { namespace examples {
+	using namespace simdal;
 	using namespace scheduler;
 
 	void run()
@@ -29,18 +29,20 @@ namespace paranoise { namespace examples {
 		const int w = 4 * 4096;//4096; //8192 * 2;
 		const int h = 4 * 4096;//4096; //8192 * 2;
 #else 
-		const int w = 1024 * 2; //8192 * 2;
-		const int h = 1024 * 2; //8192 * 2;
+		const int w = 512 * 2; //8192 * 2;
+		const int h = 512 * 2; //8192 * 2;
 #endif				
 		scheduler_settings settings({ w, h, 1 }, 1337, true);
 
 		auto f1 = [=]()
 		{
-			SIMD_DISPATCH(sysinfo,
+			system_info sysinfo2;
+			//sysinfo2.setFlag(CAPABILITY_AVX2, false);
+			SIMD_DISPATCH(sysinfo2,
 			{ 
 				//cout << ">>dispatch: using " << static_dispatcher<capability>::unit_name << " branch" << endl; 
-				return schedule2D<vreal>(generate_complex_planet<vreal, vint>(),
-					[w, h](const Vector3<vreal> &coords) { return (coords)*  Vector3<vreal>(10, 10, 2) / Vector3<vreal>(w, h, h) - Vector3<vreal>(5, 5, 1); },
+				return schedule<vreal>(generate_complex_planet<vreal, vint>(),
+					[w, h](const Vector3<vreal> &coords) { return (coords) *  Vector3<vreal>(10, 10, 2) / Vector3<vreal>(w, h, h) - Vector3<vreal>(5, 5, 1); },
 					settings); 
 			});
 		};
@@ -50,15 +52,15 @@ namespace paranoise { namespace examples {
 			system_info reference;
 			reference.feature_flags = CAPABILITY_NONE;
 			//cout << reference;
-			//cout << ">>ref dispatch: using " << static_dispatcher<integral_constant<int, CAPABILITY_SSE2>>::unit_name << " branch" << endl;
+			//cout << ">>ref dispatch: using " << static_dispatcher<integral_constant<int, CAPABILITY_NONE>>::unit_name << " branch" << endl;
 
 			SIMD_DISPATCH(reference, 
 			{
 				//cout << ">>ref dispatch: using " << static_dispatcher<capability>::unit_name << " branch" << endl;
 
-				return schedule2D<vreal>(
+				return schedule<vreal>(
 					generate_complex_planet<vreal, vint>(),
-					[w, h](const Vector3<vreal> &coords) { return (coords)* Vector3<vreal>(10, 10, 2) / Vector3<vreal>(w, h, h) - Vector3<vreal>(5, 5, 1);},
+					[w, h](const Vector3<vreal> &coords) { return (coords) * Vector3<vreal>(10, 10, 2) / Vector3<vreal>(w, h, h) - Vector3<vreal>(5, 5, 1);},
 					settings);
 			});
 		};
@@ -74,11 +76,11 @@ namespace paranoise { namespace examples {
 		};
 		run(w, h, f1, f2, grad);
 	}
-}}
+}}}
 
 int main(int argc, char** argv)
 {
-	paranoise::examples::run();
+	zzsystems::paranoise::examples::run();
 
 	return 0;
 }

@@ -4,7 +4,7 @@
 //
 //#include "base.h"
 //
-//namespace paranoise { namespace parallel {
+//namespace zzsystems { namespace simdal {
 //	struct float4;
 //	struct int4;
 //

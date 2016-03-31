@@ -17,8 +17,8 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 //Logger::WriteMessage(sstream.str().c_str()); \
 //std::cerr.rdbuf(cerrbuf);
 
-namespace paranoise { namespace test {
-	using namespace parallel;
+namespace zzsystems { namespace unittest {
+	using namespace simdal;
 
 	using capability_avx		= integral_constant<int, CAPABILITY_AVX1 | CAPABILITY_AVX2 >;
 	using capability_sse4fma	= integral_constant<int, CAPABILITY_SSE2 | CAPABILITY_SSE3 | CAPABILITY_SSE41 | CAPABILITY_FMA3>;

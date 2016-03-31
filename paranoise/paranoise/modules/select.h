@@ -2,28 +2,34 @@
 #ifndef PARANOISE_MODULES_SELECT
 #define PARANOISE_MODULES_SELECT
 
-#include "../noisegenerators.h"
-#include "../parallel/x87compat.h"
+#include "dependencies.h"
 
-namespace paranoise { namespace module {
+namespace zzsystems { namespace paranoise { namespace modules {
+	using namespace simdal;
 	using namespace generators;
-	using namespace x87compat;
+	using namespace util;
 
-	SIMD_ENABLE(TReal, TInt)
-	struct select
+	SIMD_ENABLED
+	class select : public module_base<vreal, vint>
 	{
+	public:
 		float edgeFalloff = 0.0;
-		TReal lowerBound = -1.0, upperBound = 1.0;
+		vreal lowerBound = -1.0, upperBound = 1.0;
 		
 		select(float edgeFalloff = 0.0, float lowerBound = -1.0, float upperBound = 1.0)
-			: edgeFalloff(edgeFalloff), lowerBound(lowerBound), upperBound(upperBound)
+			: module_base(3), edgeFalloff(edgeFalloff), lowerBound(lowerBound), upperBound(upperBound)
 		{}
 
-		inline TReal operator()(const Vector3<TReal>& coords, const Module<TReal>& a, const Module<TReal>& b, const Module<TReal>& controller) const
+		MODULE_PROPERTY(a, 0)
+		MODULE_PROPERTY(b, 1)
+		MODULE_PROPERTY(controller, 2)
+
+		//, const Module<vreal>& a, const Module<vreal>& b, const Module<vreal>& controller
+		vreal operator()(const Vector3<vreal>& coords) const override
 		{
-			auto cv = controller(coords);
-			auto r0 = a(coords);
-			auto r1 = b(coords);			
+			auto cv = get_controller()(coords);
+			auto r0 = get_a()(coords);
+			auto r1 = get_b()(coords);
 					
 			if (edgeFalloff > 0.0)
 			{
@@ -41,14 +47,14 @@ namespace paranoise { namespace module {
 				// else
 				auto mask0 = !(mask4 || mask3 || mask2 || mask1);
 
-				// calculation vectors
+				// merge calculation vectors
 				auto result = mask4 && r0;
 				result |= mask3 & interpolate_bounds(r0, r1, cv, lowerBound, edgeFalloff);
 				result |= mask2 & r1;
 				result |= mask1 & interpolate_bounds(r1, r0, cv, upperBound, edgeFalloff);
 				result |= mask0 & r0;
 
-				// merge results
+				
 				return result;
 			}
 			else
@@ -59,10 +65,10 @@ namespace paranoise { namespace module {
 			}
 		}
 	private:
-		inline TReal interpolate_bounds(const TReal& from,
-			const TReal& to,
-			const TReal& control,
-			TReal bound, TReal edgeFalloff) const
+		inline vreal interpolate_bounds(const vreal& from,
+			const vreal& to,
+			const vreal& control,
+			vreal bound, vreal edgeFalloff) const
 		{
 			auto lowerCurve = bound - edgeFalloff;
 			auto upperCurve = bound + edgeFalloff;
@@ -73,13 +79,14 @@ namespace paranoise { namespace module {
 	};
 
 
-	// path for scalar code
+	// path for scalar code 
+	// , const Module<float>& a, const Module<float>& b, const Module<float>& controller
 	template<>
-	inline float select<float, int>::operator()(const Vector3<float>& coords, const Module<float>& a, const Module<float>& b, const Module<float>& controller) const
+	inline float select<float, int>::operator()(const Vector3<float>& coords) const
 	{
-		auto cv = controller(coords);
-		auto r0 = a(coords);
-		auto r1 = b(coords);
+		auto cv = get_controller()(coords);
+		auto r0 = get_a()(coords);
+		auto r1 = get_b()(coords);
 
 		if (edgeFalloff > 0.0)
 		{			
@@ -102,9 +109,8 @@ namespace paranoise { namespace module {
 		{
 			auto mask = (cv < lowerBound) || (cv > upperBound);
 
-			return vsel(mask, r0, r1);
+			return vsel<bool, float>(mask, r0, r1);
 		}
 	}
-	// inline operator (Module<TReal>)() { return operator(); }
-}}
+}}}
 #endif

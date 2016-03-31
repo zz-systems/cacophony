@@ -2,49 +2,47 @@
 #ifndef PARANOISE_AVX_H
 #define PARANOISE_AVX_H
 
-#include "base.h"
+#include "dependencies.h"
+
 #include "int8.h"
 #include "float8.h"
 #include "double4.h"
-#include "x87compat.h"
 
 // Traits =========================================================================================================
 template<typename featuremask>
-struct std::_Is_integral<paranoise::parallel::int8<featuremask>> : std::true_type {	};
+struct std::_Is_integral<zzsystems::simdal::_int8> : std::true_type {	};
 
 template<typename featuremask>
-struct std::_Is_floating_point<paranoise::parallel::float8<featuremask>> : std::true_type {	};
+struct std::_Is_floating_point<zzsystems::simdal::_float8> : std::true_type {	};
 
 //template<>
-//struct std::_Is_floating_point<paranoise::parallel::double2>	: std::true_type {	};
+//struct std::_Is_floating_point<zzsystems::simdal::double2>	: std::true_type {	};
 
-namespace paranoise { namespace parallel {
+namespace zzsystems { namespace simdal {
 
 	// Converting constructors ===================================================================================
-	template<typename featuremask>
-	inline _int8::int8(const _float8& rhs) : int8(rhs.val) { }
-	template<typename featuremask>
+	ANY(featuremask)
+	_int8::int8(const _float8& rhs) : int8(rhs.val) { }
+	ANY(featuremask)
 	inline _int8::int8(const _int8& rhs) : int8(rhs.val) { }
 	//inline int8::int8(const double4& rhs) : int8(rhs.val) { }
 
-	template<typename featuremask>
-	inline _float8::float8(const _float8& rhs) : float8(rhs.val) { }
-	template<typename featuremask>
-	inline _float8::float8(const _int8& rhs) : float8(rhs.val) { }
+	ANY(featuremask)
+	_float8::float8(const _float8& rhs) : float8(rhs.val) { }
+	ANY(featuremask)
+	_float8::float8(const _int8& rhs) : float8(rhs.val) { }
 	//inline float8::float8(const double4& rhs) : float8(rhs.val) { }
 
 	/*inline double4::double4(const float8& rhs) : double4(rhs.val) { }
 	inline double4::double4(const int8& rhs) : double4(rhs.val) { }
 	inline double4::double4(const double4& rhs) : double4(rhs.val) { }*/
 
-	ANY(featuremask)
-		inline int32* extract(_int8 &src)
+	ANY(featuremask) int32_t* extract(_int8 &src)
 	{
 		return src.val.m256i_i32;
 	}
 
-	ANY(featuremask)
-		inline float* extract(_float8 &src)
+	ANY(featuremask) float* extract(_float8 &src)
 	{
 		return src.val.m256_f32;
 	}

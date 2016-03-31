@@ -2,10 +2,9 @@
 #ifndef PARANOISE_INTRINSIC_M256I_H
 #define PARANOISE_INTRINSIC_M256I_H
 
-#include "base.h"
-#include "../capabiliy.h"
+#include "dependencies.h"
 
-namespace paranoise {	namespace parallel {
+namespace zzsystems { namespace simdal {
 
 	template<typename featuremask>
 	struct float8;
@@ -17,15 +16,11 @@ namespace paranoise {	namespace parallel {
 	template<typename featuremask>
 	struct ALIGN(32) int8 {
 		__m256i val;
-/*
-		int64 i64[4];
-		int32 i32[8];
-		int16 i16[16];*/
 
 		int8() = default;
-		int8(const int32 rhs)		: val(_mm256_set1_epi32(rhs)) {}
+		int8(const int32_t rhs)		: val(_mm256_set1_epi32(rhs)) {}
 
-		int8(VARGS8(uint8))			: val(_mm256_set_epi32(VPASS8)) {}
+		int8(VARGS8(uint8_t))			: val(_mm256_set_epi32(VPASS8)) {}
 		int8(VARGS8(int))			: val(_mm256_set_epi32(VPASS8)) {}
 		int8(VARGS8(float))			: val(_mm256_cvtps_epi32(_mm256_set_ps(VPASS8))) {}
 

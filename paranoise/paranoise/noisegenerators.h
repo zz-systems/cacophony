@@ -15,10 +15,10 @@
 
 #define NOISE_VERSION 2
 
-namespace paranoise {	namespace generators {
+namespace zzsystems { namespace paranoise { namespace generators {
 	using namespace interpolation;
-	using namespace parallel;
-
+	using namespace simdal;
+	using namespace util;
 	//using namespace x87compat;
 
 	enum Quality {
@@ -60,7 +60,7 @@ namespace paranoise {	namespace generators {
 #endif
 		
 	namespace detail {
-		using namespace parallel;
+		using namespace simdal;
 
 		// Create a unit-length cube aligned along an integer boundary.  This cube
 		// surrounds the input point.
@@ -394,6 +394,6 @@ namespace paranoise {	namespace generators {
 		return lerp(iy0, iy1, s.z);
 	}
 		
-}}
+}}}
 
 #endif

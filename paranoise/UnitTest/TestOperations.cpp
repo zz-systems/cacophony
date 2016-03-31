@@ -7,12 +7,12 @@
 #include "util.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
-using namespace paranoise::interpolation;
-using namespace paranoise::parallel;
 
-namespace UnitTest
-{
-	using namespace paranoise::test;
+namespace zzsystems { namespace simdal { namespace tests {
+	using namespace paranoise;
+	using namespace interpolation;
+	using namespace simdal;
+	using namespace unittest;
 
 
 #define INIT_BIN_TEST_REAL \
@@ -90,9 +90,9 @@ namespace UnitTest
 
 			for (int i = 0; i < 8; i++)
 			{
-				_fref1[i] = i;//rng(e2);
-				_fref2[i] = i + 8; rng(e2);
-				_fref3[i] = 8 - i; rng(e2);
+				_fref1[i] = static_cast<float>(i);//rng(e2);
+				_fref2[i] = static_cast<float>(i) + 8; //rng(e2);
+				_fref3[i] = 8 - static_cast<float>(i); //rng(e2);
 
 				
 				_fmask[i] = (_bmask[i] = maskrng(e2) > 0) 
@@ -236,4 +236,4 @@ namespace UnitTest
 		TestOperations::_fmask[8];
 
 	bool TestOperations::_bmask[8];
-}
+}}}

@@ -120,17 +120,23 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="basetypes.h" />
-    <ClInclude Include="capabiliy.h" />
+    <ClInclude Include="base.h" />
+    <ClInclude Include="capabilities.h" />
     <ClInclude Include="color.h" />
     <ClInclude Include="constants.h" />
+    <ClInclude Include="generic_operators.h" />
     <ClInclude Include="interpolation.h" />
     <ClInclude Include="mapper.h" />
     <ClInclude Include="models\primitives.h" />
     <ClInclude Include="modules\all.h" />
     <ClInclude Include="modules\billow.h" />
+    <ClInclude Include="modules\buffer.h" />
+    <ClInclude Include="modules\cache.h" />
     <ClInclude Include="modules\curve.h" />
+    <ClInclude Include="modules\dependencies.h" />
+    <ClInclude Include="modules\module_base.h" />
     <ClInclude Include="modules\modules.h" />
+    <ClInclude Include="modules\module_wrapper.h" />
     <ClInclude Include="modules\perlin.h" />
     <ClInclude Include="modules\ridgedmultifrac.h" />
     <ClInclude Include="modules\rotate.h" />
@@ -141,10 +147,10 @@
     <ClInclude Include="noisegenerators.h" />
     <ClInclude Include="parallel\all.h" />
     <ClInclude Include="parallel\avx.h" />
-    <ClInclude Include="parallel\base.h" />
     <ClInclude Include="parallel\clDouble.h" />
     <ClInclude Include="parallel\clFloat.h" />
     <ClInclude Include="parallel\clInt.h" />
+    <ClInclude Include="parallel\dependencies.h" />
     <ClInclude Include="parallel\double2.h" />
     <ClInclude Include="parallel\float4.h" />
     <ClInclude Include="parallel\int4.h" />
@@ -154,7 +160,6 @@
     <ClInclude Include="parallel\opencl.h" />
     <ClInclude Include="parallel\SISD.h" />
     <ClInclude Include="parallel\sse.h" />
-    <ClInclude Include="parallel\x87compat.h" />
     <ClInclude Include="scheduler.h" />
     <ClInclude Include="vector.h" />
     <ClInclude Include="vectortable.h" />

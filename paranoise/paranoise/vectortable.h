@@ -1,10 +1,10 @@
 #pragma once
 #ifndef PARANOISE_VECTORTABLE
 #define PARANOISE_VECTORTABLE
-#include "basetypes.h"
+#include "base.h"
 
-namespace paranoise
-{
+namespace zzsystems { namespace paranoise {
+
 	SIMD_ENABLE_F(TReal)
 	struct random_vectors
 	{
@@ -279,5 +279,5 @@ namespace paranoise
 		0.991353f, 0.112814f, 0.0670273f, 0.0f,
 		0.0337884f, -0.979891f, -0.196654f, 0.0
 	};
-}
+}}
 #endif

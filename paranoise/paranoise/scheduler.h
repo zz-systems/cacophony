@@ -2,17 +2,19 @@
 #ifndef PARANOISE_SCHEDULER
 #define PARANOISE_SCHEDULER
 
-#include "basetypes.h"
+#include "base.h"
 
 #include <ppl.h>
 #include <vector>
 #include <fstream>
 #include "parallel/all.h"
+#include "modules/module_base.h"
 
-namespace paranoise { namespace scheduler {
+namespace zzsystems { namespace paranoise { namespace scheduler {
 	using namespace concurrency;
-	using namespace x87compat;
-	using namespace parallel;
+	using namespace simdal;
+	using namespace util;
+	using namespace modules;
 
 	struct scheduler_settings
 	{
@@ -26,45 +28,92 @@ namespace paranoise { namespace scheduler {
 		{}
 	};
 
-	SIMD_ENABLE_F(TReal)
-	std::shared_ptr<std::vector<std::vector<std::vector<float>>>> schedule3D(const Module<TReal>& source, const Transformer<TReal>& transform, const scheduler_settings& settings)
+
+	//template<typename TReal, typename featuremask, enable_if_t<is_same<TReal, _float4>::value, TReal>>
+	template<typename featuremask>
+	inline Vector3<_float4> build_coords(_float4 x, _float4 y, _float4 z)
 	{
-		int word = sizeof(TReal) >> 2;	
+		return Vector3<_float4>(
+			x + _float4(0, 1, 2, 3),
+			y,
+			z
+			);
+	}
+
+	//template<typename TReal, typename featuremask, enable_if_t<is_same<TReal, _float8>::value, TReal>>
+	template<typename featuremask>
+	inline Vector3<_float8> build_coords(_float8 x, _float8 y, _float8 z)
+	{
+		return Vector3<_float8>(
+			x + _float8(0, 1, 2, 3, 4, 5, 6, 7),
+			y,
+			z
+			);
+	}
+
+	//template<typename TReal, typename featuremask, enable_if_t<is_same<TReal, float>::value, TReal>>
+	//template<>
+	inline Vector3<float> build_coords(float x, float y, float z)
+	{
+		return Vector3<float> {
+			x,
+			y,
+			z
+		};
+	}
+
+	SIMD_ENABLE_F(TReal)
+	auto schedule(const Module<TReal>& source, const Transformer<TReal>& transform, const scheduler_settings& settings)
+	{
+		int word = dim<TReal>();
 		auto d = settings.dimensions;
+		auto result = make_shared<vector<float>>(d.x * d.y * d.z);
 
-		auto result = new std::vector<std::vector<std::vector<float>>>();
-		result->resize(d.z);
-
-		for (auto z = 0; z < d.z; z++)
+		if (settings.use_threads)
 		{
-			result->at(z).resize(d.y);
-			for (auto y = 0; y < d.y; y++)
+			parallel_for(0, d.z, [&](const auto z)
 			{
-				result->at(z).at(y).resize(d.x);
-				for (auto x = 0; x < d.x / word; x++)
+				auto depth = z * d.y;
+
+				parallel_for(0, d.y, [&](const auto y)
 				{
-					Vector3<TReal> coords;
+					_MM_SET_ROUNDING_MODE(_MM_ROUND_TOWARD_ZERO);					
 
-					if (word == 4)
+					auto stride = &result->at((depth + y) * d.x);
+
+					for (auto x = 0; x < d.x; x += word)
 					{
-						coords.x = TReal(x, x + 1, x + 2, x + 3);
-						coords.y = (TReal) y;
-						coords.z = (TReal) z;					
+						auto coords = transform(build_coords(
+							static_cast<TReal>(x),
+							static_cast<TReal>(y),
+							static_cast<TReal>(z)));
+
+						auto r = source(coords);
+						stream_result(stride, x, r);
 					}
-					/*else if (word == 8)
-					{
-						coords = Vector3<TReal>{
-									TReal(x, x + 1, x + 2, x + 3, x + 4, x + 5, x + 6, x + 7),
-									TReal(y),
-									TReal(z)
-						};
-					}*/
+				});
+			});
+		}
+		else
+		{
+			_MM_SET_ROUNDING_MODE(_MM_ROUND_TOWARD_ZERO);
 
-					auto chunk = source(transform(coords));
-				
-					for (int i = 0; i < word; i++)
+			for (int z = 0; z < d.z; z++)
+			{
+				auto depth = z * d.y;
+				for (int y = 0; y < d.y; y++)
+				{
+					auto stride = &result->at((depth + y) * d.x);
+
+					for (auto x = 0; x < d.x; x += word)
 					{
-						result->at(z).at(y).at(x + i) = chunk.values[i];
+						auto coords = transform(build_coords(
+							static_cast<TReal>(x),
+							static_cast<TReal>(y), 
+							static_cast<TReal>(z)));
+
+						auto r = source(coords);
+						stream_result(stride, x, r);
 					}
 				}
 			}
@@ -73,52 +122,7 @@ namespace paranoise { namespace scheduler {
 		return result;
 	}
 
-	/*template<typename TReal>
-	inline Vector3<TReal> build_coords(float x, float y)
-	{
-		return Vector3<TReal> {
-			TReal(x),
-			TReal(y),
-			TReal(0.0f)
-		};
-	}*/
-	
-	//template<typename TReal, typename featuremask, enable_if_t<is_same<TReal, _float4>::value, TReal>>
-	template<typename featuremask>
-	inline Vector3<_float4> build_coords(_float4 x, _float4 y)
-	{
-		return Vector3<_float4>(
-			x + _float4(0, 1, 2, 3),
-			y,
-			fastload<_float4>::_0()
-		);
-	}
-
-	//template<typename TReal, typename featuremask, enable_if_t<is_same<TReal, _float8>::value, TReal>>
-	template<typename featuremask>
-	inline Vector3<_float8> build_coords(_float8 x, _float8 y)
-	{
-		return Vector3<_float8>(
-			x + _float8(0, 1, 2, 3, 4, 5, 6, 7),
-			y,
-			fastload<_float8>::_0()
-		);
-	}
-	
-	//template<typename TReal, typename featuremask, enable_if_t<is_same<TReal, float>::value, TReal>>
-	//template<>
-	inline Vector3<float> build_coords(float x, float y)
-	{
-		return Vector3<float> {
-			x,
-			y,
-			0
-		};
-	}
-	using vector2D = std::vector<std::vector<float>>;
-
-	/*template <typename TReal>
-	inline void stream_result(float* stride, int x, const TReal &r);*/
+		
 
 	template <typename featuremask>
 	inline void stream_result(float* stride, int x, const _float4 &r)
@@ -137,70 +141,5 @@ namespace paranoise { namespace scheduler {
 	{
 		stride[x] = r;
 	}
-
-	SIMD_ENABLE_F(TReal)
-	auto schedule2D(const Module<TReal>& source, const Transformer<TReal>& transform, const scheduler_settings& settings)
-	{		
-		int word = dim<TReal>();
-		auto d = settings.dimensions;
-		auto result = make_shared<vector<float>>(d.x * d.y * d.z);					
-		
-		if (settings.use_threads)
-		{
-			parallel_for(0, d.y, [&](const auto y)
-			{
-				_MM_SET_ROUNDING_MODE(_MM_ROUND_TOWARD_ZERO);				
-								
-				auto stride = &result->at(y * d.x);
-
-				for (auto x = 0; x < d.x; x += word)
-				{
-					auto coords = transform(build_coords(
-						static_cast<TReal>(x), 
-						static_cast<TReal>(y)));
-
-					auto r = source(coords);
-					stream_result(stride, x, r);
-				}
-			});
-		}
-		else
-		{
-			_MM_SET_ROUNDING_MODE(_MM_ROUND_TOWARD_ZERO);
-
-			for (int y = 0; y < d.y; y++)
-			{
-				auto stride = &result->at(y * d.x);
-
-				for (auto x = 0; x < d.x; x += word)
-				{
-					auto coords = transform(build_coords(
-						static_cast<TReal>(x), 
-						static_cast<TReal>(y)));
-					auto r = source(coords);
-					stream_result(stride, x, r);
-				}
-			};
-		}
-
-		return result;
-	}
-
-	/*SIMD_ENABLE_F(TReal)
-		inline schedule_thread_body(const std::shared_ptr<vector2D> &result, )
-	{
-		result->at(y).resize(d.x);
-		for (auto x = 0; x < d.x / word; x++)
-		{
-			Vector3<TReal> coords = transform(build_coords<TReal>((float)x / d.x, (float)y / d.y));
-
-			auto chunk = source(coords);
-
-			for (int i = 0; i < word; i++)
-			{
-				result->at(y).at(x + i) = extract(chunk)[i];
-			}
-		}
-	}*/
-}}
+}}}
 #endif

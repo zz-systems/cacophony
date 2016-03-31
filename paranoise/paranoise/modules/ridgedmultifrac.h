@@ -2,63 +2,67 @@
 #ifndef PARANOISE_MODULES_RIDGED
 #define PARANOISE_MODULES_RIDGED
 
-#include "../noisegenerators.h"
-#include "../parallel/x87compat.h"
+#include "dependencies.h"
 
-namespace paranoise { namespace module {
+namespace zzsystems { namespace paranoise {	namespace modules {
+	using namespace simdal;
 	using namespace generators;
-	using namespace x87compat;
+	using namespace util;
 
 	// Multifractal code originally written by F. Kenton "Doc Mojo" Musgrave,
 	// 1998.  Modified by jas for use with libnoise.
+	// Modified by Sergej Zuyev for use with paranoise, simdal
 
-	SIMD_ENABLE(TReal, TInt)
-	struct ridged_multifractal
+	SIMD_ENABLED
+	class ridged_multifractal : public module_base<vreal, vint>
 	{
-		TReal frequency, lacunarity;
+	public:
+		vreal frequency, lacunarity;
 		Quality quality = Quality::Standard;
 		int seed;
 		int octaves;
 
-		TReal spectralWeights[30];
+		vreal spectralWeights[30];
 		ridged_multifractal(float frequency = 1.0, float lacunarity = 2.0, int seed = 0, int octaves = 6)
-			: seed(seed), octaves(octaves)
+			: frequency(frequency), lacunarity(lacunarity), seed(seed), octaves(octaves)
 		{
-			float	h		= 1.0, 
-					freq	= 1.0;
+			float h = 1.0, freq = 1.0;
 
-			for (int i = 0; i < 30; i++) 
+			for (int i = 0; i < 30; i++)
 			{
 				// Compute weight for each frequency.
-				spectralWeights[i] = std::powf(freq, -h);
+				spectralWeights[i] = powf(freq, -h);
 				freq *= lacunarity;
 			}
 		}
 
-		inline TReal operator()(const Vector3<TReal>& coords)
+		vreal operator()(const Vector3<vreal>& coords) const override
 		{
-			auto _coords = coords * Vector3<TReal>(frequency);
+			auto _coords = coords * frequency;
 
-			TReal signal = 0.0;
-			TReal value = 0.0;
-			TReal weight = 1.0;
+			// Workaround. SSE/AVX seed member gets modified => invalid for next iterations
+			vint _seed = seed;
 
-			// These parameters should be user-defined; they may be exposed in a
-			// future version of libnoise.
-			TReal offset = 1.0;
-			TReal gain = 2.0;
+			vreal
+				signal = 0.0,
+				value = 0.0,
+				weight = 1.0,
+
+				// These parameters should be user-defined; they may be exposed in a
+				// future version of libnoise.
+				offset = 1.0,
+				gain = 2.0;
 
 			for (int currentOctave = 0; currentOctave < octaves; currentOctave++) {
 
 				// Get the coherent-noise value.
-				signal = GradientCoherentNoise3D<TReal, TInt>(
-					clamp_int32<TReal>(_coords),
-					(seed + currentOctave) & 0xffffffff,
+				signal = GradientCoherentNoise3D<vreal, vint>(
+					clamp_int32<vreal>(_coords),
+					(_seed + currentOctave) & fastload<vint>::ones(),
 					quality);
 
 				// Make the ridges.
-				signal = vabs(signal);
-				signal = offset - signal;
+				signal = offset - vabs(signal);
 
 				// Square the signal to increase the sharpness of the ridges.
 				signal *= signal;
@@ -68,21 +72,18 @@ namespace paranoise { namespace module {
 				// ridges.
 				signal *= weight;
 
-				// Weight successive contributions by the previous signal.
-				weight = signal * gain;
-				weight = vclamp<TReal>(weight, 0.0, 1.0);
+				// Weight successive contributions by the previous signal. 
+				weight = vclamp(signal * gain, fastload<vreal>::_0(), fastload<vreal>::_1());
 
-				// Add the signal to the output value.
-				value += (signal * spectralWeights[currentOctave]);
-
+				// Add the signal to the output value. [value += (signal * spectralWeights[currentOctave]);]
+				value = vfmadd(signal, spectralWeights[currentOctave], value);
 				// Go to the next octave.
-				_coords *= Vector3<TReal>(lacunarity);
+				_coords *= Vector3<vreal>(lacunarity);
 			}
 
-			return (value * 1.25f) - 1.0f;
+			//return (value * 1.25f) - 1.0f;
+			return vfmsub(value, static_cast<vreal>(1.25f), fastload<vreal>::_1());
 		}
-
-		// inline operator (Module<TReal>)() { return operator(); }
-	};	
-}}
+	};
+}}}
 #endif

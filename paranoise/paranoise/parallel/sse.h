@@ -2,23 +2,22 @@
 #ifndef PARANOISE_SSE_H
 #define PARANOISE_SSE_H
 
-#include "base.h"
+#include "dependencies.h"
 #include "int4.h"
 #include "float4.h"
 #include "double2.h"
-#include "x87compat.h"
 
 // Traits =========================================================================================================
 template<typename featuremask>
-struct std::_Is_integral<paranoise::parallel::int4<featuremask>>		: std::true_type {	};
+struct std::_Is_integral<zzsystems::simdal::_int4>	: std::true_type {	};
 
 template<typename featuremask>
-struct std::_Is_floating_point<paranoise::parallel::float4<featuremask>>	: std::true_type {	};
+struct std::_Is_floating_point<zzsystems::simdal::_float4>	: std::true_type {	};
 
 //template<>
-//struct std::_Is_floating_point<paranoise::parallel::double2>	: std::true_type {	};
+//struct std::_Is_floating_point<zzsystems::simdal::double2>	: std::true_type {	};
 
-namespace paranoise { namespace parallel {
+namespace zzsystems { namespace simdal {
 
 	// Converting constructors ===================================================================================
 	template<typename featuremask>
@@ -37,7 +36,7 @@ namespace paranoise { namespace parallel {
 	inline double2::double2(const double2& rhs) : double2(rhs.val) { }	*/
 
 	ANY(featuremask)
-	inline int32* extract(_int4 &src)
+	inline int32_t* extract(_int4 &src)
 	{
 		return src.val.m128i_i32;
 	}

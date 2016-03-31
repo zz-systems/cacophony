@@ -8,8 +8,8 @@ using namespace std;
 
 
 
-namespace paranoise { namespace parallel
-{
+namespace zzsystems { namespace simdal {
+
 	enum capabilities
 	{
 		CAPABILITY_NONE		= 0,
@@ -40,9 +40,8 @@ namespace paranoise { namespace parallel
 		int feature_flags;
 
 		system_info()
+			: feature_flags(CAPABILITY_NONE)
 		{
-			feature_flags = CAPABILITY_NONE;
-
 			int cpuInfo[4];
 			__cpuid(cpuInfo, 1);
 
@@ -83,12 +82,12 @@ namespace paranoise { namespace parallel
 		
 		bool hasFlag(const capabilities c) const
 		{
-			return this->feature_flags & c;
+			return 0 != (this->feature_flags & c);
 		}
 
 		void setFlag(const capabilities c, bool enable)
 		{
-			this->feature_flags = (feature_flags & ~(c)) | (enable & c);
+			this->feature_flags = (feature_flags & ~(c)) | ((enable ? 1 : 0) & c);
 		}
 
 		bool hasAVX2() const
@@ -115,20 +114,20 @@ namespace paranoise { namespace parallel
 
 	inline ostream& operator<<(ostream& os, const system_info& cap)
 	{
-		os << "Has SSE2: "		<< cap.hasFlag(CAPABILITY_SSE2) << endl;
-		os << "Has SSE3: "		<< cap.hasFlag(CAPABILITY_SSE3)  << endl;
-		os << "Has SSSE3: "		<< cap.hasFlag(CAPABILITY_SSSE3) << endl;
+		os << "Has SSE2:	"	<< boolalpha << cap.hasFlag(CAPABILITY_SSE2) << endl;
+		os << "Has SSE3:	"	<< boolalpha << cap.hasFlag(CAPABILITY_SSE3)  << endl;
+		os << "Has SSSE3:	"	<< boolalpha << cap.hasFlag(CAPABILITY_SSSE3) << endl;
 
-		os << "Has SSE4.1: "	<< cap.hasFlag(CAPABILITY_SSE41) << endl;
-		os << "Has SSE4.2: "	<< cap.hasFlag(CAPABILITY_SSE42) << endl;
+		os << "Has SSE4.1:	"	<< boolalpha << cap.hasFlag(CAPABILITY_SSE41) << endl;
+		os << "Has SSE4.2:	"	<< boolalpha << cap.hasFlag(CAPABILITY_SSE42) << endl;
 
-		os << "Has FMA3: "		<< cap.hasFlag(CAPABILITY_FMA3) << endl;
+		os << "Has FMA3:	"	<< boolalpha << cap.hasFlag(CAPABILITY_FMA3) << endl;
 
 		//os << "Uses XRSTORE: "	<< cap.use_xrstore << endl;
 
-		os << "Has AVX1: "		<< cap.hasFlag(CAPABILITY_AVX1) << endl;
-		os << "Has AVX2: "		<< cap.hasFlag(CAPABILITY_AVX2) << endl;
-		os << "Has AVX512: "	<< cap.hasFlag(CAPABILITY_AVX512) << endl;
+		os << "Has AVX1:	"	<< boolalpha << cap.hasFlag(CAPABILITY_AVX1) << endl;
+		os << "Has AVX2:	"	<< boolalpha << cap.hasFlag(CAPABILITY_AVX2) << endl;
+		os << "Has AVX512:	"	<< boolalpha << cap.hasFlag(CAPABILITY_AVX512) << endl;
 
 		return os;
 	}

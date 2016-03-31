@@ -2,10 +2,9 @@
 #ifndef PARANOISE_INTRINSIC_M128F_H
 #define PARANOISE_INTRINSIC_M128F_H
 
-#include "base.h"
-#include "../capabiliy.h"
+#include "dependencies.h"
 
-namespace paranoise { namespace parallel {
+namespace zzsystems { namespace simdal {
 	template<typename featuremask>
 	struct int4;
 
@@ -26,8 +25,8 @@ namespace paranoise { namespace parallel {
 
 		float4(const float* rhs)	: val(_mm_load_ps(rhs)) {}
 
-		float4(VARGS4(uint8))		: val(_mm_cvtepi32_ps(_mm_set_epi32(VPASS4))) {}
-		float4(VARGS4(int32))		: val(_mm_cvtepi32_ps(_mm_set_epi32(VPASS4))) {}
+		float4(VARGS4(uint8_t))		: val(_mm_cvtepi32_ps(_mm_set_epi32(VPASS4))) {}
+		float4(VARGS4(int32_t))		: val(_mm_cvtepi32_ps(_mm_set_epi32(VPASS4))) {}
 		float4(VARGS4(float))		: val(_mm_set_ps(VPASS4)) {}
 
 		float4(const __m128& rhs)	: val(rhs) { }
