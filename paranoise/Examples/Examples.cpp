@@ -10,60 +10,54 @@
 #include "granite.h"
 #include "planet.h"
 #include "run.h"
+#include "json.h"
 
 #include "../paranoise/parallel/all.h"
-#include "../paranoise/scheduler.h"
+#include "../paranoise/engine/all.h"
 
 namespace zzsystems { namespace paranoise { namespace examples {
 	using namespace simdal;
 	using namespace scheduler;
 
+	template<typename capability, typename vreal, typename vint>
+	auto exec(const scheduler_settings& settings)
+	{
+		cout << ">>dispatch: using " << static_dispatcher<capability>::unit_name() << " branch" << endl;
+
+		cpu_scheduler<vreal> s(
+			generate_from_json<vreal, vint>(),
+			nullptr,
+			settings
+			);
+
+		return s();
+	}
+
 	void run()
 	{
 		system_info sysinfo;
 		cout << sysinfo;
-		//sysinfo.setFlag(CAPABILITY_AVX1, false);
-		//_MM_SET_ROUNDING_MODE(_MM_ROUND_TOWARD_ZERO);
 
-#ifdef PROFILE
-		const int w = 4 * 4096;//4096; //8192 * 2;
-		const int h = 4 * 4096;//4096; //8192 * 2;
-#else 
-		const int w = 512 * 2; //8192 * 2;
-		const int h = 512 * 2; //8192 * 2;
-#endif				
-		scheduler_settings settings({ w, h, 1 }, 1337, true);
+		engine e;
+		
+		e.compile_file("perlin_test.json");
+		auto flags = e.info.feature_flags;
 
-		auto f1 = [=]()
+		auto w = e.settings.dimensions.x, h = e.settings.dimensions.y;
+
+		auto f1 = [&]()
 		{
-			system_info sysinfo2;
-			//sysinfo2.setFlag(CAPABILITY_AVX2, false);
-			SIMD_DISPATCH(sysinfo2,
-			{ 
-				//cout << ">>dispatch: using " << static_dispatcher<capability>::unit_name << " branch" << endl; 
-				return schedule<vreal>(generate_complex_planet<vreal, vint>(),
-					[w, h](const Vector3<vreal> &coords) { return (coords) *  Vector3<vreal>(10, 10, 2) / Vector3<vreal>(w, h, h) - Vector3<vreal>(5, 5, 1); },
-					settings); 
-			});
+			//e.info.setFlag(CAPABILITY_AVX2, false);			
+			e.info.feature_flags = flags;
+			return e.run();
 		};
 
-		auto f2 = [=]()
+		auto f2 = [&]()
 		{
-			system_info reference;
-			reference.feature_flags = CAPABILITY_NONE;
-			//cout << reference;
-			//cout << ">>ref dispatch: using " << static_dispatcher<integral_constant<int, CAPABILITY_NONE>>::unit_name << " branch" << endl;
-
-			SIMD_DISPATCH(reference, 
-			{
-				//cout << ">>ref dispatch: using " << static_dispatcher<capability>::unit_name << " branch" << endl;
-
-				return schedule<vreal>(
-					generate_complex_planet<vreal, vint>(),
-					[w, h](const Vector3<vreal> &coords) { return (coords) * Vector3<vreal>(10, 10, 2) / Vector3<vreal>(w, h, h) - Vector3<vreal>(5, 5, 1);},
-					settings);
-			});
+			e.info.feature_flags = CAPABILITY_NONE;		
+			return e.run();
 		};
+
 		gradient1D grad
 		{
 			{ -1.01, color_rgb(0, 0, 0, 255) },

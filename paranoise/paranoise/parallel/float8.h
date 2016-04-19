@@ -19,9 +19,9 @@ namespace zzsystems { namespace simdal {
 
 		float8() = default;
 
-		float8(const int rhs)		: val(_mm256_set1_ps(rhs)) {}
+		float8(const int rhs)		: val(_mm256_set1_ps(static_cast<float>(rhs))) {}
 		float8(const float rhs)		: val(_mm256_set1_ps(rhs)) {}
-		float8(const double rhs)	: val(_mm256_set1_ps(rhs)) {}		
+		float8(const double rhs)	: val(_mm256_set1_ps(static_cast<float>(rhs))) {}
 
 		float8(const float* rhs)	: val(_mm256_load_ps(rhs)) {}
 
@@ -35,6 +35,7 @@ namespace zzsystems { namespace simdal {
 
 		float8(const _float8&	rhs);
 		float8(const _int8&	rhs);
+		float8(const _int4x2& rhs);
 		//float8(const double4&	rhs);
 
 		BIN_OP_STUB(+, _float8, float)
@@ -161,7 +162,7 @@ namespace zzsystems { namespace simdal {
 	// Special functions ==============================================================================================
 	// Branchless select
 	FEATURE_TRI_FUNC(vsel, _float8, _dispatcher::has_avx) 
-	{
+	{		
 		TRI_BODY_R(_mm256_blendv_ps); 
 	}
 	// Fused multiply-add
@@ -198,19 +199,19 @@ namespace zzsystems { namespace simdal {
 	}
 
 	// Truncate float to *.0
-	FEATURE_UN_FUNC(vtrunc, _float8, _dispatcher::has_avx && _dispatcher::has_avx2)
+	FEATURE_UN_FUNC(vtrunc, _float8, _dispatcher::has_avx)
 	{
 		BODY(_mm256_round_ps(a.val, _MM_FROUND_TO_ZERO));
 	}
 
 	// Floor value
-	FEATURE_UN_FUNC(vfloor, _float8, _dispatcher::has_avx && _dispatcher::has_avx2)
+	FEATURE_UN_FUNC(vfloor, _float8, _dispatcher::has_avx)
 	{
 		BODY(_mm256_round_ps(a.val, _MM_FROUND_TO_NEG_INF));		
 	}
 
 	// Ceil value
-	FEATURE_UN_FUNC(vceil, _float8, _dispatcher::has_avx && _dispatcher::has_avx2)
+	FEATURE_UN_FUNC(vceil, _float8, _dispatcher::has_avx)
 	{
 		BODY(_mm256_round_ps(a.val, _MM_FROUND_TO_POS_INF));
 	}
@@ -220,48 +221,6 @@ namespace zzsystems { namespace simdal {
 	{
 		BODY(_mm256_round_ps(a.val, _MM_FROUND_TO_NEAREST_INT));
 	}
-
-
-	//inline float8 vfloor(const float8& a) {
-	//	auto v0 = _mm256_setzero_si256();
-	//	auto v1 = _mm256_cmpeq_epi32(v0, v0);
-	//	auto ji = _mm256_srli_epi32(v1, 25);
-	//	auto j = *(__m256*)&_mm256_slli_epi32(ji, 23); //create vector 1.0f
-	//	auto i = _mm256_cvttps_epi32(a.val);
-	//	auto fi = _mm256_cvtepi32_ps(i);
-	//	auto igx = _mm256_cmp_ps(fi, a.val, _CMP_GT_OS);
-	//	j = _mm256_and_ps(igx, j);
-	//	return _mm256_sub_ps(fi, j);
-	//}
-
-	//inline float8 vceil(const float8& a) {
-	//	auto v0 = _mm256_setzero_si256();
-	//	auto v1 = _mm256_cmpeq_epi32(v0, v0);
-	//	auto ji = _mm256_srli_epi32(v1, 25);
-	//	auto j = *(__m256*)&_mm256_slli_epi32(ji, 23); //create vector 1.0f
-	//	auto i = _mm256_cvttps_epi32(a.val);
-	//	auto fi = _mm256_cvtepi32_ps(i);
-	//	auto igx = _mm256_cmp_ps(fi, a.val, _CMP_LT_OS);
-	//	j = _mm256_and_ps(igx, j);
-	//	return _mm256_add_ps(fi, j);
-	//}
-
-	//inline float8 vround(const float8 &a) {
-	//	auto v0 = _mm256_setzero_ps();             //generate the highest value &lt; 2
-	//	auto v1 = _mm256_cmp_ps(v0, v0, _CMP_EQ_OS);
-	//	auto vNearest2 = *(__m256*)&_mm256_srli_epi32(*(__m256i*)&v1, 2);
-	//	auto i = _mm256_cvttps_epi32(a.val);
-	//	auto aTrunc = _mm256_cvtepi32_ps(i);        // truncate a
-	//	auto rmd = _mm256_sub_ps(a.val, aTrunc);        // get remainder
-	//	auto rmd2 = _mm256_mul_ps(rmd, vNearest2); // mul remainder by near 2 will yield the needed offset
-	//	auto rmd2i = _mm256_cvttps_epi32(rmd2);    // after being truncated of course
-	//	auto rmd2Trunc = _mm256_cvtepi32_ps(rmd2i);
-	//	auto r = _mm256_add_ps(aTrunc, rmd2Trunc);
-	//	return r;
-	//}
-
-	
-
 }}
 
 #endif

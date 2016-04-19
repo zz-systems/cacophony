@@ -9,7 +9,7 @@
 namespace zzsystems { namespace paranoise { namespace util {
 	using namespace interpolation;
 
-	ALIGN(32) union color_rgb
+	union ALIGN(32) color_rgb
 	{
 		uint8_t components[4];
 		uint32_t integral;

@@ -7,14 +7,16 @@
 namespace zzsystems { namespace paranoise {	namespace modules {
 	using namespace simdal;
 	using namespace generators;
-	using namespace util;
+	using namespace math;
 
 	// Multifractal code originally written by F. Kenton "Doc Mojo" Musgrave,
 	// 1998.  Modified by jas for use with libnoise.
 	// Modified by Sergej Zuyev for use with paranoise, simdal
 
 	SIMD_ENABLED
-	class ridged_multifractal : public module_base<vreal, vint>
+	class ridged_multifractal : 
+		public cloneable<module_base<SIMD_T>, ridged_multifractal<SIMD_T>>,
+		public serializable<json>
 	{
 	public:
 		vreal frequency, lacunarity;
@@ -23,8 +25,8 @@ namespace zzsystems { namespace paranoise {	namespace modules {
 		int octaves;
 
 		vreal spectralWeights[30];
-		ridged_multifractal(float frequency = 1.0, float lacunarity = 2.0, int seed = 0, int octaves = 6)
-			: frequency(frequency), lacunarity(lacunarity), seed(seed), octaves(octaves)
+
+		void init_spectral_weights(float lacunarity)
 		{
 			float h = 1.0, freq = 1.0;
 
@@ -36,7 +38,27 @@ namespace zzsystems { namespace paranoise {	namespace modules {
 			}
 		}
 
-		vreal operator()(const Vector3<vreal>& coords) const override
+		ridged_multifractal(float frequency = 1.0, float lacunarity = 2.0, int seed = 0, int octaves = 6)
+			: cloneable(0), frequency(frequency), lacunarity(lacunarity), seed(seed), octaves(octaves)
+		{
+			init_spectral_weights(lacunarity);
+		}
+
+		const json& operator <<(const json &source) override
+		{
+			float sl;
+			frequency = source.value("frequency", 1.0f);			
+			lacunarity = sl = source.value("lacunarity", 2.0f);
+			seed = source.value("seed", 0);
+			octaves = source.value("octaves", 6);
+			quality  = static_cast<Quality>(source.value("quality", static_cast<int>(Quality::Standard)));
+
+			init_spectral_weights(sl);
+
+			return source;
+		}
+
+		vreal operator()(const vec3<vreal>& coords) const override
 		{
 			auto _coords = coords * frequency;
 
@@ -78,7 +100,7 @@ namespace zzsystems { namespace paranoise {	namespace modules {
 				// Add the signal to the output value. [value += (signal * spectralWeights[currentOctave]);]
 				value = vfmadd(signal, spectralWeights[currentOctave], value);
 				// Go to the next octave.
-				_coords *= Vector3<vreal>(lacunarity);
+				_coords *= lacunarity;
 			}
 
 			//return (value * 1.25f) - 1.0f;

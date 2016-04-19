@@ -19,9 +19,9 @@ namespace zzsystems { namespace simdal {
 
 		float4() = default;
 		
-		float4(const int rhs)		: val(_mm_set1_ps(rhs)) {}
+		float4(const int rhs)		: val(_mm_set1_ps(static_cast<float>(rhs))) {}
 		float4(const float rhs)		: val(_mm_set1_ps(rhs)) {}
-		float4(const double rhs)	: val(_mm_set1_ps(rhs)) {}
+		float4(const double rhs)	: val(_mm_set1_ps(static_cast<float>(rhs))) {}
 
 		float4(const float* rhs)	: val(_mm_load_ps(rhs)) {}
 

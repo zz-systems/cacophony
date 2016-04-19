@@ -7,32 +7,50 @@
 namespace zzsystems { namespace paranoise { namespace modules {
 	using namespace simdal;
 	using namespace generators;
-	using namespace util;
+	using namespace math;
 
 	SIMD_ENABLED
-	class terrace : public module_base<vreal, vint>
+	class terrace : 
+		public cloneable<module_base<vreal, vint>, terrace<SIMD_T>>,
+		public serializable<json>
 	{
 	public:
 		vector<pair<const vreal, vreal>> points;
 		bool invert = false;
 
 		terrace(const initializer_list<pair<const vreal, vreal>> &points, bool invert = false)
-			: module_base(1), points(points), invert(invert)
+			: cloneable(1), points(points), invert(invert)
 		{}
+
+		const json& operator <<(const json &source) override
+		{
+			if (source["points"] != nullptr && source["points"].is_array())
+			{
+				for (auto point : source["points"])
+				{
+					points.push_back(
+						make_pair<vreal, vreal>(
+							point["in"].get<float>(),
+							point["out"].get<float>()));
+				}
+			}
+
+			return source;
+		}
 
 		MODULE_PROPERTY(source, 0)
 
-		vreal operator()(const Vector3<vreal>& coords) const override
+		vreal operator()(const vec3<vreal>& coords) const override
 		{
 			auto cpc = points.size();
 			assert(cpc >= 4);
 
 			vreal cp1, cp0, set_value, already_set = fastload<vreal>::_0();
 
-			int i0, i1;
+			size_t i0, i1;
 			auto val = get_source()(coords);
 
-			for (int i = 0; i < points.size(); i++)
+			for (size_t i = 0; i < points.size(); i++)
 			{
 				// Point > supplied values?
 				set_value = points[i].first > val;

@@ -2,7 +2,8 @@
 #ifndef PARANOISE_MODULES_ALL_H
 #define PARANOISE_MODULES_ALL_H
 
-#include "modules.h"
+#include "modifiers/primitives.h"
+#include "generators/primitives.h"
 #include "billow.h"
 #include "curve.h"
 #include "perlin.h"

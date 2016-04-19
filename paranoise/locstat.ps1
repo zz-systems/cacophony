@@ -1,0 +1,2 @@
+$cnt = 0;
+dir -include *.cpp,*.h -exclude json.hpp,CImg.h  -Recurse | % { $count = (gc $_ |  ? { $_ -notmatch '^\s*$|^''|/\*|\*/' }).count; if ($count) {$cnt += $count; write-host "$_ `tcount: $count"} }; write-host "total: $cnt"

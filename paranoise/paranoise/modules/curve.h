@@ -7,10 +7,12 @@
 namespace zzsystems { namespace paranoise { namespace modules {
 	using namespace simdal;
 	using namespace generators;
-	using namespace util;
+	using namespace math;
 
 	SIMD_ENABLED
-	class curve : public module_base<vreal, vint>
+	class curve : 
+		public cloneable<module_base<vreal, vint>, curve<SIMD_T>>,
+		public serializable<json>
 	{
 	public:
 		vector<pair<const vreal, vreal>> points;
@@ -18,19 +20,35 @@ namespace zzsystems { namespace paranoise { namespace modules {
 		MODULE_PROPERTY(source, 0)
 			
 		curve(const initializer_list<pair<const vreal, vreal>>& points) 
-			: module_base(1), points(points)
+			: cloneable(1), points(points)
 		{}
 
-		vreal operator()(const Vector3<vreal>& coords) const override
+		const json& operator <<(const json &source) override
+		{
+			if (source["points"] != nullptr && source["points"].is_array()) 
+			{
+				for (auto point : source["points"])
+				{
+					points.push_back(
+						make_pair<vreal, vreal>(
+							point["in"].get<float>(),
+							point["out"].get<float>()));
+				}
+			}
+
+			return source;
+		}
+
+		vreal operator()(const vec3<vreal>& coords) const override
 		{
 			auto val = get_source()(coords);
 			
 			vreal v3, v2, v1, v0, set_value, already_set = fastload<vreal>::_0();
 		
-			int i0, i1, i2, i3;
+			size_t i0, i1, i2, i3;
 
 			// TODO: bounds
-			for (int i = 0; i < points.size(); i++)
+			for (size_t i = 0; i < points.size(); i++)
 			{
 				// Point > supplied values?
 				set_value = points[i].first > val;	

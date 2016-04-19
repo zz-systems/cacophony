@@ -51,6 +51,9 @@
     <ClInclude Include="planet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="json.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -59,5 +62,16 @@
     <ClCompile Include="Examples.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="granite.json">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="perlin_test.json">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="planet.json">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

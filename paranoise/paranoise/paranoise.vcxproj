@@ -124,9 +124,17 @@
     <ClInclude Include="capabilities.h" />
     <ClInclude Include="color.h" />
     <ClInclude Include="constants.h" />
+    <ClInclude Include="engine\all.h" />
+    <ClInclude Include="engine\dependencies.h" />
+    <ClInclude Include="engine\engine.h" />
+    <ClInclude Include="engine\parser.h" />
+    <ClInclude Include="engine\scheduler.h" />
     <ClInclude Include="generic_operators.h" />
     <ClInclude Include="interpolation.h" />
+    <ClInclude Include="lib\json.hpp" />
     <ClInclude Include="mapper.h" />
+    <ClInclude Include="math\base.h" />
+    <ClInclude Include="math\matrix.h" />
     <ClInclude Include="models\primitives.h" />
     <ClInclude Include="modules\all.h" />
     <ClInclude Include="modules\billow.h" />
@@ -134,8 +142,9 @@
     <ClInclude Include="modules\cache.h" />
     <ClInclude Include="modules\curve.h" />
     <ClInclude Include="modules\dependencies.h" />
+    <ClInclude Include="modules\generators\primitives.h" />
+    <ClInclude Include="modules\modifiers\primitives.h" />
     <ClInclude Include="modules\module_base.h" />
-    <ClInclude Include="modules\modules.h" />
     <ClInclude Include="modules\module_wrapper.h" />
     <ClInclude Include="modules\perlin.h" />
     <ClInclude Include="modules\ridgedmultifrac.h" />
@@ -157,10 +166,12 @@
     <ClInclude Include="parallel\double4.h" />
     <ClInclude Include="parallel\float8.h" />
     <ClInclude Include="parallel\int8.h" />
+    <ClInclude Include="parallel\int8_avx1.h" />
     <ClInclude Include="parallel\opencl.h" />
     <ClInclude Include="parallel\SISD.h" />
     <ClInclude Include="parallel\sse.h" />
-    <ClInclude Include="scheduler.h" />
+    <ClInclude Include="util\cloneable.h" />
+    <ClInclude Include="util\serializable.h" />
     <ClInclude Include="vector.h" />
     <ClInclude Include="vectortable.h" />
   </ItemGroup>

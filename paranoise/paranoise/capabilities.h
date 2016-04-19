@@ -94,6 +94,11 @@ namespace zzsystems { namespace simdal {
 		{
 			return hasFlag(CAPABILITY_AVX1) && hasFlag(CAPABILITY_AVX2);
 		}
+
+		bool hasAVX() const
+		{
+			return hasFlag(CAPABILITY_AVX1);// && !hasFlag(CAPABILITY_AVX2);
+		}
 		
 		bool hasSSE4() const
 		{

@@ -2,11 +2,11 @@
 
 #include "../paranoise/modules/all.h"
 #include "../paranoise/parallel/all.h"
-#include "../paranoise/scheduler.h"
 #include "../paranoise/color.h"
 
 namespace zzsystems { namespace paranoise { namespace examples {
 
+	using namespace math;
 	using namespace util;
 
 	// Southernmost coordinate of elevation grid.
@@ -126,20 +126,20 @@ namespace zzsystems { namespace paranoise { namespace examples {
 
 
 
-	SIMD_ENABLE(TReal, TInt)
-	Module<TReal> generate_complex_planet()
+	SIMD_ENABLE(vreal, vint)
+	Module<vreal> generate_complex_planet()
 	{
 		cout << "generate planet texture" << endl;
 
 		// 1: [Continent module]: This Perlin-noise module generates the continents.
 		//    This noise module has a high number of octaves so that detail is
 		//    visible at high zoom levels.
-		perlin<TReal, TInt> baseContinentDef_pe0(CONTINENT_FREQUENCY, CONTINENT_LACUNARITY, 0.5, 14, CUR_SEED + 0);
+		perlin<vreal, vint> baseContinentDef_pe0(CONTINENT_FREQUENCY, CONTINENT_LACUNARITY, 0.5, 14, CUR_SEED + 0);
 
 		// 2: [Continent-with-ranges module]: Next, a curve module modifies the
 		//    output value from the continent module so that very high values appear
 		//    near sea level.  This defines the positions of the mountain ranges.
-		curve<TReal, TInt> baseContinentDef_cu
+		curve<vreal, vint> baseContinentDef_cu
 		{
 			{ -2.0000f + SEA_LEVEL,-1.625f + SEA_LEVEL },
 			{ -1.0000f + SEA_LEVEL,-1.375f + SEA_LEVEL },
@@ -159,12 +159,12 @@ namespace zzsystems { namespace paranoise { namespace examples {
 		//    used by subsequent noise modules to carve out chunks from the mountain
 		//    ranges within the continent-with-ranges module so that the mountain
 		//    ranges will not be complely impassible.	
-		perlin<TReal, TInt> baseContinentDef_pe1(CONTINENT_FREQUENCY *  4.34375, CONTINENT_LACUNARITY, 0.5, 11, CUR_SEED + 1);
+		perlin<vreal, vint> baseContinentDef_pe1(CONTINENT_FREQUENCY *  4.34375, CONTINENT_LACUNARITY, 0.5, 11, CUR_SEED + 1);
 
 		// 4: [Scaled-carver module]: This scale/bias module scales the output
 		//    value from the carver module such that it is usually near 1.0.  This
 		//    is required for step 5.
-		Module<TReal> baseContinentDef_sb = [=](const auto&c) { return baseContinentDef_pe1(c) * 0.375f + 0.625f; };
+		Module<vreal> baseContinentDef_sb = [=](const auto&c) { return baseContinentDef_pe1(c) * 0.375f + 0.625f; };
 
 		// 5: [Carved-continent module]: This minimum-value module carves out chunks
 		//    from the continent-with-ranges module.  It does this by ensuring that
@@ -177,22 +177,22 @@ namespace zzsystems { namespace paranoise { namespace examples {
 		//    less than the output value from the continent-with-ranges module, so
 		//    in this case, the output value from the scaled-carver module is
 		//    selected.
-		Module<TReal> baseContinentDef_mi = [=](const auto& c) { return vmin(baseContinentDef_sb(c), baseContinentDef_cu(c)); };
+		Module<vreal> baseContinentDef_mi = [=](const auto& c) { return vmin(baseContinentDef_sb(c), baseContinentDef_cu(c)); };
 
 		// 6: [Clamped-continent module]: Finally, a clamp module modifies the
 		//    carved-continent module to ensure that the output value of this
 		//    subgroup is between -1.0 and 1.0.
-		Module<TReal> baseContinentDef_cl = [=](const auto& c) { return vclamp<TReal>(baseContinentDef_mi(c), -1.0, 1.0); };
+		Module<vreal> baseContinentDef_cl = [=](const auto& c) { return vclamp<vreal>(baseContinentDef_mi(c), -1.0, 1.0); };
 
 		// 7: [Base-continent-definition subgroup]: Caches the output value from the
 		//    clamped-continent module.
-		//Module<TReal> baseContinentDef = memoize<TReal, TInt>(baseContinentDef_cl);
+		//Module<vreal> baseContinentDef = memoize<vreal, vint>(baseContinentDef_cl);
 
-		buffer<TReal, TInt> buf(baseContinentDef_cl);
+		buffer<vreal, vint> buf(baseContinentDef_cl);
 		
 		return buf;
-		//return memoize<TReal, TInt>( baseContinentDef_cl );
-		//return memoize<TReal, TInt>(baseContinentDef_cl);
+		//return memoize<vreal, vint>( baseContinentDef_cl );
+		//return memoize<vreal, vint>(baseContinentDef_cl);
 	}
 
 	double seaLevelInMeters = (((SEA_LEVEL + 1.0) / 2.0)

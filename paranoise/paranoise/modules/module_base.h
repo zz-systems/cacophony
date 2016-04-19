@@ -4,29 +4,34 @@
 #include "../base.h"
 #include <vector>
 #include <memory>
+#include "../vector.h"
+#include "../math/matrix.h"
 
 #include <cassert>
+#include "../lib/json.hpp"
 
 namespace zzsystems { namespace paranoise { namespace modules
 {
 	using namespace std;
-	using namespace util;
+	using namespace math;
+	using json = nlohmann::json;
 
-	SIMD_ENABLE_F(TReal)
-		using Module = function<TReal(const Vector3<TReal>&)>;
+	SIMD_ENABLE_F(vreal)
+		using Module = function<vreal(const vec3<vreal>&)>;
 
-	SIMD_ENABLE_F(TReal)
-		using Transformer = function<Vector3<TReal>(const Vector3<TReal>&)>;
+	SIMD_ENABLE_F(vreal)
+		using Transformer = function<vec3<vreal>(const vec3<vreal>&)>;
 
-	SIMD_ENABLE(TReal, TInt)
-		using SeededModule = function<TReal(const Vector3<TReal>&, const TInt& seed)>;
+	SIMD_ENABLE(vreal, vint)
+		using SeededModule = function<vreal(const vec3<vreal>&, const vint& seed)>;
 
 #define MODULE_PROPERTY(name, index) \
-	const Module<vreal> &get_##name() const { assert(_modules>size() > index); return _modules->at(index);} \
-	void set_##name(const Module<vreal> &value) { assert(_modules>size() > index); _modules->at(index) = value; }
+	const Module<vreal> &get_##name() const { assert(_modules->size() > index); return _modules->at(index);} \
+	void set_##name(const Module<vreal> &value) { assert(_modules->size() > index); _modules->at(index) = value; }
 
 	SIMD_ENABLED
-	class module_base
+	class module_base : 
+		public serializable<json>
 	{
 		typedef module_base<vreal, vint> self_t;
 	public:
@@ -41,13 +46,19 @@ namespace zzsystems { namespace paranoise { namespace modules
 		virtual ~module_base()
 		{}
 
-		virtual vreal operator()(const Vector3<vreal> &coords) const = 0;
+		virtual vreal operator()(const vec3<vreal> &coords) const = 0;
+		
+		virtual shared_ptr<module_base<vreal, vint>> clone() const = 0;
 
-		operator Module<vreal>() const 
+		virtual operator Module<vreal>() const 
 		{ 
 			return [this](const auto &c) { return this->operator()(c); }; 
 		}
 
+		shared_ptr<vector<Module<vreal>>> get_modules() const
+		{
+			return _modules;
+		}
 	protected:
 		shared_ptr<vector<Module<vreal>>> _modules;
 	};

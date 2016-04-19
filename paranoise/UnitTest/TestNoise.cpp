@@ -2,11 +2,12 @@
 #include "CppUnitTest.h"
 
 #include "../paranoise/parallel/all.h"
-#include "../paranoise/basetypes.h"
+#include "../paranoise/base.h"
 #include "../paranoise/noisegenerators.h"
 #include <iostream>
 
 #include "util.h"
+#include "../paranoise/vector.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -16,6 +17,7 @@ namespace zzsystems { namespace paranoise { namespace tests {
 	using namespace simdal;
 	using namespace unittest;
 	using namespace generators;
+	using namespace math;
 
 	TEST_CLASS(TestNoise)
 	{
@@ -100,9 +102,9 @@ namespace zzsystems { namespace paranoise { namespace tests {
 			sse_real	zero = 0;
 			sse_real	x = 2, y = 0, z = 1;
 
-			auto x0 = static_cast<sse_int>(x - ((x > zero) & 1));
-			auto y0 = static_cast<sse_int>(y - ((y > zero) & 1));
-			auto z0 = static_cast<sse_int>(z - ((z > zero) & 1));
+			auto x0 = static_cast<sse_int>(x - ((x > zero) & 1.0f));
+			auto y0 = static_cast<sse_int>(y - ((y > zero) & 1.0f));
+			auto z0 = static_cast<sse_int>(z - ((z > zero) & 1.0f));
 
 			auto x1 = x0 + 1;
 			auto y1 = y0 + 1;

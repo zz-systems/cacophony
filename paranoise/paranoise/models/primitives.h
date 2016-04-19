@@ -6,15 +6,15 @@
 
 namespace zzsystems { namespace paranoise { namespace models {
 
-	SIMD_ENABLE_F(TReal)
+	SIMD_ENABLE_F(vreal)
 	struct line_settings
 	{
-		Vector3<TReal> from, to;
+		vec3<vreal> from, to;
 		bool attenuate = true;
 	};
 
-	SIMD_ENABLE_F(TReal)
-	inline TReal line(const Module<TReal>& source, const line_settings<TReal>& settings, const TReal& pos)
+	SIMD_ENABLE_F(vreal)
+	inline vreal line(const Module<vreal>& source, const line_settings<vreal>& settings, const vreal& pos)
 	{
 		auto coords = (settings.to - settings.from) * pos + settings.from;
 		auto result = source(coords);
@@ -24,17 +24,17 @@ namespace zzsystems { namespace paranoise { namespace models {
 			: result;
 	}
 
-	SIMD_ENABLE_F(TReal)
-	inline TReal plane(const Module<TReal>& source, const Vector3<TReal>& pos)
+	SIMD_ENABLE_F(vreal)
+	inline vreal plane(const Module<vreal>& source, const vec3<vreal>& pos)
 	{
-		return source(TReal(pos.x, 0, pos.y))
+		return source(vreal(pos.x, 0, pos.y))
 	}
 
-	SIMD_ENABLE_F(TReal)
-		inline TReal cylinder(const Module<TReal>& source, const TReal& angle, const TReal& height)
+	SIMD_ENABLE_F(vreal)
+		inline vreal cylinder(const Module<vreal>& source, const vreal& angle, const vreal& height)
 	{
 		auto _angle = angle * DEG_TO_RAD;
-		Vector3<TReal> coords;
+		vec3<vreal> coords;
 		coords.y = height;
 
 		for (int i = 0; i < dim(angle); i++)
@@ -47,11 +47,11 @@ namespace zzsystems { namespace paranoise { namespace models {
 	}
 
 
-	SIMD_ENABLE_F(TReal)
-	inline TReal sphere(const Module<TReal>& source, const TReal& lat, const TReal& lon)
+	SIMD_ENABLE_F(vreal)
+	inline vreal sphere(const Module<vreal>& source, const vreal& lat, const vreal& lon)
 	{
-		TReal r, _lat = lat * DEG2RAD, _lon = lon * DEG2RAD;
-		Vector3<TReal> pos;
+		vreal r, _lat = lat * DEG2RAD, _lon = lon * DEG2RAD;
+		vec3<vreal> pos;
 
 		for (int i = 0; i < dim(lat); i++)
 		{

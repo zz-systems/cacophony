@@ -5,7 +5,7 @@
 
 #include "base.h"
 
-namespace zzsystems { namespace simdal { 	
+namespace zzsystems { 	
 	
 	ANY(T) ASSIGN_OP(+=, T) { return a = (a + b); }
 	ANY(T) ASSIGN_OP(-=, T) { return a = (a - b); }
@@ -21,6 +21,6 @@ namespace zzsystems { namespace simdal {
 
 	ANY(T) BIN_OP(>=, T) { return !(a < b); }
 	ANY(T) BIN_OP(<=, T) { return !(a > b); }
-}}
+}
 
 #endif

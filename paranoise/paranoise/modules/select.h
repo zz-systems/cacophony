@@ -7,25 +7,39 @@
 namespace zzsystems { namespace paranoise { namespace modules {
 	using namespace simdal;
 	using namespace generators;
-	using namespace util;
+	using namespace math;
 
 	SIMD_ENABLED
-	class select : public module_base<vreal, vint>
+	class select : 
+		public cloneable<module_base<vreal, vint>, select<SIMD_T>>,
+		public serializable<json>
 	{
 	public:
 		float edgeFalloff = 0.0;
 		vreal lowerBound = -1.0, upperBound = 1.0;
 		
 		select(float edgeFalloff = 0.0, float lowerBound = -1.0, float upperBound = 1.0)
-			: module_base(3), edgeFalloff(edgeFalloff), lowerBound(lowerBound), upperBound(upperBound)
+			: cloneable(3), 
+			edgeFalloff(edgeFalloff), 
+			lowerBound(lowerBound),
+			upperBound(upperBound)
 		{}
 
 		MODULE_PROPERTY(a, 0)
 		MODULE_PROPERTY(b, 1)
 		MODULE_PROPERTY(controller, 2)
 
+		const json& operator <<(const json &source) override
+		{
+			edgeFalloff = source.value("edgeFalloff", 0.0f);
+			lowerBound	= source.value("lowerBound", -1.0f);
+			upperBound	= source.value("upperBound", 1.0f);
+
+			return source;
+		}
+
 		//, const Module<vreal>& a, const Module<vreal>& b, const Module<vreal>& controller
-		vreal operator()(const Vector3<vreal>& coords) const override
+		vreal operator()(const vec3<vreal>& coords) const override
 		{
 			auto cv = get_controller()(coords);
 			auto r0 = get_a()(coords);
@@ -82,7 +96,7 @@ namespace zzsystems { namespace paranoise { namespace modules {
 	// path for scalar code 
 	// , const Module<float>& a, const Module<float>& b, const Module<float>& controller
 	template<>
-	inline float select<float, int>::operator()(const Vector3<float>& coords) const
+	inline float select<float, int>::operator()(const vec3<float>& coords) const
 	{
 		auto cv = get_controller()(coords);
 		auto r0 = get_a()(coords);

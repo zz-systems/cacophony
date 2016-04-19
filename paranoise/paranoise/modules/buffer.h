@@ -7,7 +7,7 @@
 namespace zzsystems { namespace paranoise { namespace modules {
 	using namespace simdal;
 	using namespace generators;
-	using namespace util;
+	using namespace math;
 
 	SIMD_ENABLED
 	struct buffer
@@ -22,7 +22,7 @@ namespace zzsystems { namespace paranoise { namespace modules {
 			: source(source.source), _is_cached(source._is_cached)
 		{}
 
-		inline vreal operator()(const Vector3<vreal>& coords)
+		inline vreal operator()(const vec3<vreal>& coords)
 		{
 			auto eq = coords == _buf_coords;
 			if(!(_is_cached && static_cast<bool>(eq.x) && static_cast<bool>(eq.y) && static_cast<bool>(eq.z)))
@@ -38,7 +38,7 @@ namespace zzsystems { namespace paranoise { namespace modules {
 		inline operator Module<vreal>() const { return [this](const auto &c) { return this->operator()(c); }; }
 
 	private:
-		Vector3<vreal> _buf_coords;
+		vec3<vreal> _buf_coords;
 		vreal _buffered;
 		bool _is_cached;
 	};

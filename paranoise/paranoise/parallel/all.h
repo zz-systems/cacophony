@@ -9,6 +9,7 @@
 #include "SISD.h"
 
 #include "../vector.h"
+
 namespace std
 {
 	template <class T>
@@ -30,7 +31,7 @@ namespace std
 
 			result_type result = 0;
 
-			for (int i = 0; i < zzsystems::simdal::dim<argument_type>(); i++)
+			for (size_t i = 0; i < zzsystems::simdal::dim<argument_type>(); i++)
 				hash_combine<float>(result, v[i]);
 
 			return result;
@@ -49,7 +50,7 @@ namespace std
 
 			result_type result = 0;
 
-			for (int i = 0; i < zzsystems::simdal::dim<argument_type>(); i++)
+			for (size_t i = 0; i < zzsystems::simdal::dim<argument_type>(); i++)
 				hash_combine<float>(result, v[i]);
 
 			return result;
@@ -57,9 +58,9 @@ namespace std
 	};
 
 	template<typename T>
-	struct hash<zzsystems::paranoise::util::Vector3<T>>
+	struct hash<zzsystems::math::vec3<T>>
 	{
-		typedef zzsystems::paranoise::util::Vector3<T> argument_type;
+		typedef zzsystems::math::vec3<T> argument_type;
 		typedef size_t result_type;
 
 		result_type operator()(const argument_type &arg) const
@@ -84,25 +85,34 @@ namespace zzsystems { namespace simdal {
 
 		typedef int	integral_type;
 		typedef float	real_type;
-		static constexpr const char* unit_name = "default FPU";
+		static constexpr const char* unit_name() { return "default FPU"; }
 	};
 
 	template<typename featuremask>
 	struct static_dispatcher<featuremask, 
-		typename enable_if<!_dispatcher::has_sse && !_dispatcher::has_avx2>::type>
+		typename enable_if<!_dispatcher::has_sse && !_dispatcher::has_avx && !_dispatcher::has_avx2>::type>
 	{
 		typedef int		integral_type;
 		typedef float	real_type;
-		static constexpr const char* unit_name = "FPU";
+		static constexpr const char* unit_name() { return "FPU"; }
 	};
 
 	template<typename featuremask>
 	struct static_dispatcher<featuremask, 
-		typename enable_if<_dispatcher::has_sse && !_dispatcher::has_avx2>::type>
+		typename enable_if<_dispatcher::has_sse && !_dispatcher::has_avx && !_dispatcher::has_avx2>::type>
 	{
 		typedef _int4 integral_type;
 		typedef _float4 real_type;
-		static constexpr const char* unit_name = "SSE";
+		static constexpr const char* unit_name() { return "SSE"; }
+	};
+
+	template<typename featuremask>
+	struct static_dispatcher<featuremask,
+		typename enable_if<_dispatcher::has_avx && !_dispatcher::has_avx2>::type>
+	{
+		typedef _int4x2 integral_type;
+		typedef _float8 real_type;
+		static constexpr const char* unit_name() { return "AVX1"; }
 	};
 
 	template<typename featuremask>
@@ -111,7 +121,7 @@ namespace zzsystems { namespace simdal {
 	{
 		typedef _int8 integral_type;
 		typedef _float8 real_type;
-		static constexpr const char* unit_name = "AVX";
+		static constexpr const char* unit_name() { return "AVX2"; }
 	};	
 
 	template<typename capability>
@@ -125,14 +135,19 @@ namespace zzsystems { namespace simdal {
 	using vreal = static_dispatcher<capability>::real_type;\
 	using vint = static_dispatcher<capability>::integral_type
 
-	using capability_avx		= integral_constant<int, CAPABILITY_FASTFLOAT | CAPABILITY_AVX1 | CAPABILITY_AVX2 >; 
+	using capability_avx2		= integral_constant<int, CAPABILITY_FASTFLOAT | CAPABILITY_SSE2 | CAPABILITY_SSE3 | CAPABILITY_SSE41 | CAPABILITY_AVX1 | CAPABILITY_AVX2 >;
+	using capability_avx1		= integral_constant<int, CAPABILITY_FASTFLOAT | CAPABILITY_SSE2 | CAPABILITY_SSE3 | CAPABILITY_SSE41 | CAPABILITY_AVX1 >;
 	using capability_sse4fma	= integral_constant<int, CAPABILITY_FASTFLOAT | CAPABILITY_SSE2 | CAPABILITY_SSE3 | CAPABILITY_SSE41 | CAPABILITY_FMA3>;
 	using capability_sse4		= integral_constant<int, CAPABILITY_FASTFLOAT | CAPABILITY_SSE2 | CAPABILITY_SSE3 | CAPABILITY_SSE41>;
 	using capability_sse		= integral_constant<int, CAPABILITY_FASTFLOAT | CAPABILITY_SSE2 | CAPABILITY_SSE3>;
 	using capability_fpu		= integral_constant<int, CAPABILITY_NONE>;
 
-#define AVX_BRANCH \
-	using capability = capability_avx; \
+#define AVX2_BRANCH \
+	using capability = capability_avx2; \
+	SIMD_DISPATCH_TYPES
+
+#define AVX1_BRANCH \
+	using capability = capability_avx1; \
 	SIMD_DISPATCH_TYPES
 
 #define SSE4FMA_BRANCH \
@@ -155,7 +170,12 @@ namespace zzsystems { namespace simdal {
 	do { \
 		if (sysinfo.hasAVX2()) \
 		{ \
-			AVX_BRANCH;\
+			AVX2_BRANCH;\
+			body;\
+		} \
+		else if (false && sysinfo.hasAVX()) \
+		{ \
+			AVX1_BRANCH;\
 			body;\
 		} \
 		else if (sysinfo.hasSSE4FMA()) \
@@ -180,5 +200,38 @@ namespace zzsystems { namespace simdal {
 		} \
 	} while(false)
 
+#define SIMD_DISPATCH_ALL(body) \
+	do { \
+		if(true) \
+		{ \
+			AVX2_BRANCH;\
+			body;\
+		} \
+		if(false) \
+		{ \
+			AVX1_BRANCH;\
+			body;\
+		} \
+		if(true) \
+		{ \
+			SSE4FMA_BRANCH;\
+			body;\
+		} \
+		if(true) \
+		{ \
+			SSE4_BRANCH;\
+			body;\
+		} \
+		if(true) \
+		{ \
+			SSE_BRANCH;\
+			body;\
+		} \
+		if(true) \
+		{ \
+			FPU_BRANCH; \
+			body;\
+		} \
+	} while(false)
 }}
 #endif

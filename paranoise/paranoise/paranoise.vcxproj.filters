@@ -49,19 +49,25 @@
     <Filter Include="Header Files\simdal\impl\opencl">
       <UniqueIdentifier>{cc4ed744-7e93-48b1-9dc8-0dfb869e5fb8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\util\math">
+      <UniqueIdentifier>{0f90712c-70b5-446c-9a30-c7e01c3c4057}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\lib">
+      <UniqueIdentifier>{0b2549b0-cfb9-4f06-8a90-efb6fede5435}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\scheduling">
+      <UniqueIdentifier>{00c6817f-8baf-424f-af0e-63d80139a44a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\engine">
+      <UniqueIdentifier>{8c465682-79c4-467c-8b81-d9cad99ad584}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="scheduler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="parallel\all.h">
       <Filter>Header Files\simdal</Filter>
     </ClInclude>
     <ClInclude Include="parallel\SISD.h">
       <Filter>Header Files\simdal</Filter>
-    </ClInclude>
-    <ClInclude Include="modules\modules.h">
-      <Filter>Header Files\modules\impl</Filter>
     </ClInclude>
     <ClInclude Include="modules\all.h">
       <Filter>Header Files\modules</Filter>
@@ -71,9 +77,6 @@
     </ClInclude>
     <ClInclude Include="vectortable.h">
       <Filter>Header Files\noise</Filter>
-    </ClInclude>
-    <ClInclude Include="vector.h">
-      <Filter>Header Files\util</Filter>
     </ClInclude>
     <ClInclude Include="interpolation.h">
       <Filter>Header Files\util</Filter>
@@ -85,9 +88,6 @@
       <Filter>Header Files\models</Filter>
     </ClInclude>
     <ClInclude Include="mapper.h">
-      <Filter>Header Files\util</Filter>
-    </ClInclude>
-    <ClInclude Include="constants.h">
       <Filter>Header Files\util</Filter>
     </ClInclude>
     <ClInclude Include="capabilities.h">
@@ -171,14 +171,59 @@
     <ClInclude Include="base.h">
       <Filter>Header Files\util</Filter>
     </ClInclude>
-    <ClInclude Include="generic_operators.h">
-      <Filter>Header Files\util</Filter>
-    </ClInclude>
     <ClInclude Include="parallel\dependencies.h">
       <Filter>Header Files\simdal\impl</Filter>
     </ClInclude>
     <ClInclude Include="modules\dependencies.h">
       <Filter>Header Files\modules</Filter>
+    </ClInclude>
+    <ClInclude Include="vector.h">
+      <Filter>Header Files\util\math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\matrix.h">
+      <Filter>Header Files\util\math</Filter>
+    </ClInclude>
+    <ClInclude Include="generic_operators.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="math\base.h">
+      <Filter>Header Files\util\math</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\json.hpp">
+      <Filter>Header Files\lib</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\generators\primitives.h">
+      <Filter>Header Files\modules\generators</Filter>
+    </ClInclude>
+    <ClInclude Include="constants.h">
+      <Filter>Header Files\util\math</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\modifiers\primitives.h">
+      <Filter>Header Files\modules\modifiers</Filter>
+    </ClInclude>
+    <ClInclude Include="util\cloneable.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="util\serializable.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\engine.h">
+      <Filter>Header Files\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\parser.h">
+      <Filter>Header Files\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\scheduler.h">
+      <Filter>Header Files\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\all.h">
+      <Filter>Header Files\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\dependencies.h">
+      <Filter>Header Files\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="parallel\int8_avx1.h">
+      <Filter>Header Files\simdal\impl\avx</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

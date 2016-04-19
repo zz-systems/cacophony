@@ -12,7 +12,7 @@ namespace zzsystems { namespace paranoise { namespace tests {
 	using namespace simdal;
 	using namespace unittest;
 
-	TEST_CLASS(TestInterpolation)
+	TEST_CLASS(Tesvinterpolation)
 	{
 	public:
 		

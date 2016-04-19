@@ -30,19 +30,15 @@ namespace zzsystems { namespace paranoise { namespace examples {
 		using namespace chrono;
 
 		//PreFetchCacheLine()
-#ifndef PROFILE
-		cout << endl << "Normal: " << endl;
+#ifndef PROFILE		
 		auto sisd_t1 = high_resolution_clock::now();
-
-
 		auto result2 = *scalar_algorithm();
-
+		//vector<float> result2(512 * 512 * 1);
 		auto sisd_t2 = high_resolution_clock::now();
 		auto sisd_duration = duration_cast<milliseconds>(sisd_t2 - sisd_t1).count();
 
-		cout << "Compiler optimized: " << sisd_duration << "ms" << endl;
-#endif
-		cout << endl << "Parachute/Paranoise:" << endl;
+		cout << "Time: " << sisd_duration << "ms" << endl;
+#endif		
 		auto simd_t1 = high_resolution_clock::now();
 
 		auto result1 = *vector_algorithm();
@@ -50,7 +46,7 @@ namespace zzsystems { namespace paranoise { namespace examples {
 		auto simd_t2 = high_resolution_clock::now();
 		auto simd_duration = duration_cast<milliseconds>(simd_t2 - simd_t1).count();
 
-		cout << "PARACHUTE (optimized code + compiler optimization): " << simd_duration << "ms" << endl;
+		cout << "Time: " << simd_duration << "ms" << endl;
 #ifndef PROFILE
 		cout << "Speedup : " << (double)sisd_duration / simd_duration << endl << endl;
 #endif

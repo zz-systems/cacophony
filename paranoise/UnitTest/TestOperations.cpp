@@ -95,7 +95,7 @@ namespace zzsystems { namespace simdal { namespace tests {
 				_fref3[i] = 8 - static_cast<float>(i); //rng(e2);
 
 				
-				_fmask[i] = (_bmask[i] = maskrng(e2) > 0) 
+				_fmask[i] = (_bmask[i] = (maskrng(e2) > 0))
 					? -numeric_limits<float>::quiet_NaN() // 0xFFFF'FFFF
 					: 0.0f;
 

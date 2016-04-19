@@ -10,7 +10,7 @@
 namespace zzsystems { namespace paranoise { namespace modules {
 	using namespace std;
 	using namespace generators;
-	using namespace util;
+	using namespace math;
 
 	SIMD_ENABLED
 	struct cache
@@ -29,9 +29,9 @@ namespace zzsystems { namespace paranoise { namespace modules {
 			: source(source.source), _mut(source._mut)
 		{}
 		//#error TODO: slices! SIMD: [x0 x1 x2 x3] [y0 y0 y0 y0] [z0 z0 z0 z0]
-		inline vreal operator()(const Vector3<vreal>& coords)
+		inline vreal operator()(const vec3<vreal>& coords)
 		{
-			Vector3<vreal> _coords = coords;
+			vec3<vreal> _coords = coords;
 
 			bool dirty = false;
 			vreal	result;
@@ -43,7 +43,7 @@ namespace zzsystems { namespace paranoise { namespace modules {
 
 			_mut->lock();
 
-			for (int i = 0; i < dim<vreal>(); i++)
+			for (size_t i = 0; i < dim<vreal>(); i++)
 			{
 				auto zc = _cache.find(z[i]);
 				if (zc == _cache.end())
@@ -79,7 +79,7 @@ namespace zzsystems { namespace paranoise { namespace modules {
 
 				_mut->lock();
 
-				for (int i = 0; i < dim<vreal>(); i++)
+				for (size_t i = 0; i < dim<vreal>(); i++)
 				{				
 
 					if (_cache.find(z[i]) == _cache.end())

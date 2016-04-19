@@ -49,7 +49,7 @@ namespace zzsystems { namespace simdal {
 	
 	// Integer SQRT =============================================================================================	
 	FEATURE_FUNC(vsqrt, _int4, _dispatcher::has_sse)
-		(const _int4 a)
+		(const _int4 &a)
 	{
 		BODY(_mm_sqrt_ps(static_cast<_float4>(a).val));
 	}	
@@ -62,27 +62,27 @@ namespace zzsystems { namespace simdal {
 	}
 
 	FEATURE_FUNC(vsel, _int4, !_dispatcher::has_sse41 && _dispatcher::has_sse)
-		(const _float4 a, const _int4 b, const _int4 c)
+		(const _float4 &a, const _int4 &b, const _int4 &c)
 	{
-		auto mask = _mm_castps_si128(a.val);
-		return mask & b | ~mask & c;
+		_int4 mask(a.val);
+		return (mask & b) | (~mask & c);
 	}
 
 	FEATURE_FUNC(vsel, _float4, !_dispatcher::has_sse41 && _dispatcher::has_sse)
-		(const _int4 a, const _float4 b, const _float4 c)
+		(const _int4 &a, const _float4 &b, const _float4 &c)
 	{
-		auto mask = _mm_castsi128_ps(a.val);
+		_float4 mask = _mm_castsi128_ps(a.val);
 		return mask & b | ~mask & c;
 	}
 
 	FEATURE_FUNC(vsel, _int4, _dispatcher::has_sse41 && _dispatcher::has_sse)
-		(const _float4 a, const _int4 b, const _int4 c)
+		(const _float4 &a, const _int4 &b, const _int4 &c)
 	{
 		BODY(_mm_blendv_epi8(c.val, b.val, _mm_castps_si128(a.val)));
 	}
 
 	FEATURE_FUNC(vsel, _float4, _dispatcher::has_sse41 && _dispatcher::has_sse)
-		(const _int4 a, const _float4 b, const _float4 c)
+		(const _int4 &a, const _float4 &b, const _float4 &c)
 	{
 		BODY(_mm_blendv_ps(c.val, b.val, _mm_castsi128_ps(a.val)));
 	}	

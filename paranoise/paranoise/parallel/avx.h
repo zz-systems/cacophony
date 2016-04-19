@@ -4,6 +4,7 @@
 
 #include "dependencies.h"
 
+#include "int8_avx1.h"
 #include "int8.h"
 #include "float8.h"
 #include "double4.h"
@@ -11,6 +12,9 @@
 // Traits =========================================================================================================
 template<typename featuremask>
 struct std::_Is_integral<zzsystems::simdal::_int8> : std::true_type {	};
+
+template<typename featuremask>
+struct std::_Is_integral<zzsystems::simdal::_int4x2> : std::true_type {	};
 
 template<typename featuremask>
 struct std::_Is_floating_point<zzsystems::simdal::_float8> : std::true_type {	};
@@ -24,13 +28,26 @@ namespace zzsystems { namespace simdal {
 	ANY(featuremask)
 	_int8::int8(const _float8& rhs) : int8(rhs.val) { }
 	ANY(featuremask)
-	inline _int8::int8(const _int8& rhs) : int8(rhs.val) { }
+	_int8::int8(const _int8& rhs) : int8(rhs.val) { }
 	//inline int8::int8(const double4& rhs) : int8(rhs.val) { }
+
+	ANY(featuremask)
+		_int4x2::_int4x2(const _float8& rhs) : _int4x2(_mm256_extractf128_ps(rhs.val, 1), _mm256_extractf128_ps(rhs.val, 0)) { }
+	ANY(featuremask)
+		_int4x2::_int4x2(const _int4x2& rhs) : _int4x2(rhs.hi, rhs.lo) { }
+	ANY(featuremask)
+		_int4x2::_int4x2(const _int4& rhs_hi, const _int4& rhs_lo) : _int4x2(rhs_hi.val, rhs_lo.val) { }
 
 	ANY(featuremask)
 	_float8::float8(const _float8& rhs) : float8(rhs.val) { }
 	ANY(featuremask)
 	_float8::float8(const _int8& rhs) : float8(rhs.val) { }
+	ANY(featuremask)
+	_float8::float8(const _int4x2& rhs) 
+		: float8(_mm256_set_m128(_mm_cvtepi32_ps(rhs.hi.val), _mm_cvtepi32_ps(rhs.lo.val)))
+	{
+		_mm256_zeroupper();
+	}
 	//inline float8::float8(const double4& rhs) : float8(rhs.val) { }
 
 	/*inline double4::double4(const float8& rhs) : double4(rhs.val) { }
@@ -42,35 +59,62 @@ namespace zzsystems { namespace simdal {
 		return src.val.m256i_i32;
 	}
 
+	ANY(featuremask) int32_t* extract(_int4x2 &src)
+	{
+		return src.hi.val.m256i_i32;
+	}
+
 	ANY(featuremask) float* extract(_float8 &src)
 	{
 		return src.val.m256_f32;
 	}
 
 	// Integer SQRT =============================================================================================	
-	FEATURE_FUNC(vsqrt, _int8, _dispatcher::has_sse)
-		(const _int4 a)
+	FEATURE_FUNC(vsqrt, _int8, _dispatcher::has_avx)
+		(const _int8 &a)
 	{
-		BODY(_mm_sqrt_ps(static_cast<_float8>(a).val));
+		BODY(_mm256_sqrt_ps(static_cast<_float8>(a).val));
 	}
 
+	FEATURE_FUNC(vsqrt, _int4x2, _dispatcher::has_avx)
+		(const _int4x2 &a)
+	{
+		BODY(_mm256_sqrt_ps(static_cast<_float8>(a).val));
+	}
 	// Integer DIV ==============================================================================================	
 
-	FEATURE_BIN_OP(/ , _int8, _dispatcher::has_sse)
+	FEATURE_BIN_OP(/ , _int8, _dispatcher::has_avx2)
 	{
 		BODY(_mm256_div_ps(static_cast<_float8>(a).val, static_cast<_float8>(b).val));
 	}	
 
-	FEATURE_FUNC(vsel, _int8, _dispatcher::has_avx2)
-		(const _float8 a, const _int8 b, const _int8 c)
+	FEATURE_BIN_OP(/ , _int4x2, _dispatcher::has_avx)
 	{
-		BODY(_mm256_blendv_epi8(c.val, b.val, _mm256_castps_si256(a.val)));
+		BODY(_mm256_div_ps(static_cast<_float8>(a).val, static_cast<_float8>(b).val));
 	}
 
-	FEATURE_FUNC(vsel, _float8, _dispatcher::has_avx)
-		(const _int8 a, const _float8 b, const _float8 c)
+	FEATURE_FUNC(vsel, _int8, _dispatcher::has_avx2)
+		(const _float8 &a, const _int8 &b, const _int8 &c)
+	{		
+		BODY(vsel(c, b, _int8(a)));
+	}
+
+	FEATURE_FUNC(vsel, _float8, _dispatcher::has_avx2)
+		(const _int8 &a, const _float8 &b, const _float8 &c)
 	{
-		BODY(_mm256_blendv_ps(c.val, b.val, _mm256_castsi256_ps(a.val)));
+		BODY(vsel(c, b, _float8(a)));
+	}
+
+	FEATURE_FUNC(vsel, _int4x2, _dispatcher::has_avx && !_dispatcher::has_avx2)
+		(const _float8 &a, const _int4x2 &b, const _int4x2 &c)
+	{
+		BODY(vsel(c, b, _int4x2(a.val)));
+	}
+
+	FEATURE_FUNC(vsel, _float8, _dispatcher::has_avx && !_dispatcher::has_avx2)
+		(const _int4x2 &a, const _float8 &b, const _float8 &c)
+	{
+		BODY(vsel(c, b, _float8(a)));
 	}
 }}
 #endif

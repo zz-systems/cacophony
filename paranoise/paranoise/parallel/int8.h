@@ -20,7 +20,7 @@ namespace zzsystems { namespace simdal {
 		int8() = default;
 		int8(const int32_t rhs)		: val(_mm256_set1_epi32(rhs)) {}
 
-		int8(VARGS8(uint8_t))			: val(_mm256_set_epi32(VPASS8)) {}
+		int8(VARGS8(uint8_t))		: val(_mm256_set_epi32(VPASS8)) {}
 		int8(VARGS8(int))			: val(_mm256_set_epi32(VPASS8)) {}
 		int8(VARGS8(float))			: val(_mm256_cvtps_epi32(_mm256_set_ps(VPASS8))) {}
 
@@ -133,10 +133,9 @@ namespace zzsystems { namespace simdal {
 
 	FEATURE_BIN_FUNC(vmax, _int8, _dispatcher::has_avx2) { BIN_BODY(_mm256_max_epi32); }
 
-	// SSE 4.1 branchless select
+	// AVX2 branchless select
 	FEATURE_TRI_FUNC(vsel, _int8, _dispatcher::has_avx2)
-	{
-		//BODY(_mm256_blend_epi32(c.val, b.val, _mm256_movemask_epi8(a.val)));
+	{		
 		TRI_BODY_R(_mm256_blendv_epi8);
 	}
 }}

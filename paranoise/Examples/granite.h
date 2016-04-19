@@ -6,22 +6,22 @@
 
 namespace zzsystems { namespace paranoise { namespace examples {
 	using namespace modules;
-	using namespace util;
+	using namespace math;
 	using namespace simdal;
+	using namespace util;
 
-	SIMD_ENABLE(TReal, TInt)
-		Module<TReal> generate_granite()
+	SIMD_ENABLE(vreal, vint)
+		Module<vreal> generate_granite()
 	{
 		cout << "generate granite texture" << endl;
 
-		auto primaryGranite = billow<TReal, TInt>(8.0, 2.18359375, 0.625, 6, 100);
-		auto baseGrains = voronoi<TReal, TInt>(16, 2, 1, true);
-		auto perturb = turbulence<TReal, TInt>(1.0 / 8.0, 6, 4.0, 2.0, 0.5, 2);
+		auto primaryGranite = billow<vreal, vint>(8.0, 2.18359375, 0.625, 6, 100);
+		auto baseGrains		= voronoi<vreal, vint>(16, 2, 1, true);
+		auto perturb		= turbulence<vreal, vint>(1.0 / 8.0, 6, 4.0, 2.0, 0.5, 2);
 
-		Module<TReal> combinedGranite = [=](const Vector3<TReal>& c) { return (primaryGranite(c) + baseGrains(c)) * static_cast<TReal>(-0.5f); };
+		Module<vreal> combinedGranite = [=](const vec3<vreal>& c) { return (primaryGranite(c) + baseGrains(c)) * static_cast<vreal>(-0.5f); };
 
 		return [=](const auto& c) { return perturb(c, combinedGranite); };
-		//return [=](const auto& c) { return static_cast<TReal>(0.0f) + static_cast<TReal>(0.5f);};
 	}
 
 	gradient1D granite_grad =

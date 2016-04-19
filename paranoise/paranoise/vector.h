@@ -5,180 +5,152 @@
 #include "base.h"
 
 
-namespace zzsystems { namespace paranoise { namespace util {
+namespace zzsystems { namespace math {
 	using namespace simdal;
 
 	template<typename T>
-	struct Vector3
+	union vec3
 	{
-		union {
-			T v[3];
+		T v[3];
 
-			struct {
-				T x;
-				T y;
-				T z;
-			};
+		struct {
+			T x;
+			T y;
+			T z;
 		};
 
-		inline Vector3() = default;
-		//Vector3(const T* rhs) { v = rhs; };
+		vec3() = default;
+		//vec3(const T* rhs) { v = rhs; };
 
-		inline Vector3(const Vector3<T>& rhs) : x(rhs.x), y(rhs.y), z(rhs.z) 
+		vec3(const vec3<T>& rhs) : x(rhs.x), y(rhs.y), z(rhs.z)
 		{};
-		inline Vector3(const T& all) : x(all), y(all), z(all)
+		vec3(const T& all) : x(all), y(all), z(all)
 		{ };
-		inline Vector3(const T& x, const T& y, const T& z) : x(x), y(y), z(z) { };
+		vec3(const T& x, const T& y, const T& z) : x(x), y(y), z(z) { };
+
+		/*vec3(initializer_list<T> list) : x(list[0]), y(list[1]), z(list[2])
+		{}*/
 
 		template<typename U>
-		inline Vector3(const Vector3<U>& rhs) 
+		vec3(const vec3<U>& rhs)
 			: x(static_cast<T>(rhs.x))
 			, y(static_cast<T>(rhs.y))
 			, z(static_cast<T>(rhs.z))
 		{ }
 
-		explicit inline operator bool() const
+		explicit operator bool() const
 		{
 			return static_cast<bool>(x) && static_cast<bool>(y) && static_cast<bool>(z);
 		}
 		
-		BIN_OP_STUB(+, Vector3<T>, T)
-		BIN_OP_STUB(-, Vector3<T>, T)
-		BIN_OP_STUB(*, Vector3<T>, T)
-		BIN_OP_STUB(/, Vector3<T>, T)		
 	};
-
-	/*ANY2(TCondition, TProcess)
-		inline Vector3<TProcess> vsel(const Vector3<TCondition> &condition, const Vector3<TProcess> &choice1, const Vector3<TProcess> &choice2)
+	
+	ANY(T) BIN_OP(+, vec3<T>)
 	{
-		return Vector3<TProcess>(
-			simdal::vsel<TCondition, TProcess>(condition.x, choice1.x, choice2.x),
-			simdal::vsel<TCondition, TProcess>(condition.y, choice1.y, choice2.y),
-			simdal::vsel<TCondition, TProcess>(condition.z, choice1.z, choice2.z));
-	}*/
-
-	ANY2(T, U)
-		UN_FUNC(vtrunc, Vector3<T>)
-	{
-		BODY(Vector3<T>(vtrunc<T, U>(a.x), vtrunc<T, U>(a.y), vtrunc<T, U>(a.z)));
+		BODY(vec3<T>(a.x + b.x, a.y + b.y, a.z + b.z));
 	}
+
+	ANY(T) BIN_OP(-, vec3<T>)
+	{
+		BODY(vec3<T>(a.x - b.x, a.y - b.y, a.z - b.z));
+	}
+
+	ANY(T) BIN_OP(*, vec3<T>)
+	{
+		BODY(vec3<T>(a.x * b.x, a.y * b.y, a.z * b.z));
+	}
+
+	ANY(T) BIN_OP(/, vec3<T>)
+	{
+		BODY(vec3<T>(a.x / b.x, a.y / b.y, a.z / b.z));
+	}
+
+
+	template<typename T, typename U> inline vec3<T> operator +(const vec3<T> &a, const U &b) { return a + static_cast<vec3<T>>(b); }
+	template<typename T, typename U> inline vec3<T> operator +(const U &a, const vec3<T> &b) { return static_cast<vec3<T>>(a) + b; }
+	template<typename T, typename U> inline vec3<T> operator -(const vec3<T> &a, const U &b) { return a - static_cast<vec3<T>>(b); }
+	template<typename T, typename U> inline vec3<T> operator -(const U &a, const vec3<T> &b) { return static_cast<vec3<T>>(a) - b; }
+	template<typename T, typename U> inline vec3<T> operator *(const vec3<T> &a, const U &b) { return a * static_cast<vec3<T>>(b); }
+	template<typename T, typename U> inline vec3<T> operator *(const U &a, const vec3<T> &b) { return static_cast<vec3<T>>(a) * b; }
+	template<typename T, typename U> inline vec3<T> operator /(const vec3<T> &a, const U &b) { return a / static_cast<vec3<T>>(b); }
+	template<typename T, typename U> inline vec3<T> operator /(const U &a, const vec3<T> &b) { return static_cast<vec3<T>>(a) / b; }
+
+	template<typename T> inline vec3<T> &operator +=(vec3<T>& a, const T& b) { return a = (a + b); }
+	template<typename T> inline vec3<T> &operator -=(vec3<T>& a, const T& b) { return a = (a - b); }
+	template<typename T> inline vec3<T> &operator *=(vec3<T>& a, const T& b) { return a = (a * b); }
+	template<typename T> inline vec3<T> &operator /=(vec3<T>& a, const T& b) { return a = (a / b); }
+
+	template<typename T, typename U> inline vec3<T> &operator +=(vec3<T>& a, const U& b) { return a = (a + b); }
+	template<typename T, typename U> inline vec3<T> &operator -=(vec3<T>& a, const U& b) { return a = (a - b); }
+	template<typename T, typename U> inline vec3<T> &operator *=(vec3<T>& a, const U& b) { return a = (a * b); }
+	template<typename T, typename U> inline vec3<T> &operator /=(vec3<T>& a, const U& b) { return a = (a / b); }
+
+	template<typename T>
+	inline vec3<T>	operator <(const vec3<T>& a, const vec3<T>& b) { return vec3<T>(a.x < b.x, a.y < b.y, a.z < b.z); }
+	template<typename T>
+	inline vec3<T>	operator <=(const vec3<T>& a, const vec3<T>& b) { return vec3<T>(a.x <= b.x, a.y <= b.y, a.z <= b.z); }
+	template<typename T>
+	inline vec3<T>	operator >(const vec3<T>& a, const vec3<T>& b) { return vec3<T>(a.x > b.x, a.y > b.y, a.z > b.z); }
+	template<typename T>
+	inline vec3<T>	operator >=(const vec3<T>& a, const vec3<T>& b) { return vec3<T>(a.x >= b.x, a.y >= b.y, a.z >= b.z); }
+	template<typename T>
+	inline vec3<T>	operator ==(const vec3<T>& a, const vec3<T>& b) { return vec3<T>(a.x == b.x, a.y == b.y, a.z == b.z); }
+	template<typename T>
+	inline vec3<T>	operator !=(const vec3<T>& a, const vec3<T>& b) { return vec3<T>(a.x != b.x, a.y != b.y, a.z != b.z); }
+
+	template<typename T>
+	inline vec3<T>	operator &(const vec3<T>& a, const vec3<T>& b) { return vec3<T>(a.x < b.x, a.y < b.y, a.z < b.z); }
+	template<typename T>
+	inline vec3<T>	operator |(const vec3<T>& a, const vec3<T>& b) { return vec3<T>(a.x > b.x, a.y > b.y, a.z > b.z); }
+	template<typename T>
+	inline vec3<T>	operator ^(const vec3<T>& a, const vec3<T>& b) { return vec3<T>(a.x == b.x, a.y == b.y, a.z == b.z); }
+
+
+	template<typename T>
+	inline vec3<T>	&operator +=(vec3<T>& a, const vec3<T>& b) { a.x += b.x; a.y += b.y; a.z += b.z; return a; }
+	template<typename T>
+	inline vec3<T>	&operator -=(vec3<T>& a, const vec3<T>& b) { a.x -= b.x; a.y -= b.y; a.z -= b.z; return a; }
+	template<typename T>
+	inline vec3<T>	&operator *=(vec3<T>& a, const vec3<T>& b) { a.x *= b.x; a.y *= b.y; a.z *= b.z; return a; }
+	template<typename T>
+	inline vec3<T>	&operator /=(vec3<T>& a, const vec3<T>& b) { a.x /= b.x; a.y /= b.y; a.z /= b.z; return a; }
+
+
+	template<typename T>
+	inline vec3<T>	&operator &=(vec3<T>& a, const vec3<T>& b) { a.x &= b.x; a.y &= b.y; a.z &= b.z; return a; }
+	template<typename T>
+	inline vec3<T>	&operator |=(vec3<T>& a, const vec3<T>& b) { a.x |= b.x; a.y |= b.y; a.z |= b.z; return a; }
+	template<typename T>
+	inline vec3<T>	&operator ^=(vec3<T>& a, const vec3<T>& b) { a.x ^= b.x; a.y ^= b.y; a.z ^= b.z; return a; }
+
+	template<typename T>
+	inline T dot(const vec3<T>& a, const vec3<T>& b) { return a.x * b.x + a.y * b.y + a.z * b.z; } // fmadd?
+}
+namespace simdal
+{
+	using namespace math;
 
 	ANY(T)
-		UN_FUNC(clamp_int32, Vector3<T>)
+		UN_FUNC(clamp_int32, vec3<T>)
 	{
-		return Vector3<T>(simdal::clamp_int32<T>(a.x), simdal::clamp_int32<T>(a.y), simdal::clamp_int32<T>(a.z));
+		return vec3<T>(clamp_int32<T>(a.x), clamp_int32<T>(a.y), clamp_int32<T>(a.z));
 	}
 
-	ANY(T) BIN_OP(+, Vector3<T>)
+	ANY2(TCondition, TProcess)
+	inline vec3<TProcess> vsel(const vec3<TCondition> &condition, const vec3<TProcess> &choice1, const vec3<TProcess> &choice2)
 	{
-		BODY(Vector3<T>(a.x + b.x, a.y + b.y, a.z + b.z));
+		return vec3<TProcess>(
+			vsel<TCondition, TProcess>(condition.x, choice1.x, choice2.x),
+			vsel<TCondition, TProcess>(condition.y, choice1.y, choice2.y),
+			vsel<TCondition, TProcess>(condition.z, choice1.z, choice2.z));
 	}
 
-	ANY(T) BIN_OP(-, Vector3<T>)
+
+	ANY2(T, U)
+	UN_FUNC(vtrunc, vec3<T>)
 	{
-		BODY(Vector3<T>(a.x - b.x, a.y - b.y, a.z - b.z));
+		BODY(vec3<T>(vtrunc<T, U>(a.x), vtrunc<T, U>(a.y), vtrunc<T, U>(a.z)));
 	}
-
-	ANY(T) BIN_OP(*, Vector3<T>)
-	{
-		BODY(Vector3<T>(a.x * b.x, a.y * b.y, a.z * b.z));
-	}
-
-	ANY(T) BIN_OP(/, Vector3<T>)
-	{
-		BODY(Vector3<T>(a.x / b.x, a.y / b.y, a.z / b.z));
-	}
-
-	template<typename T> inline Vector3<T> &operator +=(Vector3<T>& a, const T& b) { a = (a + b); return a; }
-	template<typename T> inline Vector3<T> &operator -=(Vector3<T>& a, const T& b) { a = (a - b); return a; }
-	template<typename T> inline Vector3<T> &operator *=(Vector3<T>& a, const T& b) { a = (a * b); return a; }
-	template<typename T> inline Vector3<T> &operator /=(Vector3<T>& a, const T& b) { a = (a / b); return a; }
-
-	template<typename T>
-	inline Vector3<T>	operator <(const Vector3<T>& a, const Vector3<T>& b) { return Vector3<T>(a.x < b.x, a.y < b.y, a.z < b.z); }
-	template<typename T>
-	inline Vector3<T>	operator <=(const Vector3<T>& a, const Vector3<T>& b) { return Vector3<T>(a.x <= b.x, a.y <= b.y, a.z <= b.z); }
-	template<typename T>
-	inline Vector3<T>	operator >(const Vector3<T>& a, const Vector3<T>& b) { return Vector3<T>(a.x > b.x, a.y > b.y, a.z > b.z); }
-	template<typename T>
-	inline Vector3<T>	operator >=(const Vector3<T>& a, const Vector3<T>& b) { return Vector3<T>(a.x >= b.x, a.y >= b.y, a.z >= b.z); }
-	template<typename T>
-	inline Vector3<T>	operator ==(const Vector3<T>& a, const Vector3<T>& b) { return Vector3<T>(a.x == b.x, a.y == b.y, a.z == b.z); }
-	template<typename T>
-	inline Vector3<T>	operator !=(const Vector3<T>& a, const Vector3<T>& b) { return Vector3<T>(a.x != b.x, a.y != b.y, a.z != b.z); }
-
-	template<typename T>
-	inline Vector3<T>	operator &(const Vector3<T>& a, const Vector3<T>& b) { return Vector3<T>(a.x < b.x, a.y < b.y, a.z < b.z); }
-	template<typename T>
-	inline Vector3<T>	operator |(const Vector3<T>& a, const Vector3<T>& b) { return Vector3<T>(a.x > b.x, a.y > b.y, a.z > b.z); }
-	template<typename T>
-	inline Vector3<T>	operator ^(const Vector3<T>& a, const Vector3<T>& b) { return Vector3<T>(a.x == b.x, a.y == b.y, a.z == b.z); }
-
-
-	template<typename T>
-	inline Vector3<T>	&operator +=(Vector3<T>& a, const Vector3<T>& b) { a.x += b.x; a.y += b.y; a.z += b.z; return a; }
-	template<typename T>
-	inline Vector3<T>	&operator -=(Vector3<T>& a, const Vector3<T>& b) { a.x -= b.x; a.y -= b.y; a.z -= b.z; return a; }
-	template<typename T>
-	inline Vector3<T>	&operator *=(Vector3<T>& a, const Vector3<T>& b) { a.x *= b.x; a.y *= b.y; a.z *= b.z; return a; }
-	template<typename T>
-	inline Vector3<T>	&operator /=(Vector3<T>& a, const Vector3<T>& b) { a.x /= b.x; a.y /= b.y; a.z /= b.z; return a; }
-
-
-	template<typename T>
-	inline Vector3<T>	&operator &=(Vector3<T>& a, const Vector3<T>& b) { a.x &= b.x; a.y &= b.y; a.z &= b.z; return a; }
-	template<typename T>
-	inline Vector3<T>	&operator |=(Vector3<T>& a, const Vector3<T>& b) { a.x |= b.x; a.y |= b.y; a.z |= b.z; return a; }
-	template<typename T>
-	inline Vector3<T>	&operator ^=(Vector3<T>& a, const Vector3<T>& b) { a.x ^= b.x; a.y ^= b.y; a.z ^= b.z; return a; }
-
-	template<typename T>
-	inline T dot(const Vector3<T>& a, const Vector3<T>& b) { return a.x * b.x + a.y * b.y + a.z * b.z; } // fmadd?
-
-	
-
-	template<typename T>
-	union Matrix3x2
-	{
-		Vector3<T> v[2];
-		struct {
-			Vector3<T> _0;
-			Vector3<T> _1;
-		};
-
-		inline Matrix3x2() = default;
-		//Vector3(const T* rhs) { v = rhs; };
-
-		inline Matrix3x2(const Matrix3x2<T>& rhs) : _0(rhs._0), _1(rhs._1) {  };
-		inline Matrix3x2(const Vector3<T>& _0, const Vector3<T>& _1) : _0(_0), _1(_1) {  };
-	};
-
-
-	//template<typename T>
-	//inline Vector3<T>	operator +(const Vector3<T>& a, const Vector3<T>& b) { return Vector3<T>(a.x + b.x, a.y + b.y, a.z + b.z); }
-	//template<typename T>
-	//inline Vector3<T>	operator -(const Vector3<T>& a, const Vector3<T>& b) { return Vector3<T>(a.x - b.x, a.y - b.y, a.z - b.z); }
-	//template<typename T>
-	//inline Vector3<T>	operator *(const Vector3<T>& a, const Vector3<T>& b) { return Vector3<T>(a.x * b.x, a.y * b.y, a.z * b.z); }
-	//template<typename T>
-	//inline Vector3<T>	operator /(const Vector3<T>& a, const Vector3<T>& b) { return Vector3<T>(a.x / b.x, a.y / b.y, a.z / b.z); }
-
-	template<typename T>
-	union Matrix3x3
-	{
-		Vector3<T> v[3];
-		struct {
-			Vector3<T> _0;
-			Vector3<T> _1;
-			Vector3<T> _2;
-		};
-	};
-
-	template<typename T>
-	inline Matrix3x3<T>	operator +(const Matrix3x3<T>& a, const Matrix3x3<T>& b) { return Vector3<T>(a._0 + b._0, a._1 + b._1, a._2 + b._2); }
-	template<typename T>
-	inline Matrix3x3<T>	operator -(const Matrix3x3<T>& a, const Matrix3x3<T>& b) { return Vector3<T>(a._0 - b._0, a._1 - b._1, a._2 - b._2); }
-	template<typename T>
-	inline Vector3<T>	operator *(const Matrix3x3<T>& a, const Vector3<T>& b) { return Vector3<T>(dot(a._0, b), dot(a._1, b), dot(a._2, b)); }
-}}}
+}
+}
 #endif

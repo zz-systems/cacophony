@@ -7,7 +7,6 @@
 #include <functional>
 #include "../paranoise/parallel/all.h"
 #include "../paranoise/modules/all.h"
-#include "../paranoise/scheduler.h"
 #include "util.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
@@ -140,36 +139,28 @@ namespace zzsystems { namespace paranoise { namespace tests {
 
 		TEST_METHOD(Test_Module_Rotate_Implementation_Equality)
 		{
-			modules::rotate<float, int> ref_gen;
-			modules::rotate<sse_real, sse_int> sse_gen;
-			modules::rotate<avx_real, avx_int> avx_gen;
+			rotate<float, int> ref_gen;
+			rotate<sse_real, sse_int> sse_gen;
+			rotate<avx_real, avx_int> avx_gen;
 
-			Module<float> ref_in	= [](const auto& c) { return 1.0f; };
-			Module<sse_real> sse_in = [](const auto& c) { return 1.0f; };
-			Module<avx_real> avx_in = [](const auto& c) { return 1.0f; };
+			ref_gen.set_source([](const auto& c) { return 1.0f; });
+			sse_gen.set_source([](const auto& c) { return 1.0f; });
+			avx_gen.set_source([](const auto& c) { return 1.0f; });
 
-			equality_test(
-				[&](const auto& c) { return ref_gen(c, ref_in); },
-				[&](const auto& c) { return sse_gen(c, sse_in); },
-				[&](const auto& c) { return avx_gen(c, avx_in); }
-			);
+			equality_test(ref_gen, sse_gen, avx_gen);
 		}
 
 		TEST_METHOD(Test_Module_Rotate_Performance)
 		{
-			modules::rotate<float, int> ref_gen;
-			modules::rotate<sse_real, sse_int> sse_gen;
-			v::rotate<avx_real, avx_int> avx_gen;
+			rotate<float, int> ref_gen;
+			rotate<sse_real, sse_int> sse_gen;
+			rotate<avx_real, avx_int> avx_gen;
 
-			Module<float> ref_in	= [](const auto& c) { return 1.0f; };
-			Module<sse_real> sse_in = [](const auto& c) { return 1.0f; };
-			Module<avx_real> avx_in = [](const auto& c) { return 1.0f; };
+			ref_gen.set_source([](const auto& c) { return 1.0f; });
+			sse_gen.set_source([](const auto& c) { return 1.0f; });
+			avx_gen.set_source([](const auto& c) { return 1.0f; });
 
-			performance_test(
-				[&](const auto& c) { return ref_gen(c, ref_in); },
-				[&](const auto& c) { return sse_gen(c, sse_in); },
-				[&](const auto& c) { return avx_gen(c, avx_in); }
-			);
+			performance_test(ref_gen, sse_gen, avx_gen);
 		}
 
 		TEST_METHOD(Test_Module_Select_Implementation_Equality)
@@ -178,25 +169,19 @@ namespace zzsystems { namespace paranoise { namespace tests {
 			select<sse_real, sse_int> sse_gen;
 			select<avx_real, avx_int> avx_gen;
 
-			Module<float>
-				ref_a = [](const auto& c) { return -1.0f; },
-				ref_b = [](const auto& c) { return 1.0f; },
-				ref_c = [](const auto& c) { return 0.5f; };
+			ref_gen.set_a([](const auto& c) { return -1.0f; });
+			ref_gen.set_b([](const auto& c) { return 1.0f; });
+			ref_gen.set_controller([](const auto& c) { return 0.5f; });
 
-			Module<sse_real>
-				sse_a = [](const auto& c) { return -1.0f; },
-				sse_b = [](const auto& c) { return 1.0f; },
-				sse_c = [](const auto& c) { return 0.5f; };
-			Module<avx_real>
-				avx_a = [](const auto& c) { return -1.0f; },
-				avx_b = [](const auto& c) { return 1.0f; },
-				avx_c = [](const auto& c) { return 0.5f; };
+			sse_gen.set_a([](const auto& c) { return -1.0f; });
+			sse_gen.set_b([](const auto& c) { return 1.0f; });
+			sse_gen.set_controller([](const auto& c) { return 0.5f; });
 
-			equality_test(
-				[&](const auto& c) { return ref_gen(c, ref_a, ref_b, ref_c); },
-				[&](const auto& c) { return sse_gen(c, sse_a, sse_b, sse_c); },
-				[&](const auto& c) { return avx_gen(c, avx_a, avx_b, avx_c); }
-			);
+			avx_gen.set_a([](const auto& c) { return -1.0f; });
+			avx_gen.set_b([](const auto& c) { return 1.0f; });
+			avx_gen.set_controller([](const auto& c) { return 0.5f; });
+
+			equality_test(ref_gen, sse_gen, avx_gen);
 		}
 
 		TEST_METHOD(Test_Module_Select_Performance)
@@ -205,25 +190,19 @@ namespace zzsystems { namespace paranoise { namespace tests {
 			select<sse_real, sse_int> sse_gen;
 			select<avx_real, avx_int> avx_gen;
 
-			Module<float>
-				ref_a = [](const auto& c) { return -1.0f; },
-				ref_b = [](const auto& c) { return 1.0f; },
-				ref_c = [](const auto& c) { return 0.5f; };
+			ref_gen.set_a([](const auto& c) { return -1.0f; });
+			ref_gen.set_b([](const auto& c) { return 1.0f; });
+			ref_gen.set_controller([](const auto& c) { return 0.5f; });
 
-			Module<sse_real>
-				sse_a = [](const auto& c) { return -1.0f; },
-				sse_b = [](const auto& c) { return 1.0f; },
-				sse_c = [](const auto& c) { return 0.5f; };
-			Module<avx_real>
-				avx_a = [](const auto& c) { return -1.0f; },
-				avx_b = [](const auto& c) { return 1.0f; },
-				avx_c = [](const auto& c) { return 0.5f; };
+			sse_gen.set_a([](const auto& c) { return -1.0f; });
+			sse_gen.set_b([](const auto& c) { return 1.0f; });
+			sse_gen.set_controller([](const auto& c) { return 0.5f; });
 
-			performance_test(
-				[&](const auto& c) { return ref_gen(c, ref_a, ref_b, ref_c); },
-				[&](const auto& c) { return sse_gen(c, sse_a, sse_b, sse_c); },
-				[&](const auto& c) { return avx_gen(c, avx_a, avx_b, avx_c); }
-			);
+			avx_gen.set_a([](const auto& c) { return -1.0f; });
+			avx_gen.set_b([](const auto& c) { return 1.0f; });
+			avx_gen.set_controller([](const auto& c) { return 0.5f; });
+
+			performance_test(ref_gen, sse_gen, avx_gen);
 		}
 
 		TEST_METHOD(Test_Module_Turbulence_Implementation_Equality)
@@ -232,15 +211,11 @@ namespace zzsystems { namespace paranoise { namespace tests {
 			turbulence<sse_real, sse_int> sse_gen;
 			turbulence<avx_real, avx_int> avx_gen;
 
-			Module<float> ref_in	= [](const auto& c) { return 1.0f; };
-			Module<sse_real> sse_in = [](const auto& c) { return 1.0f; };
-			Module<avx_real> avx_in = [](const auto& c) { return 1.0f; };
+			ref_gen.set_source([](const auto& c) { return 1.0f; });
+			sse_gen.set_source([](const auto& c) { return 1.0f; });
+			avx_gen.set_source([](const auto& c) { return 1.0f; });
 
-			equality_test(
-				[&](const auto& c) { return ref_gen(c, ref_in); },
-				[&](const auto& c) { return sse_gen(c, sse_in); },
-				[&](const auto& c) { return avx_gen(c, avx_in); }
-			);
+			equality_test(ref_gen, sse_gen, avx_gen);
 		}
 
 		TEST_METHOD(Test_Module_Turbulence_Performance)
@@ -249,15 +224,12 @@ namespace zzsystems { namespace paranoise { namespace tests {
 			turbulence<sse_real, sse_int> sse_gen;
 			turbulence<avx_real, avx_int> avx_gen;
 
-			Module<float> ref_in = [](const auto& c) { return 1.0f; };
-			Module<sse_real> sse_in = [](const auto& c) { return 1.0f; };
-			Module<avx_real> avx_in = [](const auto& c) { return 1.0f; };
+			ref_gen.set_source([](const auto& c) { return 1.0f; });
+			sse_gen.set_source([](const auto& c) { return 1.0f; });
+			avx_gen.set_source([](const auto& c) { return 1.0f; });
 
-			performance_test(
-				[&](const auto& c) { return ref_gen(c, ref_in); },
-				[&](const auto& c) { return sse_gen(c, sse_in); },
-				[&](const auto& c) { return avx_gen(c, avx_in); }
-			);
+
+			performance_test(ref_gen, sse_gen, avx_gen);
 		}
 
 
@@ -288,15 +260,12 @@ namespace zzsystems { namespace paranoise { namespace tests {
 				{ 2.0, 5.5 }
 			};
 
-			Module<float> ref_in	= [](const auto& c) { return 1.0f; };
-			Module<sse_real> sse_in = [](const auto& c) { return 1.0f; };
-			Module<avx_real> avx_in = [](const auto& c) { return 1.0f; };
+			ref_gen.set_source([](const auto& c) { return 1.0f; });
+			sse_gen.set_source([](const auto& c) { return 1.0f; });
+			avx_gen.set_source([](const auto& c) { return 1.0f; });
 
-			equality_test(
-				[&](const auto& c) { return ref_gen(c, ref_in); },
-				[&](const auto& c) { return sse_gen(c, sse_in); },
-				[&](const auto& c) { return avx_gen(c, avx_in); }
-			);
+
+			equality_test(ref_gen, sse_gen, avx_gen);
 		}
 
 		TEST_METHOD(Test_Module_Terrace_Performance)
@@ -326,15 +295,12 @@ namespace zzsystems { namespace paranoise { namespace tests {
 				{ 2.0, 5.5 }
 			};
 
-			Module<float> ref_in = [](const auto& c) { return 1.0f; };
-			Module<sse_real> sse_in = [](const auto& c) { return 1.0f; };
-			Module<avx_real> avx_in = [](const auto& c) { return 1.0f; };
+			ref_gen.set_source([](const auto& c) { return 1.0f; });
+			sse_gen.set_source([](const auto& c) { return 1.0f; });
+			avx_gen.set_source([](const auto& c) { return 1.0f; });
 
-			performance_test(
-				[&](const auto& c) { return ref_gen(c, ref_in); },
-				[&](const auto& c) { return sse_gen(c, sse_in); },
-				[&](const auto& c) { return avx_gen(c, avx_in); }
-			);
+
+			performance_test(ref_gen, sse_gen, avx_gen);
 		}
 
 		TEST_METHOD(Test_Module_Scheduler)
@@ -343,7 +309,7 @@ namespace zzsystems { namespace paranoise { namespace tests {
 			module_s.seed = 125;
 			scheduler_settings scheduler_s({4, 4, 4}, 1337, true);
 
-			auto result = schedule2D<float4>([&module_s](const Vector3<float4>& coords) { return billow<float4, int4>(coords, module_s); }, [](const Vector3<float4>& coords) { return coords; }, scheduler_s);
+			auto result = schedule2D<float4>([&module_s](const vec3<float4>& coords) { return billow<float4, int4>(coords, module_s); }, [](const vec3<float4>& coords) { return coords; }, scheduler_s);
 			*/
 
 			Assert::AreEqual(1, 1, std::numeric_limits<float>::epsilon());
@@ -357,9 +323,9 @@ namespace zzsystems { namespace paranoise { namespace tests {
 			for (float y = -1; y <= 1; y += 0.25)
 			for (float x = -1; x <= 1; x += 0.25)
 			{	
-				auto ref = ref_gen(Vector3<float>(x, y, z));
-				auto sse = sse_gen(Vector3<sse_real>(x, y, z));
-				auto avx = avx_gen(Vector3<avx_real>(x, y, z));
+				auto ref = ref_gen(vec3<float>(x, y, z));
+				auto sse = sse_gen(vec3<sse_real>(x, y, z));
+				auto avx = avx_gen(vec3<avx_real>(x, y, z));
 					
 				wstringstream sse_feedback;
 				wstringstream avx_feedback;
@@ -384,7 +350,7 @@ namespace zzsystems { namespace paranoise { namespace tests {
 			for (float y = -8; y <= 8; y += 0.25)			
 			for (float z = -8; z <= 8; z += 0.25)
 			{					 
-				ref_gen(Vector3<float>(x, y, z));
+				ref_gen(vec3<float>(x, y, z));
 			});
 
 			PERFORMANCE_SNAPSHOT(sse_times,
@@ -399,7 +365,7 @@ namespace zzsystems { namespace paranoise { namespace tests {
 
 					for (float z = -8; z <= 8; z += 0.25)
 					{
-						sse_gen(Vector3<sse_real>(_x, _y, z));
+						sse_gen(vec3<sse_real>(_x, _y, z));
 					}
 				}
 			});
@@ -416,7 +382,7 @@ namespace zzsystems { namespace paranoise { namespace tests {
 
 					for (float z = -8; z <= 8; z += 0.25)
 					{
-						avx_gen(Vector3<avx_real>(_x, _y, z));
+						avx_gen(vec3<avx_real>(_x, _y, z));
 					}
 				}
 			});
@@ -429,10 +395,10 @@ namespace zzsystems { namespace paranoise { namespace tests {
 
 			perfstream
 				<< "ref: " << ref_time << endl
-				<< "sse: " << sse_time << " (" << (double)ref_time / sse_time << ")" << endl
-				<< "avx: " << avx_time << " (" << (double)ref_time / avx_time << ")" << endl;
+				<< "sse: " << sse_time << " (" << static_cast<double>(ref_time) / sse_time << ")" << endl
+				<< "avx: " << avx_time << " (" << static_cast<double>(ref_time) / avx_time << ")" << endl;
 
 			Logger::WriteMessage(perfstream.str().c_str());
 		}
 	};
-}
+}}}
