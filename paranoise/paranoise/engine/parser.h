@@ -3,7 +3,7 @@
 #define ZZSYSTEMS_PARANOISE_MODULES_PARSER_H
 
 #include "dependencies.h"
-#include "../modules//all.h"
+#include "../modules/all.h"
 #include "../lib/json.hpp"
 
 #include <iostream>

@@ -200,29 +200,29 @@ namespace zzsystems { namespace simdal {
 		} \
 	} while(false)
 
-#define SIMD_DISPATCH_ALL(body) \
+#define SIMD_DISPATCH_ALL(sysinfo, body) \
 	do { \
-		if(true) \
+		if(sysinfo.hasAVX2()) \
 		{ \
 			AVX2_BRANCH;\
 			body;\
 		} \
-		if(false) \
+		if(sysinfo.hasAVX()) \
 		{ \
 			AVX1_BRANCH;\
 			body;\
 		} \
-		if(true) \
+		if(sysinfo.hasSSE4FMA()) \
 		{ \
 			SSE4FMA_BRANCH;\
 			body;\
 		} \
-		if(true) \
+		if(sysinfo.hasSSE4()) \
 		{ \
 			SSE4_BRANCH;\
 			body;\
 		} \
-		if(true) \
+		if(sysinfo.hasSSE()) \
 		{ \
 			SSE_BRANCH;\
 			body;\

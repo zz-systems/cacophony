@@ -7,11 +7,12 @@
     "entryPoint": "finalGranite",
 
     "scheduler": {
-      "dimensions": [ 2048, 2048, 1 ],
+      "dimensions": [ 257, 256, 1 ],
 
       "scale": [ 1, 1, 1 ],
-      "offset": [ 5, 5, 1 ],
+      "offset": [ 0, 0, 0 ],
 
+      "seamless": true,
       "use_threads": true
     }
   },

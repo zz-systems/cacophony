@@ -204,11 +204,11 @@ namespace zzsystems { namespace paranoise { namespace examples {
 		{ -256 + seaLevelInMeters,		color_rgb(6,  58, 127, 255) },
 		{ -1.0 + seaLevelInMeters,		color_rgb(14, 112, 192, 255) },
 		{ 0.0 + seaLevelInMeters,		color_rgb(70, 120,  60, 255) },
-		{ 1024.0 + seaLevelInMeters,		color_rgb(110, 140,  75, 255) },
-		{ 2048.0 + seaLevelInMeters,		color_rgb(160, 140, 111, 255) },
-		{ 3072.0 + seaLevelInMeters,		color_rgb(184, 163, 141, 255) },
-		{ 4096.0 + seaLevelInMeters,		color_rgb(255, 255, 255, 255) },
-		{ 6144.0 + seaLevelInMeters,		color_rgb(128, 255, 255, 255) },
+		{ 1024.0 + seaLevelInMeters,	color_rgb(110, 140,  75, 255) },
+		{ 2048.0 + seaLevelInMeters,	color_rgb(160, 140, 111, 255) },
+		{ 3072.0 + seaLevelInMeters,	color_rgb(184, 163, 141, 255) },
+		{ 4096.0 + seaLevelInMeters,	color_rgb(255, 255, 255, 255) },
+		{ 6144.0 + seaLevelInMeters,	color_rgb(128, 255, 255, 255) },
 		{ 16384.0 + seaLevelInMeters,	color_rgb(0,   0, 255, 255) },
 	};
 }}}

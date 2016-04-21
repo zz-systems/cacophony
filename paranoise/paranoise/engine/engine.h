@@ -50,7 +50,7 @@ namespace zzsystems { namespace paranoise
 		{
 			settings << source["environment"]["scheduler"];
 
-			SIMD_DISPATCH_ALL( 
+			SIMD_DISPATCH_ALL(info,
 			{
 				cout << ">>building " << static_dispatcher<capability>::unit_name() << " branch" << endl;
 
@@ -61,11 +61,11 @@ namespace zzsystems { namespace paranoise
 			});
 		}
 
-		shared_ptr<vector<float>> run()
+		shared_ptr<vector<float>> run(const vec3<float> &origin)
 		{
 			SIMD_DISPATCH(info,
 			{
-				return (exec<capability, vreal, vint>());
+				return (exec<capability, vreal, vint>(origin));
 			});
 		}
 
@@ -87,11 +87,11 @@ namespace zzsystems { namespace paranoise
 
 
 		template<typename capability, typename vreal, typename vint>
-		auto exec()
+		auto exec(const vec3<float> &origin)
 		{
 			cout << ">>dispatch: using " << static_dispatcher<capability>::unit_name() << " branch" << endl;
 			
-			return scheduler_cache<vreal, vint>()();
+			return scheduler_cache<vreal, vint>()(origin);
 		}
 	};
 }}

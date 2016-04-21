@@ -36,13 +36,19 @@ namespace zzsystems { namespace simdal {
 	inline double2::double2(const double2& rhs) : double2(rhs.val) { }	*/
 
 	ANY(featuremask)
-	inline int32_t* extract(_int4 &src)
+	int32_t* extract(_int4 &src)
 	{
 		return src.val.m128i_i32;
 	}
 
 	ANY(featuremask)
-		inline float* extract(_float4 &src)
+	const int32_t* extract(const _int4 &src)
+	{
+		return src.val.m128i_i32;
+	}
+
+	ANY(featuremask)
+	const float* extract(const _float4 &src)
 	{		
 		return src.val.m128_f32;		
 	}

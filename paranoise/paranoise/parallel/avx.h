@@ -58,13 +58,30 @@ namespace zzsystems { namespace simdal {
 	{
 		return src.val.m256i_i32;
 	}
+	ANY(featuremask)
+		const int32_t* extract(const _int8 &src)
+	{
+		return src.val.m256i_i32;
+	}
 
 	ANY(featuremask) int32_t* extract(_int4x2 &src)
 	{
-		return src.hi.val.m256i_i32;
+		return src.hi.val.m128i_i32;
+	}
+
+	ANY(featuremask)
+		const int32_t* extract(const _int4x2 &src)
+	{
+		return src.hi.val.m128i_i32;
 	}
 
 	ANY(featuremask) float* extract(_float8 &src)
+	{
+		return src.val.m256_f32;
+	}
+
+	ANY(featuremask)
+		const float* extract(const _float8 &src)
 	{
 		return src.val.m256_f32;
 	}

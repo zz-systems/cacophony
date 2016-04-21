@@ -49,13 +49,13 @@ namespace zzsystems { namespace paranoise { namespace examples {
 		{
 			//e.info.setFlag(CAPABILITY_AVX2, false);			
 			e.info.feature_flags = flags;
-			return e.run();
+			return e.run({0, 0, 0});
 		};
 
 		auto f2 = [&]()
 		{
 			e.info.feature_flags = CAPABILITY_NONE;		
-			return e.run();
+			return e.run({ 0, 0, 0 });
 		};
 
 		gradient1D grad

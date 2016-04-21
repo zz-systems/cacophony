@@ -23,7 +23,7 @@ namespace zzsystems { namespace paranoise { namespace scheduler {
 		vec3<int> dimensions;
 		vec3<float> scale, offset;
 		bool use_threads;
-
+		bool seamless;
 
 		scheduler_settings() = default;
 
@@ -54,6 +54,7 @@ namespace zzsystems { namespace paranoise { namespace scheduler {
 				: vec3<float>(0); 
 
 			use_threads = source.value("use_threads", true);
+			seamless = source.value("seamless", true);
 
 			return source;
 		}
@@ -65,7 +66,7 @@ namespace zzsystems { namespace paranoise { namespace scheduler {
 	{
 	public:
 		scheduler_settings	settings;
-		Module<vreal>			source;
+		Module<vreal>		source;
 		Transformer<vreal>	transform;
 
 		cpu_scheduler() : source(nullptr), transform(nullptr)
@@ -91,19 +92,25 @@ namespace zzsystems { namespace paranoise { namespace scheduler {
 			return source;
 		}
 
-		auto operator()() const
+		auto operator()(const vec3<float> &origin) const
 		{
 			if (settings.use_threads)
-				return schedule_mt();
+				return schedule_mt(origin);
 			else
-				return schedule_st();
+				return schedule_st(origin);
 		}
 	private:
 		Transformer<vreal> build_transform(Transformer<vreal> transformer)
 		{
+			auto scale		= static_cast<vec3<vreal>>(settings.scale);
+			auto offset		= static_cast<vec3<vreal>>(settings.offset);
 			auto dimensions = static_cast<vec3<vreal>>(settings.dimensions);
-			auto scale = static_cast<vec3<vreal>>(settings.scale);
-			auto offset = static_cast<vec3<vreal>>(settings.offset);
+			if(settings.seamless)
+			{
+				dimensions.x = vmax(dimensions.x - fastload<vreal>::_1(), fastload<vreal>::_1());
+				dimensions.y = vmax(dimensions.y - fastload<vreal>::_1(), fastload<vreal>::_1());
+				dimensions.z = vmax(dimensions.z - fastload<vreal>::_1(), fastload<vreal>::_1());
+			}
 
 			if (static_cast<bool>(transformer))
 			{
@@ -138,7 +145,7 @@ namespace zzsystems { namespace paranoise { namespace scheduler {
 		}
 
 		ANY(featuremask)
-			static inline vec3<_float8> build_coords(const _float8 &x,const _float8 &y, const _float8 &z)
+			static vec3<_float8> build_coords(const _float8 &x,const _float8 &y, const _float8 &z)
 		{
 			return vec3<_float8>(
 				x + _float8(0, 1, 2, 3, 4, 5, 6, 7),
@@ -147,7 +154,7 @@ namespace zzsystems { namespace paranoise { namespace scheduler {
 				);
 		}
 
-		static inline vec3<float> build_coords(float x, float y, float z)
+		static vec3<float> build_coords(float x, float y, float z)
 		{
 			return vec3<float> {
 				x,
@@ -163,7 +170,7 @@ namespace zzsystems { namespace paranoise { namespace scheduler {
 		}
 
 		ANY(featuremask)
-			static inline void stream_result(float* stride, size_t x, const _float8 &r)
+			static void stream_result(float* stride, size_t x, const _float8 &r)
 		{
 			_mm256_stream_ps(stride + x, r.val);
 		}
@@ -172,11 +179,31 @@ namespace zzsystems { namespace paranoise { namespace scheduler {
 		{
 			stride[x] = r;
 		}
-		
-		auto schedule_st() const
+
+		ANY(featuremask)
+			static inline void store_result(float* stride, size_t x, const _float4 &r)
 		{
-			size_t word = dim<vreal>();
-			auto d = this->settings.dimensions;
+			_mm_storeu_ps(stride + x, r.val);
+		}
+
+		ANY(featuremask)
+			static void store_result(float* stride, size_t x, const _float8 &r)
+		{
+			_mm256_storeu_ps(stride + x, r.val);
+		}
+
+		static void store_result(float* stride, size_t x, const float r)
+		{
+			stride[x] = r;
+		}
+		
+		auto schedule_st(const vec3<float> &origin) const
+		{
+			size_t word		= dim<vreal>();
+			auto d			= this->settings.dimensions;
+			auto remainder	= d.x % word;
+			auto adjust		= remainder > 0 ? word - remainder : 0;
+
 			auto result = make_shared<vector<float>>(d.x * d.y * d.z);
 			
 			_MM_SET_ROUNDING_MODE(_MM_ROUND_TOWARD_ZERO);
@@ -187,16 +214,29 @@ namespace zzsystems { namespace paranoise { namespace scheduler {
 				for (int y = 0; y < d.y; y++)
 				{
 					auto stride = &result->at((depth + y) * d.x);
-
-					for (size_t x = 0; x < d.x; x += word)
+					
+					for (size_t x = 0; x < d.x + adjust; x += word)
 					{
 						auto coords = transform(build_coords(
 							static_cast<vreal>(static_cast<int>(x)),
 							static_cast<vreal>(y),
 							static_cast<vreal>(z)));
 
-						auto r = source(coords);
-						stream_result(stride, x, r);
+						auto r = source(static_cast<vec3<vreal>>(origin) + coords);
+
+						if (remainder == 0) // All rows aligned on 32-bit boundaries -> stream
+						{
+							stream_result(stride, x, r);
+						}
+						else if (x < d.x - remainder) // Not aligned - but still in the "good" range
+						{
+							store_result(stride, x, r);
+						}
+						else // Fill remaining columns
+						{
+							for (size_t i = 0; i < remainder; i++)
+								stride[x + i] = extract(r)[i];
+						}
 					}
 				}
 			}
@@ -204,7 +244,7 @@ namespace zzsystems { namespace paranoise { namespace scheduler {
 			return result;
 		}
 
-		auto schedule_mt() const
+		auto schedule_mt(const vec3<float> &origin) const
 		{
 			size_t word = dim<vreal>();
 			auto d = this->settings.dimensions;
@@ -220,7 +260,8 @@ namespace zzsystems { namespace paranoise { namespace scheduler {
 					//_MM_SET_DENORMALS_ZERO_MODE(_MM_FLUSH_ZERO_ON | _MM_DENORMALS_ZERO_ON);
 
 					auto stride = &result->at((depth + y) * d.x);
-
+					auto remainder = d.x % word;
+					auto adjust = remainder > 0 ? word - remainder : 0;
 					for (size_t x = 0; x < d.x; x += word)
 					{
 						auto coords = transform(build_coords(
@@ -229,8 +270,21 @@ namespace zzsystems { namespace paranoise { namespace scheduler {
 							static_cast<vreal>(z)));
 
 						
-						auto r = source(coords);
-						stream_result(stride, x, r);
+						auto r = source(static_cast<vec3<vreal>>(origin) + coords);						
+
+						if (remainder == 0) // All rows aligned on 32-bit boundaries -> stream
+						{
+							stream_result(stride, x, r);
+						}
+						else if(x < d.x - remainder) // Not aligned - but still in the "good" range
+						{
+							store_result(stride, x, r);
+						}
+						else // Fill remaining columns
+						{
+							for (size_t i = 0; i < remainder; i++)
+								stride[x + i] = extract(r)[i];
+						}						
 					}
 				});
 			});		
