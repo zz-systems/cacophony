@@ -86,6 +86,31 @@ namespace zzsystems { namespace simdal {
 		return src.val.m256_f32;
 	}
 
+	ANY(featuremask)
+		_int8 vgather(int* memloc, _int8 index)
+	{
+		return _mm256_i32gather_epi32(memloc, index.val, sizeof(int));
+	}
+
+	ANY(featuremask)
+		_int4x2 vgather(int* memloc, _int4x2 index)
+	{
+		return{ vgather(memloc, index.hi), vgather(memloc, index.lo) };
+	}
+
+	ANY(featuremask)
+		_float8 vgather(float* memloc, _int4x2 index)
+	{
+		return _mm256_set_m128(vgather(memloc, index.hi).val, vgather(memloc, index.lo).val);
+	}
+
+	ANY(featuremask)
+		_float8 vgather(float* memloc, _int8 index)
+	{
+		return _mm256_i32gather_ps(memloc, index.val, sizeof(float));
+	}
+
+
 	// Integer SQRT =============================================================================================	
 	FEATURE_FUNC(vsqrt, _int8, _dispatcher::has_avx)
 		(const _int8 &a)

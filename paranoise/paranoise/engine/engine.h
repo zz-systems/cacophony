@@ -61,7 +61,7 @@ namespace zzsystems { namespace paranoise
 			});
 		}
 
-		shared_ptr<vector<float>> run(const vec3<float> &origin)
+		float* run(const vec3<float> &origin)
 		{
 			SIMD_DISPATCH(info,
 			{
@@ -69,6 +69,13 @@ namespace zzsystems { namespace paranoise
 			});
 		}
 
+		void run(float *target, const vec3<float> &origin)
+		{
+			SIMD_DISPATCH(info,
+			{
+				return (exec<capability, vreal, vint>(target, origin));
+			});
+		}
 	private:
 		SIMD_ENABLED
 		auto compile_module(const nlohmann::json &source)
@@ -92,6 +99,14 @@ namespace zzsystems { namespace paranoise
 			cout << ">>dispatch: using " << static_dispatcher<capability>::unit_name() << " branch" << endl;
 			
 			return scheduler_cache<vreal, vint>()(origin);
+		}
+
+		template<typename capability, typename vreal, typename vint>
+		void exec(float *target, const vec3<float> &origin)
+		{
+			cout << ">>dispatch: using " << static_dispatcher<capability>::unit_name() << " branch" << endl;
+
+			scheduler_cache<vreal, vint>()(target, origin);
 		}
 	};
 }}

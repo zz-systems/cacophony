@@ -276,9 +276,9 @@ namespace zzsystems { namespace simdal {
 
 	// Round value
 	FEATURE_UN_FUNC(vround, _float4, !_dispatcher::has_sse41 && _dispatcher::has_sse)
-	{
+	{		
 		//generate the highest value < 2		
-		auto vNearest2 = _mm_castsi128_ps(_mm_srli_epi32(_float4::ones(), 2));
+		_float4 vNearest2 = _mm_srli_epi32(_float4::ones(), 2);
 		auto aTrunc = vtrunc(a);
 
 		auto rmd = a - aTrunc;        // get remainder

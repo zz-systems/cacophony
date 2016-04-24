@@ -249,7 +249,7 @@ namespace zzsystems { namespace simdal {
 	}
 
 	// Round value
-	FEATURE_UN_FUNC(vround, _float4, _dispatcher::has_avx)
+	FEATURE_UN_FUNC(vround, _float8, _dispatcher::has_avx)
 	{
 		BODY(_mm256_round_ps(a.val, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));
 	}

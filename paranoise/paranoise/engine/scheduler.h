@@ -92,12 +92,68 @@ namespace zzsystems { namespace paranoise { namespace scheduler {
 			return source;
 		}
 
+		void operator()(float* target, const vec3<float> &origin) const
+		{
+			if(settings.use_threads)
+				schedule_mt(target, origin);
+			else
+				schedule_st(target, origin);
+		}
+
 		auto operator()(const vec3<float> &origin) const
 		{
-			if (settings.use_threads)
-				return schedule_mt(origin);
-			else
-				return schedule_st(origin);
+			auto d = this->settings.dimensions;
+			auto target = new float[d.x * d.y * d.z];
+
+			this->operator()(target, origin);
+
+			return target;
+		}
+
+		static void write_result(vec3<vreal> d, float* stride, size_t remainder, size_t x, vreal r)
+		{
+			if (remainder == 0) // All rows aligned on 32-bit boundaries -> stream
+			{
+				stream_result(stride, x, r);
+			}
+			else if (x < d.x - remainder) // Not aligned - but still in the "good" range
+			{
+				store_result(stride, x, r);
+			}
+			else // Fill remaining columns
+			{
+				for (size_t i = 0; i < remainder; i++)
+					stride[x + i] = extract(r)[i];
+			}
+		}
+
+		ANY(featuremask)
+			static inline vec3<_float4> build_coords(const _float4 & x, const _float4 & y, const _float4 & z)
+		{
+			return vec3<_float4>(
+				x + _float4(0, 1, 2, 3),
+				y,
+				z
+				);
+		}
+
+		ANY(featuremask)
+			static vec3<_float8> build_coords(const _float8 &x, const _float8 &y, const _float8 &z)
+		{
+			return vec3<_float8>(
+				x + _float8(0, 1, 2, 3, 4, 5, 6, 7),
+				y,
+				z
+				);
+		}
+
+		static vec3<float> build_coords(float x, float y, float z)
+		{
+			return vec3<float> {
+				x,
+					y,
+					z
+			};
 		}
 	private:
 		Transformer<vreal> build_transform(Transformer<vreal> transformer)
@@ -134,34 +190,7 @@ namespace zzsystems { namespace paranoise { namespace scheduler {
 			return [=](const auto&c) { return c / dimensions; };
 		}
 
-		ANY(featuremask)
-			static inline vec3<_float4> build_coords(const _float4 & x, const _float4 & y, const _float4 & z)
-		{
-			return vec3<_float4>(
-				x + _float4(0, 1, 2, 3),
-				y,
-				z
-				);
-		}
-
-		ANY(featuremask)
-			static vec3<_float8> build_coords(const _float8 &x,const _float8 &y, const _float8 &z)
-		{
-			return vec3<_float8>(
-				x + _float8(0, 1, 2, 3, 4, 5, 6, 7),
-				y,
-				z
-				);
-		}
-
-		static vec3<float> build_coords(float x, float y, float z)
-		{
-			return vec3<float> {
-				x,
-				y,
-				z
-			};
-		}
+		
 
 		ANY(featuremask)
 			static inline void stream_result(float* stride, size_t x, const _float4 &r)
@@ -197,14 +226,12 @@ namespace zzsystems { namespace paranoise { namespace scheduler {
 			stride[x] = r;
 		}
 		
-		auto schedule_st(const vec3<float> &origin) const
+		void schedule_st(float *target, const vec3<float> &origin) const
 		{
 			size_t word		= dim<vreal>();
 			auto d			= this->settings.dimensions;
 			auto remainder	= d.x % word;
 			auto adjust		= remainder > 0 ? word - remainder : 0;
-
-			auto result = make_shared<vector<float>>(d.x * d.y * d.z);
 			
 			_MM_SET_ROUNDING_MODE(_MM_ROUND_TOWARD_ZERO);
 			//_MM_SET_DENORMALS_ZERO_MODE(_MM_FLUSH_ZERO_ON | _MM_DENORMALS_ZERO_ON);
@@ -213,7 +240,7 @@ namespace zzsystems { namespace paranoise { namespace scheduler {
 				auto depth = z * d.y;
 				for (int y = 0; y < d.y; y++)
 				{
-					auto stride = &result->at((depth + y) * d.x);
+					auto stride = target + (depth + y) * d.x;
 					
 					for (size_t x = 0; x < d.x + adjust; x += word)
 					{
@@ -224,32 +251,17 @@ namespace zzsystems { namespace paranoise { namespace scheduler {
 
 						auto r = source(static_cast<vec3<vreal>>(origin) + coords);
 
-						if (remainder == 0) // All rows aligned on 32-bit boundaries -> stream
-						{
-							stream_result(stride, x, r);
-						}
-						else if (x < d.x - remainder) // Not aligned - but still in the "good" range
-						{
-							store_result(stride, x, r);
-						}
-						else // Fill remaining columns
-						{
-							for (size_t i = 0; i < remainder; i++)
-								stride[x + i] = extract(r)[i];
-						}
+						write_result(d, stride, remainder, x, r);
 					}
 				}
 			}
-			
-			return result;
-		}
+		}	
 
-		auto schedule_mt(const vec3<float> &origin) const
+		void schedule_mt(float *target, const vec3<float> &origin) const
 		{
 			size_t word = dim<vreal>();
 			auto d = this->settings.dimensions;
-			auto result = make_shared<vector<float>>(d.x * d.y * d.z);
-
+			
 			parallel_for(0, d.z, [&](const auto z)
 			{
 				auto depth = z * d.y;
@@ -259,7 +271,7 @@ namespace zzsystems { namespace paranoise { namespace scheduler {
 					_MM_SET_ROUNDING_MODE(_MM_ROUND_TOWARD_ZERO);
 					//_MM_SET_DENORMALS_ZERO_MODE(_MM_FLUSH_ZERO_ON | _MM_DENORMALS_ZERO_ON);
 
-					auto stride = &result->at((depth + y) * d.x);
+					auto stride = target + ((depth + y) * d.x);
 					auto remainder = d.x % word;
 					auto adjust = remainder > 0 ? word - remainder : 0;
 					for (size_t x = 0; x < d.x; x += word)
@@ -270,26 +282,12 @@ namespace zzsystems { namespace paranoise { namespace scheduler {
 							static_cast<vreal>(z)));
 
 						
-						auto r = source(static_cast<vec3<vreal>>(origin) + coords);						
+						auto r = source(static_cast<vec3<vreal>>(origin) + coords);
 
-						if (remainder == 0) // All rows aligned on 32-bit boundaries -> stream
-						{
-							stream_result(stride, x, r);
-						}
-						else if(x < d.x - remainder) // Not aligned - but still in the "good" range
-						{
-							store_result(stride, x, r);
-						}
-						else // Fill remaining columns
-						{
-							for (size_t i = 0; i < remainder; i++)
-								stride[x + i] = extract(r)[i];
-						}						
+						write_result(d, stride, remainder, x, r);
 					}
 				});
-			});		
-
-			return result;
+			});	
 		}
 
 		auto schedule_ocl() const

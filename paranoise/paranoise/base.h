@@ -210,6 +210,9 @@ namespace zzsystems { namespace simdal
 
 		ANY(TType) BIN_FUNC(vmax, TType) { BODY(std::max<TType>(a, b)); }
 
+		inline double vtrunc(double a) { return static_cast<int>(a); }
+		inline float vtrunc(float a) { return static_cast<int>(a); }
+
 		inline double vfloor(double a) { return std::floor(a); }
 		inline float vfloor(float a) { return std::floorf(a); }
 

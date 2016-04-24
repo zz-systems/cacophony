@@ -53,6 +53,20 @@ namespace zzsystems { namespace simdal {
 		return src.val.m128_f32;		
 	}
 	
+	ANY(featuremask)
+	_int4 vgather(int* memloc, _int4 index)
+	{
+		auto i = extract(index);
+		return _mm_set_epi32(memloc[i[3]], memloc[i[2]], memloc[i[1]], memloc[i[0]]);
+	}
+
+	ANY(featuremask)
+		_float4 vgather(float* memloc, _int4 index)
+	{
+		auto i = extract(index);
+		return _mm_set_ps(memloc[i[3]], memloc[i[2]], memloc[i[1]], memloc[i[0]]);
+	}
+
 	// Integer SQRT =============================================================================================	
 	FEATURE_FUNC(vsqrt, _int4, _dispatcher::has_sse)
 		(const _int4 &a)

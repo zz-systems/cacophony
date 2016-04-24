@@ -12,6 +12,15 @@ namespace zzsystems { namespace simdal {
 	inline float* extract(float& src)		{ return &src; }
 	inline double* extract(double& src)		{ return &src; }
 
+	inline int vgather(int* memloc, int index)
+	{
+		return memloc[index];
+	}
+
+	inline float vgather(float* memloc, int index)
+	{
+		return memloc[index];
+	}
 }}
 
 #endif 
