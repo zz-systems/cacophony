@@ -16,6 +16,12 @@ public:
 
 	virtual shared_ptr<tbase> clone() const
 	{
-		return make_shared<tconcrete>(static_cast<tconcrete const&>(*this));
+		_is_cloning = true;
+		auto result = make_shared<tconcrete>(static_cast<tconcrete const&>(*this));
+		_is_cloning = false;
+
+		return result;
 	}
+protected:
+	mutable bool _is_cloning;
 };

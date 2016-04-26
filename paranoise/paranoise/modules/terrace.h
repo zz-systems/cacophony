@@ -18,7 +18,7 @@ namespace zzsystems { namespace paranoise { namespace modules {
 		vector<pair<const vreal, vreal>> points;
 		bool invert = false;
 
-		terrace(const initializer_list<pair<const vreal, vreal>> &points, bool invert = false)
+		terrace(const initializer_list<pair<const vreal, vreal>> &points = {}, bool invert = false)
 			: cloneable(1), points(points), invert(invert)
 		{}
 

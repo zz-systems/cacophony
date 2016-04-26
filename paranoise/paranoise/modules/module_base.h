@@ -40,7 +40,11 @@ namespace zzsystems { namespace paranoise { namespace modules
 		{}
 
 		module_base(const module_base& other)
+<<<<<<< HEAD
 			: _modules(make_shared<vector<Module<vreal>>>(other._modules->begin(), other._modules->end()))
+=======
+			: _modules( make_shared<vector<Module<vreal>>>( other._modules->begin(), other._modules->end()))
+>>>>>>> 2c614baf9ceae55d5ef72429490ddf6860612141
 		{}
 
 		virtual ~module_base()

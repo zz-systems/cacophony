@@ -30,6 +30,10 @@ namespace zzsystems {
 						}
 					},
 					{ "modifier", tmodules{
+						{ "curve", make_shared<curve<vreal, vint>>() },
+						{ "rotate", make_shared<rotate<vreal, vint>>() },
+						{ "select", make_shared<select<vreal, vint>>() },
+						{ "terrace", make_shared<terrace<vreal, vint>>() },
 						{ "turbulence", make_shared<turbulence<vreal, vint>>() },
 
 						{ "add", make_shared<add<vreal, vint>>() },
@@ -39,6 +43,7 @@ namespace zzsystems {
 						
 						{ "min", make_shared<min<vreal, vint>>() },
 						{ "max", make_shared<max<vreal, vint>>() },
+						{ "clamp", make_shared<clamp<vreal, vint>>() },
 
 						{ "blend", make_shared<blend<vreal, vint>>() },
 
