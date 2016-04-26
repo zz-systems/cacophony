@@ -19,7 +19,7 @@ namespace zzsystems { namespace paranoise { namespace modules {
 
 		MODULE_PROPERTY(source, 0)
 			
-		curve(const initializer_list<pair<const vreal, vreal>>& points) 
+			curve(const initializer_list<pair<const vreal, vreal>>& points = {})
 			: cloneable(1), points(points)
 		{}
 

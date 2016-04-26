@@ -40,22 +40,29 @@ namespace zzsystems { namespace paranoise { namespace examples {
 
 		engine e;
 		
-		e.compile_file("perlin_test.json");
+		e.compile_file("planet.json");
 		auto flags = e.info.feature_flags;
 
 		auto w = e.settings.dimensions.x, h = e.settings.dimensions.y;
 
 		auto f1 = [&]()
 		{
+			auto t = make_shared<vector<float>>(w * h * 1);
 			//e.info.setFlag(CAPABILITY_AVX2, false);			
 			e.info.feature_flags = flags;
-			return e.run({0, 0, 0});
+			e.run(&t->at(0), {0, 0, 0});
+
+			return t;
 		};
 
 		auto f2 = [&]()
 		{
+			auto t = make_shared<vector<float>>(w * h * 1);
+
 			e.info.feature_flags = CAPABILITY_NONE;		
-			return e.run({ 0, 0, 0 });
+			e.run(&t->at(0), { 0, 0, 0 });
+
+			return t;
 		};
 
 		gradient1D grad

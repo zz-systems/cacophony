@@ -148,7 +148,7 @@ namespace zzsystems { namespace simdal {
 	// Bitwise not
 	FEATURE_UN_OP(~, _float8, _dispatcher::has_avx)	
 	{
-		BODY(a ^ _float8::ones());
+		BODY(_mm256_xor_ps(a.val, _mm256_castsi256_ps(_float8::ones())));
 	}
 
 	// Bitwise or
