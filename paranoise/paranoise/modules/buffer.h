@@ -10,19 +10,21 @@ namespace zzsystems { namespace paranoise { namespace modules {
 	using namespace math;
 
 	SIMD_ENABLED
-	struct buffer
+	struct buffer : 
+		cloneable<module_base<SIMD_T>, buffer<SIMD_T>>,
+		serializable<json>
 	{
-		Module<vreal> source;
+		MODULE_PROPERTY(source, 0)
 
 		buffer(const Module<vreal> &source)
-			: source(source), _is_cached(false)
+			: cloneable(1), _is_cached(false)
 		{}
 
 		buffer(const buffer<vreal, vint> &source)
-			: source(source.source), _is_cached(source._is_cached)
+			: cloneable(source), _is_cached(source._is_cached)
 		{}
 
-		inline vreal operator()(const vec3<vreal>& coords)
+		vreal operator()(const vec3<vreal>& coords) const override
 		{
 			auto eq = coords == _buf_coords;
 			if(!(_is_cached && static_cast<bool>(eq.x) && static_cast<bool>(eq.y) && static_cast<bool>(eq.z)))
@@ -33,14 +35,12 @@ namespace zzsystems { namespace paranoise { namespace modules {
 
 			_is_cached = true;
 			return _buffered;			
-		}
-
-		inline operator Module<vreal>() const { return [this](const auto &c) { return this->operator()(c); }; }
+		}		
 
 	private:
-		vec3<vreal> _buf_coords;
-		vreal _buffered;
-		bool _is_cached;
+		mutable vec3<vreal> _buf_coords;
+		mutable vreal _buffered;
+		mutable bool _is_cached;
 	};
 
 }}}

@@ -22,15 +22,20 @@ namespace zzsystems { namespace paranoise
 		const nlohmann::json &operator<<(const nlohmann::json &source) override
 		{
 			auto environment = source["environment"];
+
+			// No limits
 			int feature_set = environment.value("max_feature_set", 0xFFFF'FFFF);
 
+			// Restrict with extracted bitmask
 			info.feature_flags &= feature_set;	
 
+			// Build modules
 			compile(source);
 
 			return source;
 		}
 		
+		// COmpile from file
 		void compile_file(const string &path)
 		{
 			ifstream file(path);
@@ -39,6 +44,7 @@ namespace zzsystems { namespace paranoise
 			*this << source;
 		}
 
+		// Compile from immediate string
 		void compile_imm_str(const string &content)
 		{
 			json source = json::parse(content);
@@ -46,17 +52,21 @@ namespace zzsystems { namespace paranoise
 			*this << source;
 		}
 
+		// COmpile from json object
 		void compile(const nlohmann::json &source)
 		{
+			// Get scheduler type
 			settings << source["environment"]["scheduler"];
 
+			// For each valid branch
 			SIMD_DISPATCH_ALL(info,
 			{
 				cout << ">>building " << static_dispatcher<capability>::unit_name() << " branch" << endl;
 
-				auto& scheduler = (scheduler_cache<vreal, vint>());
-				scheduler.source = (compile_module<vreal, vint>(source));
+				auto& scheduler		= (scheduler_cache<vreal, vint>());
+				scheduler.source	= (compile_module<vreal, vint>(source));
 				scheduler.transform = [](const auto&c) {return c;};
+
 				scheduler << source["environment"]["scheduler"];
 			});
 		}

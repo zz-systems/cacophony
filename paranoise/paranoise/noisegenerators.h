@@ -134,6 +134,7 @@ namespace zzsystems { namespace paranoise { namespace generators {
 	template<typename featuremask>
 	vec3<_float4> gatherRandoms(_int4 &index)
 	{	
+		
 		//_mm_prefetch
 		auto a0 = random_vectors<float>::values + _mm_extract_epi32(index.val, 0);
 		auto a1 = random_vectors<float>::values + _mm_extract_epi32(index.val, 1);
@@ -210,7 +211,12 @@ namespace zzsystems { namespace paranoise { namespace generators {
 		vi &= (vint) 0xFF;	
 		vi <<= 2;
 
-		auto gradients = gatherRandoms(vi);	
+		//auto gradients = gatherRandoms(vi);	
+		vec3<vreal> gradients(
+			vgather(static_cast<const float*>(random_vectors<float>::values),	   vi),
+			vgather(static_cast<const float*>(random_vectors<float>::values + 1), vi),
+			vgather(static_cast<const float*>(random_vectors<float>::values + 2), vi)
+		);
 		
 
 

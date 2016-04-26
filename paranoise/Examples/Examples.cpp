@@ -47,15 +47,19 @@ namespace zzsystems { namespace paranoise { namespace examples {
 
 		auto f1 = [&]()
 		{
+			auto r = make_shared<vector<float>>(w * h * 1);
 			//e.info.setFlag(CAPABILITY_AVX2, false);			
 			e.info.feature_flags = flags;
-			return e.run({0, 0, 0});
+			e.run(&r->at(0), {0, 0, 0});
+			return r;
 		};
 
 		auto f2 = [&]()
 		{
+			auto r = make_shared<vector<float>>(w * h * 1);
 			e.info.feature_flags = CAPABILITY_NONE;		
-			return e.run({ 0, 0, 0 });
+			e.run(&r->at(0), { 0, 0, 0 });
+			return r;
 		};
 
 		gradient1D grad
@@ -68,6 +72,7 @@ namespace zzsystems { namespace paranoise { namespace examples {
 			{ 0.7500, color_rgb(45, 113,  98, 255) },
 			{ 1.01, color_rgb(255, 176, 192, 255) }
 		};
+
 		run(w, h, f1, f2, grad);
 	}
 }}}

@@ -54,14 +54,14 @@ namespace zzsystems { namespace simdal {
 	}
 	
 	ANY(featuremask)
-	_int4 vgather(int* memloc, _int4 index)
+	_int4 vgather(const int* memloc, _int4 index)
 	{
 		auto i = extract(index);
 		return _mm_set_epi32(memloc[i[3]], memloc[i[2]], memloc[i[1]], memloc[i[0]]);
 	}
 
 	ANY(featuremask)
-		_float4 vgather(float* memloc, _int4 index)
+		_float4 vgather(const float* memloc, _int4 index)
 	{
 		auto i = extract(index);
 		return _mm_set_ps(memloc[i[3]], memloc[i[2]], memloc[i[1]], memloc[i[0]]);
