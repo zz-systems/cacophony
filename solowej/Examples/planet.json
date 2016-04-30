@@ -1,0 +1,151 @@
+{
+  "version": "0.9",
+  "id": "597C0CF5-D13D-4379-87DF-665C1ADE7B77",
+  "environment": {
+    "max_feature_set": -1,
+    "entryPoint": "output",
+    "scheduler": {
+      "dimensions": [ 1024, 1024, 1 ],
+      "seamless": true,
+      "scale": [ 1, 5, 1 ],
+      "offset": [ 0, 0, 0 ],
+      "use_threads": true
+    }
+  },
+  "constants": {
+    "PLANET_CIRCUMFERENCE": 44236800.0,
+    "MIN_ELEV": -8192.0,
+    "MAX_ELEV": 8192.0,
+    "CONTINENT_FREQUENCY": 1.0,
+    "CONTINENT_LACUNARITY": 2.208984375,
+    "MOUNTAIN_LACUNARITY": 2.142578125,
+    "HILLS_LACUNARITY": 2.162109375,
+    "PLAINS_LACUNARITY": 2.314453125,
+    "BADLANDS_LACUNARITY": 2.212890625,
+    "MOUNTAINS_TWIST": 1.0,
+    "HILLS_TWIST": 1.0,
+    "BADLANDS_TWIST": 1.0,
+    "SEA_LEVEL": 0.0,
+    "SHELF_LEVEL": -0.375,
+    "MOUNTAINS_AMOUNT": 0.5,
+    "HILLS_AMOUNT": 0.75,
+    "BADLANDS_AMOUNT": 0.03125,
+    "TERRAIN_OFFSET": 1.0,
+    "MOUNTAIN_GLACIATION": 1.375,
+    "CONTINENT_HEIGHT_SCALE": 0.25,
+    "RIVER_DEPTH": 0.0234375
+  },
+  "modules": [
+    {
+      "name": "baseContinentDef_pe0",
+      "type": "generator",
+      "module": "perlin",
+      "settings": {
+        "frequency": 1.0,
+        "lacunarity": 2.208984375,
+        "persistence": 0.5,
+        "octaves": 14,
+        "seed": 0
+      }
+    },
+    {
+      "name": "baseContinentDef_cu",
+      "type": "modifier",
+      "module": "curve",
+      "source": [ "baseContinentDef_pe0" ],
+      "settings": {
+        "points": [
+          {
+            "in": -2,
+            "out": -1.625
+          },
+          {
+            "in": -1,
+            "out": -1.375
+          },
+          {
+            "in": 0,
+            "out": -0.375
+          },
+          {
+            "in": 0.0625,
+            "out": -0.125
+          },
+          {
+            "in": 0.125,
+            "out": 0.25
+          },
+          {
+            "in": 0.25,
+            "out": 1.0
+          },
+          {
+            "in": 0.5,
+            "out": 0.25
+          },
+          {
+            "in": 0.75,
+            "out": 0.25
+          },
+          {
+            "in": 1,
+            "out": 0.5
+          },
+          {
+            "in": 2,
+            "out": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "name": "baseContinentDef_pe1",
+      "type": "generator",
+      "module": "perlin",
+      "settings": {
+        "frequency": 4.34375,
+        "lacunarity": 2.208984375,
+        "persistence": 0.5,
+        "octaves": 11,
+        "seed": 111
+      }
+    },
+    {
+      "name": "baseContinentDef_sb",
+      "type": "modifier",
+      "module": "scale_output_biased",
+      "source": [ "baseContinentDef_pe1" ],
+      "settings": {
+        "scale": 0.375,
+        "bias": 0.625
+      }
+    },
+    {
+      "name": "baseContinentDef_mi",
+      "type": "modifier",
+      "module": "min",
+      "source": [ "baseContinentDef_sb", "baseContinentDef_cu" ],
+      "settings": { }
+    },
+    {
+      "name": "baseContinentDef_cl",
+      "type": "modifier",
+      "module": "clamp",
+      "source": [ "baseContinentDef_mi" ],
+      "settings": {
+        "min": -1,
+        "max": 1
+      }
+    },
+    {
+      "name": "output",
+      "type": "modifier",
+      "module": "scale_output_biased",
+      "source": [ "baseContinentDef_cl" ],
+      "settings": {
+        "scale": 0.5,
+        "bias": 0.5
+      }
+    }
+  ]
+}
