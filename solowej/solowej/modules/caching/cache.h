@@ -30,24 +30,24 @@
 
 
 namespace zzsystems { namespace solowej { namespace modules {
-	using namespace std;
-	
+	//using namespace std;
+
 	using namespace math;
 
-	MODULE(cache)
+	MODULE(mod_cache)
 	{
 	public:
-		typedef unordered_map<float, float> xmap;
-		typedef unordered_map<float, xmap>  yxmap;
-		typedef unordered_map<float, yxmap> zyxmap;
+		typedef std::unordered_map<float, float> xmap;
+		typedef std::unordered_map<float, xmap>  yxmap;
+		typedef std::unordered_map<float, yxmap> zyxmap;
 
 		Module<vreal> source;
 
-		cache(const Module<vreal> &source)
-			: source(source), _mut(make_shared<mutex>())
+		mod_cache(const Module<vreal> &source)
+			: source(source), _mut(std::make_shared<mutex>())
 		{}
 
-		cache(const cache<vreal, vint> &source)
+		mod_cache(const mod_cache<vreal, vint> &source)
 			: source(source.source), _mut(source._mut)
 		{}
 		//#error TODO: slices! SIMD: [x0 x1 x2 x3] [y0 y0 y0 y0] [z0 z0 z0 z0]
@@ -58,10 +58,11 @@ namespace zzsystems { namespace solowej { namespace modules {
 			bool dirty = false;
 			vreal	result;
 
-			float   *x = extract(_coords.x),
-					*y = extract(_coords.y),
-					*z = extract(_coords.z),
-					*e = extract(result);
+			float   x[dim<vreal>()], y[dim<vreal>()], z[dim<vreal>()], e[dim<vreal>()];
+
+			extract(_coords.x, x);
+			extract(_coords.y, y);
+			extract(_coords.z, z);
 
 			_mut->lock();
 
@@ -122,11 +123,11 @@ namespace zzsystems { namespace solowej { namespace modules {
 
 				_mut->unlock();
 			}
-
+			result = e;
 			return result;
 		}
 
-		inline operator Module<vreal>() const { return [this](const auto &c) { return this->operator()(c); }; }
+		inline operator Module<vreal>() const override { return [this](const auto &c) { return this->operator()(c); }; }
 
 	private:
 		mutable zyxmap	_cache;

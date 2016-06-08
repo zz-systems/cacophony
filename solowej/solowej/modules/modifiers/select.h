@@ -31,14 +31,14 @@ namespace zzsystems { namespace solowej { namespace modules {
 	
 	using namespace math;
 
-	MODULE(select)
+	MODULE(mod_select)
 	{
 	public:
 		float edgeFalloff = 0.0;
 		vreal lowerBound = -1.0, upperBound = 1.0;
-		
-		select(float edgeFalloff = 0.0, float lowerBound = -1.0, float upperBound = 1.0)
-			: cloneable(3), 
+
+		mod_select(float edgeFalloff = 0.0, float lowerBound = -1.0, float upperBound = 1.0) :
+			BASE(mod_select)::cloneable(3),
 			edgeFalloff(edgeFalloff), 
 			lowerBound(lowerBound),
 			upperBound(upperBound)
@@ -50,9 +50,9 @@ namespace zzsystems { namespace solowej { namespace modules {
 
 		const json& operator <<(const json &source) override
 		{
-			edgeFalloff = source.value("edgeFalloff", 0.0f);
-			lowerBound	= source.value("lowerBound", -1.0f);
-			upperBound	= source.value("upperBound", 1.0f);
+			edgeFalloff = source.value<float>("edgeFalloff", 0.0f);
+			lowerBound	= source.value<float>("lowerBound", -1.0f);
+			upperBound	= source.value<float>("upperBound", 1.0f);
 
 			return source;
 		}
@@ -115,7 +115,7 @@ namespace zzsystems { namespace solowej { namespace modules {
 	// path for scalar code 
 	// , const Module<float>& a, const Module<float>& b, const Module<float>& controller
 	template<>
-	inline float select<float, int>::operator()(const vec3<float>& coords) const
+	inline float mod_select<float, int>::operator()(const vec3<float>& coords) const
 	{
 		auto cv = get_controller()(coords);
 		auto r0 = get_a()(coords);

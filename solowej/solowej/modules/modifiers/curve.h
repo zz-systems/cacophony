@@ -30,15 +30,15 @@ namespace zzsystems { namespace solowej { namespace modules {
 	using namespace gorynych;
 	using namespace math;
 
-	MODULE(curve)
+	MODULE(mod_curve)
 	{
 	public:
-		vector<pair<const vreal, vreal>> points;
+		vector<pair<const vreal, vreal>, aligned_allocator<vreal, 32>> points;
 
 		MODULE_PROPERTY(source, 0)
-			
-			curve(const initializer_list<pair<const vreal, vreal>>& points = {})
-			: cloneable(1), points(points)
+
+		mod_curve(const initializer_list<pair<const vreal, vreal>>& points = {})
+			: BASE(mod_curve)::cloneable(1), points(points)
 		{}
 
 		const json& operator <<(const json &source) override
@@ -61,7 +61,7 @@ namespace zzsystems { namespace solowej { namespace modules {
 		{
 			auto val = get_source()(coords);
 			
-			vreal v3, v2, v1, v0, set_value, already_set = cfl<vreal>::_0();
+			vreal v3, v2, v1, v0, set_value, already_set = cfl<vreal, 0>::val();
 		
 			size_t i0, i1, i2, i3;
 
@@ -96,7 +96,7 @@ namespace zzsystems { namespace solowej { namespace modules {
 			v1 = vsel(v2 == v1, v1 + v2, v1);
 
 			// blend results
-			auto alpha = (val - v1) / (v2 - v1);// +numeric_limits<float>::epsilon());
+			auto alpha = (val - v1) / (v2 - v1 +numeric_limits<float>::epsilon());
 
 			//return vsel(result == ones, cerp(v0, v1, v2, v3, alpha), result);
 			return cerp(v0, v1, v2, v3, alpha);

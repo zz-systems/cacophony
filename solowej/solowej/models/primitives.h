@@ -2,7 +2,7 @@
 // Vectorized and parallelized version of libnoise using the gorynych SIMD toolkit
 // Copyright (C) 2015-2016 Sergej Zuyev (sergej.zuyev - at - zz-systems.net)
 //
-// Original libnoise: 
+// Original libnoise:
 // Copyright (C) 2003, 2004 Jason Bevins
 // The developer's email is jlbezigvins@gmzigail.com (for great email, take
 // off every 'zig'.)
@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "../../submodules/gorynych/gorynych/gorynych.h"
+#include "../../gorynych/gorynych/gorynych.h"
 #include "../modules/module_base.h"
 
 namespace zzsystems { namespace solowej { namespace models {
@@ -37,13 +37,13 @@ namespace zzsystems { namespace solowej { namespace models {
 	};
 
 	SIMD_ENABLED_F
-	inline vreal line(const modules::Module<vreal>& source, const line_settings<vreal>& settings, const vreal& pos)
+	inline vreal line(const Module<vreal>& source, const line_settings<vreal>& settings, const vreal& pos)
 	{
 		auto coords = (settings.to - settings.from) * pos + settings.from;
 		auto result = source(coords);
-		
-		return settings.attenuate 
-			? pos * (1 - pos) * 4 * result 
+
+		return settings.attenuate
+			? pos * (1 - pos) * 4 * result
 			: result;
 	}
 

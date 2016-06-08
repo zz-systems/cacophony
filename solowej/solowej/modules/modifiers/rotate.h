@@ -31,23 +31,23 @@ namespace zzsystems { namespace solowej { namespace modules {
 	
 	using namespace math;
 
-	MODULE(rotate)
+	MODULE(mod_rotate)
 	{
 	public:
 		mat3x3<vreal> rot;
 		vec3<float>  angles;
 
-		rotate() : rotate({ 0.0f, 0.0f, 0.0f }) {}		
+		mod_rotate() : mod_rotate({ 0.0f, 0.0f, 0.0f }) {}
 
-		rotate(const vec3<float> &angles) : 
-			cloneable(1), 
+		mod_rotate(const vec3<float> &angles) :
+			BASE(mod_rotate)::cloneable(1),
 			angles(angles)
 		{
 			build_rot_matrix(angles);
 		}
 
-		rotate(const rotate<vreal, vint> &rhs) :
-			cloneable(rhs), 
+		mod_rotate(const mod_rotate<vreal, vint> &rhs) :
+			BASE(mod_rotate)::cloneable(rhs),
 			rot(rhs.rot), 
 			angles(rhs.angles)
 		{}
@@ -56,9 +56,9 @@ namespace zzsystems { namespace solowej { namespace modules {
 		{
 			if (source["angles"] != nullptr && source["angles"].is_object())
 			{
-				angles.x = source.value("x", 0.0f);
-				angles.y = source.value("y", 0.0f);
-				angles.z = source.value("z", 0.0f);
+				angles.x = source.value<float>("x", 0.0f);
+				angles.y = source.value<float>("y", 0.0f);
+				angles.z = source.value<float>("z", 0.0f);
 			}
 
 			build_rot_matrix(angles);

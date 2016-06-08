@@ -37,6 +37,7 @@
 #include "modifiers/select.h"
 #include "modifiers/terrace.h"
 #include "modifiers/turbulence.h"
+#include "modifiers/displace.h"
 
 #include "caching/buffer.h"
 #include "caching/cache.h"

@@ -24,6 +24,6 @@
 
 #pragma once
 
-#include "../../submodules/json/src/json.hpp"
+#include "../../json/src/json.hpp"
 #include "../util/serializable.h"
 #include "../util/cloneable.h"

@@ -30,7 +30,7 @@ namespace zzsystems { namespace solowej { namespace modules {
 	using namespace gorynych;	
 	using namespace math;
 
-	MODULE(billow)
+	MODULE(mod_billow)
 	{
 	public:
 		vreal frequency, lacunarity, persistence;
@@ -39,19 +39,19 @@ namespace zzsystems { namespace solowej { namespace modules {
 		int octaves;
 		Quality quality;
 
-		billow(float frequency = 1.0, float lacunarity = 2.0, float persistence = 0.5, int octaves = 6, int seed = 0, Quality quality = Quality::Standard)
-			: cloneable(0), frequency(frequency), lacunarity(lacunarity), persistence(persistence), seed(seed), octaves(octaves), quality(quality)
+		mod_billow(float frequency = 1.0, float lacunarity = 2.0, float persistence = 0.5, int octaves = 6, int seed = 0, Quality quality = Quality::Standard)
+			: BASE(mod_billow)::cloneable(0), frequency(frequency), lacunarity(lacunarity), persistence(persistence), seed(seed), octaves(octaves), quality(quality)
 		{}
 
 		const json& operator<<(const json &source) override
 		{			
-			frequency	= source.value("frequency", 1.0f);
-			lacunarity	= source.value("lacunarity", 2.0f);
-			persistence = source.value("persistence", 0.5f);
+			frequency	= source.value<float>("frequency", 1.0f);
+			lacunarity	= source.value<float>("lacunarity", 2.0f);
+			persistence = source.value<float>("persistence", 0.5f);
 
-			seed		= source.value("seed", 0);
-			octaves		= source.value("octaves", 6);
-			quality		= static_cast<Quality>(source.value("quality", static_cast<int>(Quality::Standard)));
+			seed		= source.value<int>("seed", 0);
+			octaves		= source.value<int>("octaves", 6);
+			quality		= static_cast<Quality>(source.value<int>("quality", static_cast<int>(Quality::Standard)));
 
 			return source;
 		}
@@ -74,7 +74,7 @@ namespace zzsystems { namespace solowej { namespace modules {
 				// final result.
 				signal = noisegen<SIMD_T>::gradient_coherent_3d(n, seed + currentOctave, quality);
 
-				signal = vfmsub(cfl<vreal>::_2(), vabs(signal), cfl<vreal>::_1());
+				signal = vfmsub(cfl<vreal, 2>::val(), vabs(signal), cfl<vreal, 1>::val());
 
 				//value += signal * curPersistence;
 				value = vfmadd(signal, curPersistence, value);

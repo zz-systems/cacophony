@@ -24,74 +24,74 @@
 
 #pragma once
 
+
 #include "dependencies.h"
-#include "parser.h"
-#include "scheduler.h"
 #include <fstream>
+#include <type_traits>
+
+#include "../../gorynych/gorynych/gorynych.h"
+
+#include "../library/objectdispatch.h"
+#include "simd_engine.h"
+#include "scheduler_base.h"
+
 namespace zzsystems { namespace solowej
 {
-	using namespace gorynych;
-	using namespace scheduler;
-
 	class engine :
-		public serializable<nlohmann::json>
+		public simd_engine
 	{		
 	public:
-		system_info info;
-		string file_name;
+		gorynych::system_info info;
+		std::string file_name;
 		scheduler_settings settings;
 
-		engine() = default;
+		aligned_map<int, shared_ptr<simd_engine>> _engines;
 
-		const nlohmann::json &operator<<(const nlohmann::json &source) override
+		engine()
 		{
+#if defined(COMPILE_AVX2)
+				_engines[gorynych::capability_AVX2::value] 		= get_avx2_engine();
+#endif
+#if defined(COMPILE_AVX1)
+				_engines[gorynych::capability_AVX1::value] 		= get_avx1_engine();
+#endif
+#if defined(COMPILE_SSE4FMA)
+				_engines[gorynych::capability_SSE4FMA::value] 	= get_sse4fma_engine();
+#endif
+#if defined(COMPILE_SSE4)
+				_engines[gorynych::capability_SSE4::value] 		= get_sse4_engine();
+#endif
+#if defined(COMPILE_SSSE3)
+				_engines[gorynych::capability_SSSE3::value] 	= get_ssse3_engine();
+#endif
+#if defined(COMPILE_SSE3)
+				_engines[gorynych::capability_SSE3::value] 		= get_sse3_engine();
+#endif
+#if defined(COMPILE_SSE2)
+				_engines[gorynych::capability_SSE2::value] 		= get_sse2_engine();
+#endif
+#if defined(COMPILE_FPU)
+				_engines[gorynych::capability_FPU::value] 		= get_fpu_engine();
+#endif
+		}
+
+		// COmpile from json object
+		void compile(const nlohmann::json &source)
+		{
+			settings << source["environment"]["scheduler"];
 			auto environment = source["environment"];
 
 			// No limits
 			int feature_set = environment.value("max_feature_set", -1);
 
 			// Restrict with extracted bitmask
-			info.feature_flags &= feature_set;	
+			info.feature_flags &= feature_set;
 
-			// Build modules
-			compile(source);
-
-			return source;
-		}
-		
-		// COmpile from file
-		void compile_file(const string &path)
-		{
-			ifstream file(path);
-			json source(file);
-			
-			*this << source;
-		}
-
-		// Compile from immediate string
-		void compile_imm_str(const string &content)
-		{
-			json source = json::parse(content);
-
-			*this << source;
-		}
-
-		// COmpile from json object
-		void compile(const nlohmann::json &source)
-		{
-			// Get scheduler type
-			settings << source["environment"]["scheduler"];
 
 			// For each valid branch
 			SIMD_BUILD(info,
 			{
-				cout << ">>building " << static_dispatcher<capability>::unit_name() << " branch" << endl;
-
-				auto& scheduler		= (scheduler_cache<vreal, vint>());
-				scheduler.source	= (compile_module<vreal, vint>(source));
-				scheduler.transform = [](const auto&c) {return c;};
-
-				scheduler << source["environment"]["scheduler"];
+				_engines[capability::value]->compile(source);
 			});
 		}
 
@@ -99,48 +99,19 @@ namespace zzsystems { namespace solowej
 		{
 			SIMD_DISPATCH(info,
 			{
-				return (exec<capability, vreal, vint>(origin));
+				return _engines[capability::value]->run(origin);
 			});
+
+			return nullptr;
 		}
 
-		void run(float *target, const vec3<float> &origin)
+		void run(const vec3<float> &origin, float *target)
 		{
 			SIMD_DISPATCH(info,
 			{
-				return (exec<capability, vreal, vint>(target, origin));
+				_engines[capability::value]->run(origin, target);
 			});
 		}
 	private:
-		SIMD_ENABLED
-		auto compile_module(const nlohmann::json &source)
-		{
-			parser<SIMD_T> p;
-			return p.parse(source);
-		}
-
-		SIMD_ENABLED
-		cpu_scheduler<vreal> &scheduler_cache()
-		{
-			static cpu_scheduler<vreal> scheduler;
-
-			return scheduler;
-		}
-
-
-		template<typename capability, typename vreal, typename vint>
-		auto exec(const vec3<float> &origin)
-		{
-			cout << ">>dispatch: using " << static_dispatcher<capability>::unit_name() << " branch" << endl;
-			
-			return scheduler_cache<vreal, vint>()(origin);
-		}
-
-		template<typename capability, typename vreal, typename vint>
-		void exec(float *target, const vec3<float> &origin)
-		{
-			cout << ">>dispatch: using " << static_dispatcher<capability>::unit_name() << " branch" << endl;
-
-			scheduler_cache<vreal, vint>()(target, origin);
-		}
 	};
 }}

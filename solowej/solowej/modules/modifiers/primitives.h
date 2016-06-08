@@ -30,7 +30,7 @@ namespace zzsystems { namespace solowej {	namespace modules {
 	using namespace gorynych;	
 	using namespace math;
 
-	/*MODULE(pow)
+	/*MODULE(mod_pow)
 	{
 	public:
 		MODULE_PROPERTY(a, 0);
@@ -44,26 +44,27 @@ namespace zzsystems { namespace solowej {	namespace modules {
 		}
 	};*/
 
-	MODULE(add)
+	MODULE(mod_add)
 	{
 	public:
 		MODULE_PROPERTY(a, 0);
 		MODULE_PROPERTY(b, 1);
 
-		add() : cloneable(2) {}
+		mod_add() : BASE(mod_add)::cloneable(2) {}
 
 		vreal operator()(const vec3<vreal> &coords) const override
 		{
 			return get_a()(coords) + get_b()(coords);
 		}
 	};
-	MODULE(sub)
+
+	MODULE(mod_sub)
 	{
 	public:
 		MODULE_PROPERTY(a, 0);
 		MODULE_PROPERTY(b, 1);
 
-		sub() : cloneable(2) {}
+		mod_sub() : BASE(mod_sub)::cloneable(2) {}
 
 		vreal operator()(const vec3<vreal> &coords) const override
 		{
@@ -71,13 +72,13 @@ namespace zzsystems { namespace solowej {	namespace modules {
 		}
 	};
 
-	MODULE(mul)
+	MODULE(mod_mul)
 	{
 	public:
 		MODULE_PROPERTY(a, 0);
 		MODULE_PROPERTY(b, 1);
 
-		mul() : cloneable(2) {}
+		mod_mul() : BASE(mod_mul)::cloneable(2) {}
 
 		vreal operator()(const vec3<vreal> &coords) const override
 		{
@@ -85,13 +86,13 @@ namespace zzsystems { namespace solowej {	namespace modules {
 		}
 	};
 
-	MODULE(div)
+	MODULE(mod_div)
 	{
 	public:
 		MODULE_PROPERTY(a, 0);
 		MODULE_PROPERTY(b, 1);
 
-		div() : cloneable(2) {}
+		mod_div() : BASE(mod_div)::cloneable(2) {}
 
 		vreal operator()(const vec3<vreal> &coords) const override
 		{
@@ -99,36 +100,36 @@ namespace zzsystems { namespace solowej {	namespace modules {
 		}
 	};
 
-	MODULE(blend)
+	MODULE(mod_blend)
 	{
 	public:
 		MODULE_PROPERTY(a, 0);
 		MODULE_PROPERTY(b, 1);
 		MODULE_PROPERTY(alpha, 2);
 
-		blend() : cloneable(3) {}
+		mod_blend() : BASE(mod_blend)::cloneable(3) {}
 
 		vreal operator()(const vec3<vreal> &coords) const override
 		{
 			//return lerp(v0, v1, (alpha + 1.0) / 2.0);
 			return lerp(get_a()(coords),
 						get_b()(coords), 
-						(get_alpha()(coords) + cfl<vreal>::_1()) / cfl<vreal>::_2()
+						(get_alpha()(coords) + cfl<vreal, 1>::val()) / cfl<vreal, 2>::val()
 				);
 		}
 	};
 
-	MODULE(translate_input)
+	MODULE(mod_translate_input)
 	{
 	public:
 		vec3<vreal> offset;
-		translate_input(const vec3<vreal> &offset = vec3<vreal>(0.0f)) : 
-			cloneable(1), 
+		mod_translate_input(const vec3<vreal> &offset = vec3<vreal>(0.0f)) :
+			BASE(mod_translate_input)::cloneable(1),
 			offset(offset)
 		{}
 
-		translate_input(const translate_input<SIMD_T> &rhs) : 
-			cloneable(rhs), offset(rhs.offset)
+		mod_translate_input(const mod_translate_input<SIMD_T> &rhs) :
+			BASE(mod_translate_input)::cloneable(rhs), offset(rhs.offset)
 		{}
 		
 		const json& operator <<(const json &source) override
@@ -148,21 +149,23 @@ namespace zzsystems { namespace solowej {	namespace modules {
 		}
 	};
 
-	MODULE(scale_input)
+	MODULE(mod_scale_input)
 	{
 	public:
-		vreal scale;
-		scale_input(const vreal &scale = 1.0f) : 
-			cloneable(1), scale(scale)
+		vec3<vreal> scale;
+		mod_scale_input(const vec3<vreal> &scale = vec3<vreal>(1.0f)) :
+			BASE(mod_scale_input)::cloneable(1), scale(scale)
 		{}
 
-		scale_input(const scale_input &rhs) :
-			cloneable(rhs), scale(rhs.scale)
+		mod_scale_input(const mod_scale_input &rhs) :
+			BASE(mod_scale_input)::cloneable(rhs), scale(rhs.scale)
 		{}
 
 		const json& operator <<(const json &source) override
 		{
-			scale = source.value("scale", 1.0f);
+			auto so = source["scale"];
+// TODO: add "value" default read
+			scale = vec3<vreal>(so[0].get<float>(), so[1].get<float>(), so[2].get<float>());
 			return source;
 		}
 
@@ -174,21 +177,21 @@ namespace zzsystems { namespace solowej {	namespace modules {
 		}
 	};
 
-	MODULE(scale_output)
+	MODULE(mod_scale_output)
 	{
 	public:
 		vreal scale;
-		scale_output(const vreal &scale = 1.0f) : 
-			cloneable(1), scale(scale)
+		mod_scale_output(const vreal &scale = 1.0f) :
+			BASE(mod_scale_output)::cloneable(1), scale(scale)
 		{}
 
-		scale_output(const scale_output &rhs) : 
-			cloneable(rhs), scale(rhs.scale)
+		mod_scale_output(const mod_scale_output &rhs) :
+			BASE(mod_scale_output)::cloneable(rhs), scale(rhs.scale)
 		{}
 
 		const json& operator <<(const json &source) override
 		{
-			scale = source.value("scale", 1.0f);
+			scale = source.value<float>("scale", 1.0f);
 			return source;
 		}
 
@@ -200,22 +203,22 @@ namespace zzsystems { namespace solowej {	namespace modules {
 		}
 	};
 
-	MODULE(scale_output_biased)
+	MODULE(mod_scale_output_biased)
 	{
 	public:
 		vreal scale, bias;
-		scale_output_biased(const vreal &scale = 1.0f, const vreal &bias = 0.0f) :
-			cloneable(1), scale(scale), bias(bias)
+		mod_scale_output_biased(const vreal &scale = 1.0f, const vreal &bias = 0.0f) :
+			BASE(mod_scale_output_biased)::cloneable(1), scale(scale), bias(bias)
 		{}
 
-		scale_output_biased(const scale_output_biased &rhs) :
-			cloneable(rhs), scale(rhs.scale), bias(rhs.bias)
+		mod_scale_output_biased(const mod_scale_output_biased &rhs) :
+			BASE(mod_scale_output_biased)::cloneable(rhs), scale(rhs.scale), bias(rhs.bias)
 		{}
 
 		const json& operator <<(const json &source) override
 		{
-			scale = source.value("scale", 1.0f);
-			bias = source.value("bias", 0.0f);
+			scale = source.value<float>("scale", 1.0f);
+			bias = source.value<float>("bias", 0.0f);
 			return source;
 		}
 		
@@ -227,14 +230,26 @@ namespace zzsystems { namespace solowej {	namespace modules {
 		}
 	};
 
+	MODULE(mod_abs)
+	{
+	public:
+		MODULE_PROPERTY(a, 0);
 
-	MODULE(min)
+		mod_abs() : BASE(mod_abs)::cloneable(1) {}
+
+		vreal operator()(const vec3<vreal> &coords) const override
+		{
+			return vabs(get_a()(coords));
+		}
+	};
+
+	MODULE(mod_min)
 	{
 	public:
 		MODULE_PROPERTY(a, 0);
 		MODULE_PROPERTY(b, 1);
 
-		min() : cloneable(2) {}
+		mod_min() : BASE(mod_min)::cloneable(2) {}
 
 		vreal operator()(const vec3<vreal> &coords) const override 
 		{
@@ -242,13 +257,13 @@ namespace zzsystems { namespace solowej {	namespace modules {
 		}
 	};
 
-	MODULE(max)
+	MODULE(mod_max)
 	{
 	public:
 		MODULE_PROPERTY(a, 0);
 		MODULE_PROPERTY(b, 1);
 
-		max() : cloneable(2) {}
+		mod_max() : BASE(mod_max)::cloneable(2) {}
 
 		vreal operator()(const vec3<vreal> &coords) const override
 		{
@@ -256,22 +271,22 @@ namespace zzsystems { namespace solowej {	namespace modules {
 		}
 	};
 
-	MODULE(clamp)
+	MODULE(mod_clamp)
 	{
 	public:
 		vreal min, max;
-		clamp(const vreal &min = -1.0f, const vreal &max = 1.0f) :
-			cloneable(1), min(min), max(max)
+		mod_clamp(const vreal &min = -1.0f, const vreal &max = 1.0f) :
+			BASE(mod_clamp)::cloneable(1), min(min), max(max)
 		{}
 
-		clamp(const clamp &rhs) :
-			cloneable(rhs), min(rhs.min), max(rhs.max)
+		mod_clamp(const mod_clamp &rhs) :
+			BASE(mod_clamp)::cloneable(rhs), min(rhs.min), max(rhs.max)
 		{}
 
 		const json& operator <<(const json &source) override
 		{
-			min = source.value("min", -1.0f);
-			max = source.value("max", 1.0f);
+			min = source.value<float>("min", -1.0f);
+			max = source.value<float>("max", 1.0f);
 			return source;
 		}
 

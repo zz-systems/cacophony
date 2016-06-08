@@ -24,33 +24,50 @@
 
 #pragma once
 
+#include <type_traits>
+#include <exception>
 #include <vector>
 #include <memory>
+#include <functional>
 #include "../math/vector.h"
-#include "../../submodules/json/src/json.hpp"
+#include "../../json/src/json.hpp"
 
 namespace zzsystems { namespace solowej { namespace modules
 {
-	using namespace std;
+	//using namespace std;
+	using namespace zzsystems::math;
 	using namespace math;
 	using json = nlohmann::json;
 
 	SIMD_ENABLED_F
-		using Module = function<vreal(const vec3<vreal>&)>;
+		//	template<typename vreal, typename enable = typename std::enable_if<std::is_floating_point<vreal>::value != 0>::type>
+		using Module = std::function<vreal(const vec3<vreal>)>;
 
 	SIMD_ENABLED_F
-		using Transformer = function<vec3<vreal>(const vec3<vreal>&)>;
+		using Transformer = std::function<vec3<vreal>(const vec3<vreal>)>;
 
-	SIMD_ENABLE(vreal, vint)
-		using SeededModule = function<vreal(const vec3<vreal>&, const vint& seed)>;
+	SIMD_ENABLED
+		using SeededModule = std::function<vreal(const vec3<vreal>&, const vint& seed)>;
 
 #define MODULE_PROPERTY(name, index) \
-	const Module<vreal> &get_##name() const { assert(_modules->size() > index); return _modules->at(index);} \
-	void set_##name(const Module<vreal> &value) { assert(_modules->size() > index); _modules->at(index) = value; }
+	const Module<vreal> &get_##name() const { assert(this->get_modules()->size() > index); return this->get_modules()->at(index);} \
+	void set_##name(const Module<vreal> &value) { assert(this->get_modules()->size() > index); this->get_modules()->at(index) = value; }
 
+#if defined(COMPILE_AVX2) || defined(COMPILE_AVX1)
+#define MODULE(class_name) \
+	SIMD_ENABLED class alignas(32) class_name : \
+		public cloneable<module_base<SIMD_T>, class_name<SIMD_T>>
+#elif defined(COMPILE_SSE2) || defined(COMPILE_SSE3) || defined(COMPILE_SSSE3) || defined(COMPILE_SSE4) || defined(COMPILE_SSE4FMA)
+#define MODULE(class_name) \
+	SIMD_ENABLED class alignas(16) class_name : \
+		public cloneable<module_base<SIMD_T>, class_name<SIMD_T>>
+#else
 #define MODULE(class_name) \
 	SIMD_ENABLED class class_name : \
 		public cloneable<module_base<SIMD_T>, class_name<SIMD_T>>
+#endif
+
+#define BASE(class_name) cloneable<module_base<SIMD_T>, class_name<SIMD_T>>
 
 	SIMD_ENABLED
 	class module_base : 
@@ -58,12 +75,16 @@ namespace zzsystems { namespace solowej { namespace modules
 	{
 		typedef module_base<vreal, vint> self_t;
 	public:
+		const size_t required_module_count;
+
 		module_base(const size_t n_modules = 0) 
-			: _modules(make_shared<vector<Module<vreal>>>(n_modules))
+			: _modules(make_shared<vector<Module<vreal>>>(n_modules)),
+			  required_module_count(n_modules)
 		{}
 
 		module_base(const module_base& other)
-			: _modules( make_shared<vector<Module<vreal>>>( other._modules->begin(), other._modules->end()))
+			: _modules(gorynych::make_shared<vector<Module<vreal>>>( other._modules->begin(), other._modules->end())),
+			  required_module_count(other.required_module_count)
 		{}
 
 		virtual ~module_base()
@@ -73,12 +94,20 @@ namespace zzsystems { namespace solowej { namespace modules
 		
 		virtual shared_ptr<module_base<vreal, vint>> clone() const = 0;
 
-		virtual operator Module<vreal>() const 
+		virtual inline operator Module<vreal>() const
 		{ 
-			return [this](const auto &c) { return this->operator()(c); }; 
+			return [this](const auto c)
+			{
+				return this->operator()(c);
+			};
 		}
 
-		shared_ptr<vector<Module<vreal>>> get_modules() const
+		virtual bool is_valid()
+		{
+			return true;
+		}
+
+		inline shared_ptr<vector<Module<vreal>>> get_modules() const
 		{
 			return _modules;
 		}

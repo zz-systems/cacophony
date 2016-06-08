@@ -82,7 +82,7 @@ namespace zzsystems { namespace solowej {
 		static vreal gradient_3d(const vec3<vreal>& input, const vec3<vint>& nearby, const vint &seed)
 		{
 			auto word = dim<vreal>();
-			auto vi = (SEED_NOISE_GEN<vint>() * seed + dot(NOISE_GEN<vint>(), nearby)) & cfl<vint>::ones();
+			auto vi = (SEED_NOISE_GEN<vint>() * seed + dot(NOISE_GEN<vint>(), nearby)) & static_cast<vint>(0xFFFFFFFF);//ccl<vint>::ones();
 			auto diff = input - static_cast<vec3<vreal>>(nearby);
 
 			vi ^= (vi >> SHIFT_NOISE_GEN);
@@ -137,12 +137,12 @@ namespace zzsystems { namespace solowej {
 
 		static vint intvalue_3d(const vec3<vint>& c, const vint &seed)
 		{
-			vint n = (SEED_NOISE_GEN<vint>() * seed + dot(NOISE_GEN<vint>(), c)) & cfl<vint>::intmax();
+			vint n = (SEED_NOISE_GEN<vint>() * seed + dot(NOISE_GEN<vint>(), c)) & numeric_limits<int>::max();//& static_cast<vint>(0x7fffffff);// ccl<vint>::max();
 
 			n ^= (n >> 13);
 
 			//return (n * (n * n * 60493 + 19990303) + 1376312589) & 0x7fffffff;
-			return (n * (n * n * 1087 + 2749) + 3433) & cfl<vint>::intmax();
+			return (n * (n * n * 1087 + 2749) + 3433) & numeric_limits<int>::max();// & static_cast<vint>(0x7FFFFFFF); // & ccl<vint>::max();
 		}
 
 		static vreal realvalue_3d(const vec3<vint>& c, const vint &seed)
@@ -154,7 +154,7 @@ namespace zzsystems { namespace solowej {
 				static_cast<vreal>(intvalue_3d(c, seed)),
 				//IntValueNoise3D<vreal, vint>(c, seed),
 				valuenoise_adjust<vreal>(),
-				cfl<vreal>::_1());
+				cfl<vreal, 1>::val());
 		}
 
 		static vreal value_coherent_3d(const vec3<vreal>& c, const vint &seed, Quality quality)
@@ -189,21 +189,21 @@ namespace zzsystems { namespace solowej {
 
 			return lerp(iy0, iy1, s.z);
 		}
-	protected:
+	public:
 		// Create a unit-length cube aligned along an integer boundary.  This cube
 		// surrounds the input point.
 		static mat3x2<vint> construct_cube(const vec3<vreal>& c)
 		{
 			vec3<vint> lowerEdge
 			(
-				static_cast<vint>(vfloor(c.x)),//*/ (vint)c.x - vsel(c.x > cfl<vreal>::_0(), cfl<vint>::_0(), cfl<vint>::_1()),
-				static_cast<vint>(vfloor(c.y)),//*/ (vint)c.y - vsel(c.y > cfl<vreal>::_0(), cfl<vint>::_0(), cfl<vint>::_1()),
-				static_cast<vint>(vfloor(c.z))//*/ (vint)c.z - vsel(c.z > cfl<vreal>::_0(), cfl<vint>::_0(), cfl<vint>::_1())
+				static_cast<vint>(vfloor(c.x)),//*/ (vint)c.x - vsel(c.x > cfl<vreal, 0>::val(), cfl<vint, 0>::val(), cfl<vint, 1>::val()),
+				static_cast<vint>(vfloor(c.y)),//*/ (vint)c.y - vsel(c.y > cfl<vreal, 0>::val(), cfl<vint, 0>::val(), cfl<vint, 1>::val()),
+				static_cast<vint>(vfloor(c.z))//*/ (vint)c.z - vsel(c.z > cfl<vreal, 0>::val(), cfl<vint, 0>::val(), cfl<vint, 1>::val())
 			);
 
 			return mat3x2<vint>(
 				lowerEdge,
-				lowerEdge + cfl<vint>::_1()
+				lowerEdge + cfl<vint, 1>::val()
 				);
 		}
 
@@ -241,6 +241,7 @@ namespace zzsystems { namespace solowej {
 				);
 		}
 
+#if defined(COMPILE_SSE2) || defined(COMPILE_SSE3) || defined(COMPILE_SSE4) || defined(COMPILE_SSE4FMA)
 		// For SSE case: No need to gather. Load 4 vectors and transpose them - omitting the last (0 0 0 0) row
 		FEATURE
 		static vec3<_float4> gather_randoms(_int4 &index)
@@ -273,5 +274,54 @@ namespace zzsystems { namespace solowej {
 				_mm_shuffle_ps(_Tmp2, _Tmp3, 0x88) //rv2,
 			};			
 		}
-	};	
+#endif
+	};
+
+
+	template<> inline int noisegen<float, int>::intvalue_3d(const vec3<int>& c, const int& seed)
+	{
+		auto ng = NOISE_GEN<unsigned>();
+		//unsigned cx = c.x > 0 ? c.x :
+		unsigned dnc = ng.x * c.x + ng.y * c.y + ng.z * c.z;
+
+		unsigned n = (SEED_NOISE_GEN<unsigned>() * seed + dnc) & 0x7FFFFFFF;// numeric_limits<int>::max();//& static_cast<vint>(0x7fffffff);// ccl<vint>::max();
+
+		n ^= (n >> 13);
+
+		//return (n * (n * n * 60493 + 19990303) + 1376312589) & 0x7fffffff;
+		n = (n * (n * n * 1087 + 2749) + 3433);// & static_cast<vint>(0x7FFFFFFF); // & ccl<vint>::max();
+
+		int nn = 0;
+
+		if (n <= 0x7FFFFFFF)
+			nn = static_cast<int>(n);
+		else
+		if (n >= 0x80000000)
+			nn = static_cast<int>(n - 0x80000000) +  0x80000000;//0x7FFFFFFF + 1;//numeric_limits<int>::max();
+
+		return nn  & 0x7FFFFFFF;//numeric_limits<int>::max();
+	}
+
+	template <> inline float noisegen<float, int>::gradient_3d(const vec3<float>& c, const vec3<int>& nearby, const int &seed)
+	{
+		auto ng = NOISE_GEN<unsigned>();
+		unsigned dnc = ng.x * nearby.x + ng.y * nearby.y + ng.z * nearby.z;
+
+		unsigned vi = (SEED_NOISE_GEN<unsigned>() * seed + dnc) & static_cast<int>(0xFFFFFFFF);//ccl<vint>::ones();
+
+
+		vi ^= (vi >> SHIFT_NOISE_GEN);
+
+		vi &= (0xFF);
+		vi <<= 2;
+
+		int vvi  = static_cast<int>(vi);
+		auto grad = gather_randoms(vvi);
+
+		auto diff = c - static_cast<vec3<float>>(nearby);
+
+		//return dot(gradients, diff) * static_cast<vreal>(2.12f);
+
+		return dot(grad, diff) * 2.12f;
+	}
 }}
