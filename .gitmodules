@@ -1,12 +1,15 @@
 [submodule "solowej/submodules/gorynych"]
-	path = solowej/submodules/gorynych
+	path = solowej/gorynych
 	url = https://github.com/zz-systems/gorynych.git
 [submodule "solowej/submodules/CImg"]
-	path = solowej/submodules/CImg
+	path = solowej/CImg
 	url = https://github.com/dtschump/CImg.git
 [submodule "solowej/submodules/json"]
-	path = solowej/submodules/json
+	path = solowej/json
 	url = https://github.com/nlohmann/json.git
 [submodule "solowej/submodules/Catch"]
-	path = solowej/submodules/Catch
+	path = solowej/Catch
 	url = https://github.com/philsquared/Catch.git
+[submodule "solowej/submodules/asyncplusplus"]
+	path = solowej/asyncplusplus
+	url = https://github.com/Amanieu/asyncplusplus.git

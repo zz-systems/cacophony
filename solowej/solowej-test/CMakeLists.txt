@@ -1,0 +1,31 @@
+cmake_minimum_required(VERSION 3.5)
+project(gorynych-test)
+
+include(../CMakeCommons)
+
+set(CMAKE_C_COMPILER "/usr/bin/clang" CACHE string "clang compiler" FORCE)
+set(CMAKE_CXX_COMPILER "/usr/bin/clang++" CACHE string "clang compiler" FORCE)
+
+set(CMAKE_CXX_FLAGS_DEBUG " -g ")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+
+#set(CMAKE_BUILD_TYPE Debug)
+set( CMAKE_VERBOSE_MAKEFILE on )
+set(CMAKE_CXX_FLAGS "-std=c++14 -O3 -march=x86-64")
+
+
+set(BRANCHES_TO_COMPILE
+        sse2_branch
+        sse3_branch
+        ssse3_branch
+        sse4_branch
+        sse4fma_branch
+        avx1_branch
+        avx2_branch)
+
+set(BRANCH_MODULES "float_test\;test_float.cpp" "int_test\;test_operators.cpp")
+prepare_branches()
+
+list(APPEND SOURCE_FILES unit_test.cpp)
+
+add_executable(gorynych-test ${SOURCE_FILES})

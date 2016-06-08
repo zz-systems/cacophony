@@ -1,0 +1,8 @@
+//
+// Created by szuyev on 16.05.16.
+//
+
+#ifndef SOLOWEJ_OBJECTDISPATCH_H
+#define SOLOWEJ_OBJECTDISPATCH_H
+
+#endif //SOLOWEJ_OBJECTDISPATCH_H
