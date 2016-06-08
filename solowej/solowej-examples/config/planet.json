@@ -5,7 +5,7 @@
     "max_feature_set": -1,
     "entryPoint": "output",
     "scheduler": {
-      "dimensions": [ 1024, 1024, 1 ],
+      "dimensions": [ 1257, 1, 1257 ],
       "seamless": true,
       "scale": [ 1, 5, 1 ],
       "offset": [ 0, 0, 0 ],

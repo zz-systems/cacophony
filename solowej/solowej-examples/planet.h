@@ -1,7 +1,9 @@
 #pragma once
 
+#include "../solowej/solowej.h"
+
 #include "../solowej/modules/all.h"
-#include "../submodules/gorynych/gorynych/gorynych.h"
+#include "../gorynych/gorynych/gorynych.h"
 #include "../solowej/util/color.h"
 
 namespace zzsystems { namespace solowej { namespace examples {
@@ -126,7 +128,7 @@ namespace zzsystems { namespace solowej { namespace examples {
 
 
 
-	SIMD_ENABLE(vreal, vint)
+	SIMD_ENABLED
 	Module<vreal> generate_complex_planet()
 	{
 		cout << "generate planet texture" << endl;
@@ -134,12 +136,12 @@ namespace zzsystems { namespace solowej { namespace examples {
 		// 1: [Continent module]: This Perlin-noise module generates the continents.
 		//    This noise module has a high number of octaves so that detail is
 		//    visible at high zoom levels.
-		perlin<vreal, vint> baseContinentDef_pe0(CONTINENT_FREQUENCY, CONTINENT_LACUNARITY, 0.5, 14, CUR_SEED + 0);
+		mod_perlin<vreal, vint> baseContinentDef_pe0(CONTINENT_FREQUENCY, CONTINENT_LACUNARITY, 0.5, 14, CUR_SEED + 0);
 
 		// 2: [Continent-with-ranges module]: Next, a curve module modifies the
 		//    output value from the continent module so that very high values appear
 		//    near sea level.  This defines the positions of the mountain ranges.
-		curve<vreal, vint> baseContinentDef_cu
+		mod_curve<vreal, vint> baseContinentDef_cu
 		{
 			{ -2.0000f + SEA_LEVEL,-1.625f + SEA_LEVEL },
 			{ -1.0000f + SEA_LEVEL,-1.375f + SEA_LEVEL },
@@ -159,7 +161,7 @@ namespace zzsystems { namespace solowej { namespace examples {
 		//    used by subsequent noise modules to carve out chunks from the mountain
 		//    ranges within the continent-with-ranges module so that the mountain
 		//    ranges will not be complely impassible.	
-		perlin<vreal, vint> baseContinentDef_pe1(CONTINENT_FREQUENCY *  4.34375, CONTINENT_LACUNARITY, 0.5, 11, CUR_SEED + 1);
+		mod_perlin<vreal, vint> baseContinentDef_pe1(CONTINENT_FREQUENCY *  4.34375, CONTINENT_LACUNARITY, 0.5, 11, CUR_SEED + 1);
 
 		// 4: [Scaled-carver module]: This scale/bias module scales the output
 		//    value from the carver module such that it is usually near 1.0.  This
@@ -188,7 +190,7 @@ namespace zzsystems { namespace solowej { namespace examples {
 		//    clamped-continent module.
 		//Module<vreal> baseContinentDef = memoize<vreal, vint>(baseContinentDef_cl);
 
-		buffer<vreal, vint> buf(baseContinentDef_cl);
+		mod_buffer<vreal, vint> buf(baseContinentDef_cl);
 		
 		return buf;
 		//return memoize<vreal, vint>( baseContinentDef_cl );

@@ -41,7 +41,8 @@ namespace zzsystems { namespace solowej {
 	};
 
 	SIMD_ENABLED_F
-	const vreal random_vectors<vreal>::values[size] =
+	alignas(64) const vreal random_vectors<vreal>::values[size] =
+	//alignas(64) const float random_vectors[1024]
 	{
 		-0.763874f, -0.596439f, -0.246489f, 0.0f,
 		0.396055f, 0.904518f, -0.158073f, 0.0f,

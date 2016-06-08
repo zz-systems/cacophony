@@ -25,7 +25,7 @@
 #pragma once
 
 #include <vector>
-#include "../../submodules/gorynych/gorynych/gorynych.h"
+#include "../../gorynych/gorynych/gorynych.h"
 #include "../util/cloneable.h"
 #include "../util/serializable.h"
 #include "../math/vector.h"

@@ -3,15 +3,14 @@
 #ifndef PROFILE
 
 #pragma warning(push, 0)
-#include "../submodules/CImg/CImg.h"
+#include "../CImg/CImg.h"
 #pragma warning(pop)
 
 #endif
 
-#include "run.h"
 #include <chrono>
-#include <ppl.h>
 
+#include "../asyncplusplus/include/async++.h"
 
 #include <functional>
 #include <memory>
@@ -59,8 +58,9 @@ namespace zzsystems { namespace solowej { namespace examples {
 
 		cimg_library::CImg<uint8_t> img1(w, h, 1, 3), img2(w, h, 1, 3);
 
-		Concurrency::parallel_for(0, w * h, [&](const auto i)
-			//for (int i = 0; i < v.size(); i++)	
+		//async::parallel_for(async::irange(0, w * h), [&](const auto i)
+//#pragma omp parallel for
+		for (int i = 0; i < w * h; i++)
 		{
 			int x = i % w;
 			int y = i / w;
@@ -78,7 +78,7 @@ namespace zzsystems { namespace solowej { namespace examples {
 			img2(x, y, 1) = color2.g;
 			img2(x, y, 2) = color2.b;
 		}
-		);
+		//);
 
 		img1.display("simd", true);
 		img2.display("sisd", true);

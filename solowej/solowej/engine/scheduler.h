@@ -24,89 +24,46 @@
 
 #pragma once
 
-#include <ppl.h>
-#include <vector>
 
-#include "../../submodules/gorynych/gorynych/gorynych.h"
+#include "../../asyncplusplus/include/async++.h"
+
+#include <vector>
+#include <memory>
+#include "../../gorynych/gorynych/gorynych.h"
 #include "../util/serializable.h"
 #include "../modules/module_base.h"
+#include "scheduler_base.h"
 
-namespace zzsystems { namespace solowej { namespace scheduler {
-	using namespace concurrency;
+namespace zzsystems { namespace solowej {
+	using namespace async;
 	using namespace gorynych;
 	using namespace math;
 	using namespace modules;
 
-	struct scheduler_settings :
-		serializable<json>
-	{
-		vec3<int> dimensions;
-		vec3<float> scale, offset;
-		bool use_threads;
-		bool seamless;
 
-		scheduler_settings() = default;
-
-		scheduler_settings(vec3<int> dimensions, bool use_threads = true)
-			: dimensions(dimensions), use_threads(use_threads)
-		{}
-
-		scheduler_settings(const scheduler_settings& rhs)
-			: dimensions(rhs.dimensions), use_threads(rhs.use_threads)
-		{}
-
-		const json& operator<<(const json& source) override
-		{
-			auto dimensions = source["dimensions"];
-			auto scale  = source["scale"];
-			auto offset = source["offset"];
-
-			this->dimensions = dimensions != nullptr && dimensions.size() >= 3
-				? vec3<int>(dimensions[0], dimensions[1], dimensions[2])
-				: vec3<int>(128, 128, 1);
-			
-			this->scale		 = scale != nullptr && scale.size() >= 3
-				? vec3<float>(scale[0], scale[1], scale[2])
-				: vec3<float>(1);
-						
-			this->offset = offset != nullptr && offset.size() >= 3
-				? vec3<float>(offset[0], offset[1], offset[2])
-				: vec3<float>(0); 
-
-			use_threads = source.value("use_threads", true);
-			seamless = source.value("seamless", true);
-
-			cout << "dimensions: [ " << this->dimensions.x << ", " << this->dimensions.y << ", " << this->dimensions.z << " ]" << endl;
-			cout << "scale: [ " << this->scale.x << ", " << this->scale.y << ", " << this->scale.z << " ]" << endl;
-			cout << "offset: [ " << this->offset.x << ", " << this->offset.y << ", " << this->offset.z << " ]" << endl;
-
-			cout << "multithreaded: " << boolalpha << use_threads << endl;
-			return source;
-		}
-	};
 
 	SIMD_ENABLED_F
 	class cpu_scheduler
-		: serializable<json>
+		: public serializable<json>
 	{
 	public:
 		scheduler_settings	settings;
 		Module<vreal>		source;
 		Transformer<vreal>	transform;
 
-		cpu_scheduler() : source(nullptr), transform(nullptr)
+		cpu_scheduler() : source(nullptr)//, transform(nullptr)
 		{}
 
 		cpu_scheduler(const Module<vreal> &source, const Transformer<vreal> &transformer)
-			: source(source), transform(transformer)
+			: source(source)//, //transform(transformer)
 		{}
 
 		cpu_scheduler(const Module<vreal> &source, const Transformer<vreal> &transformer, const scheduler_settings &settings)
-			: settings(settings), source(source), transform(transformer)
+			: settings(settings), source(source)//, //transform(transformer)
 		{}
 
 		cpu_scheduler(const Module<vreal> &source, const Transformer<vreal> &transformer, vec3<int> dimensions, bool use_threads = true)
-			: settings(dimensions, use_threads), source(source), transform(transformer)
+			: settings(dimensions, use_threads), source(source)//, //transform(transformer)
 		{}		
 
 		const json& operator<<(const json& source) override
@@ -128,13 +85,17 @@ namespace zzsystems { namespace solowej { namespace scheduler {
 		auto operator()(const vec3<float> &origin) const
 		{
 			auto d = this->settings.dimensions;
-			auto target = new float[d.x * d.y * d.z];
+			//auto target = new float[d.x * d.y * d.z];
 
+			gorynych::aligned_allocator<float, 32> alloc;
+
+			//float* target;// = alloc.allocate(d.x * d.y * d.z);
+			float* target = reinterpret_cast<float*>(aligned_malloc(sizeof(float) * d.x * d.y * d.z, 64));
 			this->operator()(target, origin);
 
 			return target;
 		}
-
+	private:
 		static void write_result(const vec3<int> &d, float* stride, size_t remainder, size_t x, const vreal &r)
 		{
 			if (remainder == 0) // All rows aligned on 32-bit boundaries -> stream
@@ -147,8 +108,11 @@ namespace zzsystems { namespace solowej { namespace scheduler {
 			}
 			else // Fill remaining columns
 			{
+				float extracted[dim<vreal>()];
+				extract(r, extracted);
+
 				for (size_t i = 0; i < remainder; i++)
-					stride[x + i] = extract(r)[i];
+					stride[x + i] = extracted[i];
 			}
 		}
 
@@ -175,45 +139,36 @@ namespace zzsystems { namespace solowej { namespace scheduler {
 		static vec3<float> build_coords(float x, float y, float z)
 		{
 			return vec3<float> {
-				x,
+					x,
 					y,
 					z
 			};
 		}
-	private:
+
 		Transformer<vreal> build_transform(Transformer<vreal> transformer)
 		{
 			cout << "building input transform..." << endl;
 
-			auto scale		= static_cast<vec3<vreal>>(settings.scale);
-			auto offset		= static_cast<vec3<vreal>>(settings.offset);
-			auto dimensions = static_cast<vec3<vreal>>(settings.dimensions);
 
 			cout << boolalpha << "has seam: " << settings.seamless << endl;
 
-			if(settings.seamless)
-			{
-				dimensions.x = vmax(dimensions.x - cfl<vreal>::_1(), cfl<vreal>::_1());
-				dimensions.y = vmax(dimensions.y - cfl<vreal>::_1(), cfl<vreal>::_1());
-				dimensions.z = vmax(dimensions.z - cfl<vreal>::_1(), cfl<vreal>::_1());
-			}
 
 			if (static_cast<bool>(transformer))
 			{
 				if (settings.scale != vec3<float>(1) && settings.offset != vec3<float>(0))
 				{
 					cout << "user defined transformer: scaled, biased" << endl;
-					return [=](const auto&c) { return transformer(c) / dimensions * scale + offset; };
+					return [this, transformer](const auto&c) { return transformer(c) / static_cast<vec3<vreal>>(settings.seam_dimensions) * static_cast<vec3<vreal>>(settings.scale) + static_cast<vec3<vreal>>(settings.offset); };
 				}
 				if (settings.scale != vec3<float>(1))
 				{
 					cout << "user defined transformer: scaled" << endl;
-					return [=](const auto&c) { return transformer(c) / dimensions * scale; };
+					return [this, transformer](const auto&c) { return transformer(c) / static_cast<vec3<vreal>>(settings.seam_dimensions) * static_cast<vec3<vreal>>(settings.scale); };
 				}
 				if (settings.offset != vec3<float>(0))
 				{
 					cout << "user defined transformer: biased" << endl;
-					return [=](const auto&c) { return transformer(c) / dimensions + offset; };
+					return [this, transformer](const auto&c) { return transformer(c) / static_cast<vec3<vreal>>(settings.seam_dimensions) + static_cast<vec3<vreal>>(settings.offset); };
 				}
 			}
 			else
@@ -221,26 +176,38 @@ namespace zzsystems { namespace solowej { namespace scheduler {
 				if (settings.scale != vec3<float>(1) && settings.offset != vec3<float>(0))
 				{
 					cout << "default transformer: scaled, biased" << endl;
-					return [=](const auto&c) { return c / dimensions * scale + offset; };
+					return [this](const auto&c) { return c / static_cast<vec3<vreal>>(settings.seam_dimensions) * static_cast<vec3<vreal>>(settings.scale) + static_cast<vec3<vreal>>(settings.offset); };
 				}
 				if (settings.scale != vec3<float>(1))
 				{
 					cout << "default transformer: scaled" << endl;
-					return [=](const auto&c) { return c / dimensions * scale; };
+					return [this](const auto&c) { return c / static_cast<vec3<vreal>>(settings.seam_dimensions) * static_cast<vec3<vreal>>(settings.scale); };
 				}
 				if (settings.offset != vec3<float>(0))
 				{
 					cout << "default transformer: biased" << endl;
-					return [=](const auto&c) { return c / dimensions + offset; };
+					return [this](const auto&c) { return c / static_cast<vec3<vreal>>(settings.seam_dimensions) + static_cast<vec3<vreal>>(settings.offset); };
 				}
 			}
 
 			cout << "default transformer" << endl;
-			return [=](const auto&c) { return c / dimensions; };
+			return [this](const auto &c) { return c / static_cast<vec3<vreal>>(settings.seam_dimensions); };
 		}
 
-		
 
+
+		static inline void stream_result(float* stride, size_t x, const float r)
+		{
+			stride[x] = r;
+		}
+
+		static inline void store_result(float* stride, size_t x, const float r)
+		{
+			stride[x] = r;
+		}
+
+
+//#if defined(COMPILE_SSE2) || defined(COMPILE_SSE3) || defined(COMPILE_SSE4) || defined(COMPILE_SSE4FMA)
 		ANY(featuremask)
 			static inline void stream_result(float* stride, size_t x, const _float4 &r)
 		{
@@ -248,20 +215,17 @@ namespace zzsystems { namespace solowej { namespace scheduler {
 		}
 
 		ANY(featuremask)
-			static void stream_result(float* stride, size_t x, const _float8 &r)
-		{
-			_mm256_stream_ps(stride + x, r.val);
-		}
-
-		static inline void stream_result(float* stride, size_t x, const float r)
-		{
-			stride[x] = r;
-		}
-
-		ANY(featuremask)
-			static inline void store_result(float* stride, size_t x, const _float4 &r)
+		static inline void store_result(float* stride, size_t x, const _float4 &r)
 		{
 			_mm_storeu_ps(stride + x, r.val);
+		}
+//#endif
+//#if defined(COMPILE_AVX1) || defined(COMPILE_AVX2)
+		ANY(featuremask)
+			static void stream_result(float* stride, size_t x, const _float8 &r)
+		{
+			//_mm256_stream_ps(stride + x, r.val);
+			_mm256_storeu_ps(stride + x, r.val);
 		}
 
 		ANY(featuremask)
@@ -269,12 +233,7 @@ namespace zzsystems { namespace solowej { namespace scheduler {
 		{
 			_mm256_storeu_ps(stride + x, r.val);
 		}
-
-		static void store_result(float* stride, size_t x, const float r)
-		{
-			stride[x] = r;
-		}
-		
+//#endif
 		void schedule_st(float *target, const vec3<float> &origin) const
 		{
 			size_t word		= dim<vreal>();
@@ -283,10 +242,13 @@ namespace zzsystems { namespace solowej { namespace scheduler {
 			auto adjust		= remainder > 0 ? word - remainder : 0;
 			
 			_MM_SET_ROUNDING_MODE(_MM_ROUND_TOWARD_ZERO);
-			//_MM_SET_DENORMALS_ZERO_MODE(_MM_FLUSH_ZERO_ON | _MM_DENORMALS_ZERO_ON);
+			_MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_ON);
+
+//#pragma omp parallel for
 			for (int z = 0; z < d.z; z++)
 			{
 				auto depth = z * d.y;
+//#pragma omp parallel for
 				for (int y = 0; y < d.y; y++)
 				{
 					auto stride = target + (depth + y) * d.x;
@@ -310,33 +272,61 @@ namespace zzsystems { namespace solowej { namespace scheduler {
 		{
 			size_t word = dim<vreal>();
 			auto d = this->settings.dimensions;
-			
-			parallel_for(0, d.z, [&](const auto z)
+
+			if(d.z >= d.y)
 			{
-				auto depth = z * d.y;
-
-				parallel_for(0, d.y, [&](const auto y)
-				{
+				parallel_for(irange(0, d.z), [&](const int z) {
 					_MM_SET_ROUNDING_MODE(_MM_ROUND_TOWARD_ZERO);
-					//_MM_SET_DENORMALS_ZERO_MODE(_MM_FLUSH_ZERO_ON | _MM_DENORMALS_ZERO_ON);
+					_MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_ON);
+					auto depth = z * d.y;
 
-					auto stride = target + ((depth + y) * d.x);
-					auto remainder = d.x % word;
-					auto adjust = remainder > 0 ? word - remainder : 0;
-					for (size_t x = 0; x < d.x; x += word)
+					for(int y = 0; y < d.y; y++)
 					{
-						auto coords = transform(build_coords(
-							static_cast<vreal>(static_cast<int>(x)),
-							static_cast<vreal>(y),
-							static_cast<vreal>(z)));
+						auto stride = target + ((depth + y) * d.x);
+						auto remainder = d.x % word;
+						auto adjust = remainder > 0 ? word - remainder : 0;
+						for (size_t x = 0; x < d.x; x += word) {
+							auto coords = transform(build_coords(
+									static_cast<vreal>(static_cast<int>(x)),
+									static_cast<vreal>(y),
+									static_cast<vreal>(z)));
 
-						
-						auto r = source(static_cast<vec3<vreal>>(origin) + coords);
 
-						write_result(d, stride, remainder, x, r);
+							auto r = source(static_cast<vec3<vreal>>(origin) + coords);
+
+							write_result(d, stride, remainder, x, r);
+						}
 					}
 				});
-			});	
+			}
+			else
+			{
+				for(int z = 0; z < d.z; z++)
+				{
+					auto depth = z * d.y;
+
+					parallel_for(irange(0, d.y), [&](const int y)
+					{
+						_MM_SET_ROUNDING_MODE(_MM_ROUND_TOWARD_ZERO);
+						_MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_ON);
+
+						auto stride = target + ((depth + y) * d.x);
+						auto remainder = d.x % word;
+						auto adjust = remainder > 0 ? word - remainder : 0;
+						for (size_t x = 0; x < d.x; x += word) {
+							auto coords = transform(build_coords(
+									static_cast<vreal>(static_cast<int>(x)),
+									static_cast<vreal>(y),
+									static_cast<vreal>(z)));
+
+
+							auto r = source(static_cast<vec3<vreal>>(origin) + coords);
+
+							write_result(d, stride, remainder, x, r);
+						}
+					});
+				}
+			}
 		}
 
 		auto schedule_ocl() const
@@ -348,4 +338,4 @@ namespace zzsystems { namespace solowej { namespace scheduler {
 			return result;
 		}
 	};	
-}}}
+}}

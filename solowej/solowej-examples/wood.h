@@ -8,15 +8,15 @@ namespace zzsystems { namespace solowej { namespace examples {
 	using namespace math;
 	using namespace util;
 
-	SIMD_ENABLE(vreal, vint)
+	SIMD_ENABLED
 		Module<vreal> generate_wood()
 	{
 		cout << "generate wood texture" << endl;
 		
-		perlin<vreal, vint> woodGrainNoise(48, 2.20703125f, 0.5f, 3, 21337);
-		turbulence<vreal, vint> perturbedWood(1.0f / 256.0f, 4, 4.0, 2.0f, 0.5, 1);
-		rotate<vreal, vint> rotatedWood({ 84.0f, 0, 0 });
-		turbulence<vreal, vint> finalWood(1.0f / 64.0f, 4, 2.0f, 2.0f, 0.5f, 2);
+		mod_perlin<vreal, vint> woodGrainNoise(48, 2.20703125f, 0.5f, 3, 21337);
+		mod_turbulence<vreal, vint> perturbedWood(1.0f / 256.0f, 4, 4.0, 2.0f, 0.5, 1);
+		mod_rotate<vreal, vint> rotatedWood({ 84.0f, 0, 0 });
+		mod_turbulence<vreal, vint> finalWood(1.0f / 64.0f, 4, 2.0f, 2.0f, 0.5f, 2);
 
 		//auto baseGrains = voronoi<vreal, vint>(16, 2, 1, true);
 

@@ -31,17 +31,17 @@ namespace zzsystems { namespace solowej { namespace modules {
 	
 	using namespace math;
 
-	MODULE(buffer)
+	MODULE(mod_buffer)
 	{
 	public:
 		MODULE_PROPERTY(source, 0)
 
-		buffer(const Module<vreal> &source)
-			: cloneable(1), _is_cached(false)
+		mod_buffer(const Module<vreal> &source)
+			: BASE(mod_buffer)::cloneable(1), _is_cached(false)
 		{}
 
-		buffer(const buffer<vreal, vint> &source)
-			: cloneable(source), _is_cached(source._is_cached)
+		mod_buffer(const mod_buffer<vreal, vint> &source)
+			: BASE(mod_buffer)::cloneable(source), _is_cached(source._is_cached)
 		{}
 
 		vreal operator()(const vec3<vreal>& coords) const override
@@ -49,7 +49,7 @@ namespace zzsystems { namespace solowej { namespace modules {
 			auto eq = coords == _buf_coords;
 			if(!(_is_cached && static_cast<bool>(eq.x) && static_cast<bool>(eq.y) && static_cast<bool>(eq.z)))
 			{
-				_buffered = source(coords);
+				_buffered = get_source()(coords);
 				_buf_coords = coords;
 			}
 

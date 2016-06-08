@@ -26,125 +26,382 @@
 
 #include "dependencies.h"
 #include "../modules/all.h"
+#include "../util/string.h"
 
 #include <iostream>
+#include <sstream>
 #include <map>
+#include <unordered_set>
+#include <exception>
+
 namespace zzsystems { namespace solowej {
-	using namespace std;
 	using namespace modules;
 
-	SIMD_ENABLED class parser 
+	struct amt_node
 	{
-		using tmodules = map <string, shared_ptr<module_base<vreal, vint>>>;
+		std::string instance_name, module_type, module_name;
 
-		map<string, tmodules> _module_resolver =
+		amt_node() = default;
+		amt_node(string instance_name, string module_type, string module_name) :
+			instance_name(instance_name),
+			module_type(module_type),
+			module_name(module_name)
+		{}
+
+		nlohmann::json module_config, sources_config;
+
+		std::vector<shared_ptr<amt_node>> references;
+		std::vector<shared_ptr<amt_node>> referenced_in;
+	};
+
+	struct compilation_error : public std::runtime_error
+	{
+		compilation_error() : runtime_error("Compilation error")
+		{}
+
+		compilation_error(string message) : runtime_error("Compilation error: " + message)
+		{}
+	};
+
+	struct aggregate_error : public std::exception
+	{
+		vector<shared_ptr<exception>> errors;
+
+		aggregate_error() : std::exception()
+		{}
+
+		void push_back(shared_ptr<exception> ex)
+		{
+			errors.push_back(ex);
+		}
+	};
+
+	struct invalid_module_error : public compilation_error
+	{
+		invalid_module_error(string module_name) : compilation_error("Faulty module [" + module_name + "]")
+		{}
+
+		invalid_module_error(string module_name, string reason) : compilation_error("Faulty module [" + module_name + "]: " + reason)
+		{}
+	};
+
+	struct unresolved_module_reference_error : public compilation_error
+	{
+		unresolved_module_reference_error(string module_name) : compilation_error("Unresolved module reference [" + module_name + "]")
+		{}
+
+        unresolved_module_reference_error(string module_name, string module_type) : compilation_error("Unresolved module reference [" + module_type + "][" + module_name + "]")
+        {}
+	};
+
+	struct unresolved_node_reference_error : public compilation_error
+	{
+		unresolved_node_reference_error(string module_name) : compilation_error("Unresolved node reference [" + module_name + "]")
+		{}
+	};
+
+	struct duplicate_module_error : public compilation_error
+	{
+		duplicate_module_error(string module_name) : compilation_error("Duplicate module [" + module_name + "] definition")
+		{}
+	};
+
+	struct invalid_entry_point_error : public compilation_error
+	{
+		invalid_entry_point_error() : compilation_error("Entry point not found")
+		{}
+
+		invalid_entry_point_error(string entry_point) : compilation_error("Entry point not found [" + entry_point + "]")
+		{}
+	};
+
+	struct cyclic_module_ref_error : public compilation_error
+	{
+		cyclic_module_ref_error() : compilation_error("Cyclic reference found")
+		{}
+
+		cyclic_module_ref_error(string module_name) : compilation_error("Cyclic reference found for [" + module_name + "]")
+		{}
+	};
+
+	SIMD_ENABLED class compiler
+	{
+		using tmodules          = std::map <string, std::shared_ptr<module_base<vreal, vint>>>;
+		using emitted_modules   = gorynych::aligned_map<string, gorynych::shared_ptr<module_base<vreal, vint>>>;
+
+		std::map<string, tmodules> _module_resolver =
 		{
 			{ "generator", tmodules
 				{
-					{ "perlin",		make_shared<perlin<vreal, vint>>() },
-					{ "billow",		make_shared<billow<vreal, vint>>() },
-					{ "voronoi",	make_shared<voronoi<vreal, vint>>() },
-					{ "ridged",		make_shared<ridged_multifractal<vreal, vint>>() },
-					{ "spheres",	make_shared<spheres<vreal, vint>>()},
-					{ "cylinders",	make_shared<cylinders<vreal, vint>>()}
+					{ "perlin",		gorynych::make_shared<mod_perlin<vreal, vint>>() },
+					{ "billow",		gorynych::make_shared<mod_billow<vreal, vint>>() },
+					{ "voronoi",	gorynych::make_shared<mod_voronoi<vreal, vint>>() },
+					{ "ridged",		gorynych::make_shared<mod_ridged_multifractal<vreal, vint>>() },
+					{ "spheres",	gorynych::make_shared<mod_spheres<vreal, vint>>()},
+					{ "cylinders",	gorynych::make_shared<mod_cylinders<vreal, vint>>()},
+					{ "checker",	gorynych::make_shared<mod_checkerboard<vreal, vint>>()},
+					{ "const",		gorynych::make_shared<mod_const<vreal, vint>>()},
 				}
 			},
 			{ "modifier", tmodules{
-				{ "curve", make_shared<curve<vreal, vint>>() },
-				{ "rotate", make_shared<rotate<vreal, vint>>() },
-				{ "select", make_shared<select<vreal, vint>>() },
-				{ "terrace", make_shared<terrace<vreal, vint>>() },
-				{ "turbulence", make_shared<turbulence<vreal, vint>>() },
+				{ "curve", 		gorynych::make_shared<mod_curve<vreal, vint>>() },
+				{ "rotate", 	gorynych::make_shared<mod_rotate<vreal, vint>>() },
+				{ "select", 	gorynych::make_shared<mod_select<vreal, vint>>() },
+				{ "terrace", 	gorynych::make_shared<mod_terrace<vreal, vint>>() },
+				{ "turbulence", gorynych::make_shared<mod_turbulence<vreal, vint>>() },
+				{ "displace", 	gorynych::make_shared<mod_displace<vreal, vint>>() },
 
-				{ "add", make_shared<add<vreal, vint>>() },
-				{ "sub", make_shared<sub<vreal, vint>>() },
-				{ "mul", make_shared<mul<vreal, vint>>() },
-				{ "div", make_shared<div<vreal, vint>>() },
 
-				{ "min", make_shared<min<vreal, vint>>() },
-				{ "max", make_shared<max<vreal, vint>>() },
-				{ "clamp", make_shared<clamp<vreal, vint>>() },
+				{ "add", gorynych::make_shared<mod_add<vreal, vint>>() },
+				{ "sub", gorynych::make_shared<mod_sub<vreal, vint>>() },
+				{ "mul", gorynych::make_shared<mod_mul<vreal, vint>>() },
+				{ "div", gorynych::make_shared<mod_div<vreal, vint>>() },
 
-				{ "blend", make_shared<blend<vreal, vint>>() },
+				{ "abs", gorynych::make_shared<mod_abs<vreal, vint>>() },
+				{ "min", gorynych::make_shared<mod_min<vreal, vint>>() },
+				{ "max", gorynych::make_shared<mod_max<vreal, vint>>() },
+				{ "clamp", gorynych::make_shared<mod_clamp<vreal, vint>>() },
 
-				{ "translate_input",		make_shared<translate_input<vreal, vint>>() },
-				{ "scale_input",			make_shared<scale_input<vreal, vint>>() },
-				{ "scale_output",			make_shared<scale_output<vreal, vint>>() },
-				{ "scale_output_biased",	make_shared<scale_output_biased<vreal, vint>>() }
+				{ "blend", gorynych::make_shared<mod_blend<vreal, vint>>() },
+
+				{ "translate_input",		gorynych::make_shared<mod_translate_input<vreal, vint>>() },
+				{ "scale_input",			gorynych::make_shared<mod_scale_input<vreal, vint>>() },
+				{ "scale_output",			gorynych::make_shared<mod_scale_output<vreal, vint>>() },
+				{ "scale_output_biased",	gorynych::make_shared<mod_scale_output_biased<vreal, vint>>() }
 			}
 			}
 		};
 
+		bool _aggregate_errors;
+
 		public:
-			Module<vreal> parse(istream &source)
+
+			compiler(bool aggregate_errors = true) : _aggregate_errors(aggregate_errors)
+			{}
+
+			Module<vreal> compile(istream &source)
 			{
 				json j(source);
 
-				return parse(j);
+				return compile(j);
 			}
 
-			Module<vreal> parse(const json &source)
+			Module<vreal> compile(const json &source)
 			{
 				string version = source["version"];
 				if (version == "0.9")
 				{
-					return parse_v09(source);
+					return compile_v09(source);
 				}
 
 				return nullptr;
 			}
+
+            template<template<typename, typename> class module>
+            void add_module_map(const string &type, const string &name)
+            {
+                _module_resolver[type][name] = gorynych::make_shared<module<vreal, vint>>();
+            }
+
+            template<template<typename, typename> class module>
+            void add_module_map(const string &path)
+            {
+                auto fragments = split(path, '/');
+
+                _module_resolver[fragments[0]][fragments[1]] = gorynych::make_shared<module<vreal, vint>>();
+            }
+
 		private:
-			Module<vreal> parse_v09(const json &j)
+			template<typename error, typename... Args>
+			void emit_error(aggregate_error &errors, Args &&... args) const
 			{
-				map<string, shared_ptr<module_base<vreal, vint>>> modules;
+                auto err = std::make_shared<error>(std::forward<Args>(args)...);
+                cerr << err->what() << endl;
 
-				if (j["modules"].is_array())
+                errors.push_back(err);
+
+                if(!_aggregate_errors)
+                    throw *err;
+			}
+
+
+            // Prepares a flat node list
+            // Builds an abstract module tree
+			virtual shared_ptr<amt_node> build_amt(const json &source, emitted_modules &emitted, aggregate_error &errors) const
+			{
+				std::map<string, shared_ptr<amt_node>> nodes;
+				shared_ptr<amt_node> entry_point;
+
+                // Fetch entry point
+				auto environment        = source["environment"];
+				auto raw_entry_point    = environment["entryPoint"];
+				string entry_point_name = raw_entry_point != nullptr ? raw_entry_point : "";
+
+				bool has_entry_point    = entry_point_name != "";
+				if(!has_entry_point)
+					emit_error<invalid_entry_point_error>(errors);
+
+				// parse modules partially (flat list)
+				if (source["modules"].is_array())
 				{
-					for (auto module : j["modules"])
+					for (auto module : source["modules"])
 					{
-						const string instance_name = module["name"];
-						const string module_type = module["type"];
-						const string module_name = module["module"];
+						auto node = make_shared<amt_node>();
 
-						if (_module_resolver[module_type].find(module_name) == _module_resolver[module_type].end())
-							continue;
+						node->instance_name 	= module["name"];
+						node->module_type 		= module["type"];
+						node->module_name 		= module["module"];
+						node->module_config 	= module["settings"];
+						node->sources_config 	= module["source"];
 
-						auto skeleton = _module_resolver[module_type][module_name]->clone();
-						modules[instance_name] = skeleton;
-					}
-
-					for (auto module : j["modules"])
-					{
-						string instance_name = module["name"];
-						if (modules.find(instance_name) == modules.end())
-							continue;
-
-						auto instance = modules[instance_name];
-
-						auto settings = module["settings"];
-						auto sources = module["source"];
-
-						*instance << settings;
-
-						if (sources != nullptr && sources.is_array())
-						{
-							auto target = instance->get_modules();
-							target->resize(sources.size());
-
-							for (size_t index = 0; index < sources.size(); index++)
-							{
-								auto ref_name = sources[index];
-								auto ref = modules[ref_name];
-
-								target->at(index) = [ref](const auto &c) { return ref->operator()(c);};
-							}
-						}
+                        // Check for duplicate declaration
+						if(nodes.find(node->instance_name) != nodes.end())
+							emit_error<duplicate_module_error>(errors, node->instance_name);
+						else
+							nodes[node->instance_name] = node;
 					}
 				}
 
-				string entry_point_name = j["environment"]["entryPoint"];
-				auto entry_point = modules[entry_point_name];
-				return [entry_point](const auto &c) { return entry_point->operator()(c);};
+                // Check if entry node exists
+				has_entry_point = has_entry_point && nodes.find(entry_point_name) != nodes.end();
+
+				if(has_entry_point)
+					entry_point = nodes[entry_point_name];
+				else
+					emit_error<unresolved_node_reference_error>(errors, entry_point_name);
+
+				// build tree with empty cycle check chain
+				build_amt_node(entry_point, nodes, unordered_set<shared_ptr<amt_node>>(), emitted, errors);
+
+				return entry_point;
+			}
+
+
+            // Emits a real functor from abstract module tree node
+			virtual Module<vreal> emit_amt_module(shared_ptr<amt_node> node, emitted_modules &emitted, aggregate_error &errors) const
+			{
+				auto node_module 	= emitted[node->instance_name];
+				auto target_modules = node_module->get_modules();
+
+                // Pass module config to module-level parser
+				try
+				{
+					*node_module << node->module_config;
+				}
+				catch(exception ex)
+				{
+					emit_error<invalid_module_error>(errors, ex.what());
+				}
+
+                // Set sources
+				for (size_t index = 0; index < node->references.size(); index++)
+				{
+					auto ref_node = node->references[index];
+
+					target_modules->at(index) = emit_amt_module(ref_node, emitted, errors);
+				}
+
+                // Wrap exec operator
+				return [node_module](const auto &coords) { return node_module->operator()(coords); };
+			}
+
+
+            // Builds a node tree from a flat config
+            // Checks for cyclic references
+            // Checks for existing refereces
+			virtual void build_amt_node(shared_ptr<amt_node> node,
+								std::map<string, shared_ptr<amt_node>> &nodes,
+								unordered_set<shared_ptr<amt_node>> cycle_check, // each stage should have it's own chain
+								emitted_modules &emittable,
+								aggregate_error &errors) const
+			{
+                // Check for cyclic references.
+                // In case a cycle is present: abort. Otherwise the tree will grow indefinitely
+                if(cycle_check.find(node) != cycle_check.end())
+                {
+                    emit_error<cyclic_module_ref_error>(errors, node->instance_name);
+
+                    return; // don't even try to go deeper (cycle!)
+                }
+                else
+                {
+                    cycle_check.insert(node);
+                }
+
+
+                auto skeleton = find_module(node, errors);
+
+                // Check if the source count matches the module requirements
+				bool has_sources = node->sources_config != nullptr && node->sources_config.is_array();
+				if(has_sources && skeleton->required_module_count > 0 && node->sources_config.size() < skeleton->required_module_count)
+				{
+					emit_error<invalid_module_error>(errors, node->instance_name, "input module count mismatch");
+				}
+				else
+				{
+					emittable[node->instance_name] = skeleton->clone();
+				}
+
+                // Resolve sources
+				if (has_sources)
+				{
+					for (string ref_name : node->sources_config)
+					{
+                        // Check if the referenced node exists
+						if (nodes.find(ref_name) == nodes.end())
+						{
+							emit_error<unresolved_node_reference_error>(errors, ref_name);
+							continue;
+						}
+
+                        // Set node references
+						auto ref_node = nodes[ref_name];
+
+						ref_node->referenced_in.push_back(node);
+						node->references.push_back(ref_node);
+
+                        // Build subtree
+                        build_amt_node(ref_node, nodes, cycle_check, emittable, errors);
+					}
+				}
+			}
+
+            // Checks if the requested module skeleton [type, name] exists
+			virtual shared_ptr<module_base<vreal, vint>> find_module(shared_ptr<amt_node> node, aggregate_error &errors) const
+			{
+                auto type_branch = _module_resolver.find(node->module_type);
+
+                if(type_branch == _module_resolver.end())
+                {
+                    emit_error<unresolved_module_reference_error>(errors, node->module_name, node->module_type);
+                    return nullptr;
+                }
+
+                auto name_branch = type_branch->second.find(node->module_name);
+
+                if(name_branch == type_branch->second.end())
+                {
+                    emit_error<unresolved_module_reference_error>(errors, node->module_name);
+                    return nullptr;
+                }
+
+
+				return name_branch->second;
+			};
+
+			virtual Module<vreal> compile_v09(const json &source) const
+			{
+				gorynych::aligned_map<string, gorynych::shared_ptr<module_base<vreal, vint>>> modules;
+
+				aggregate_error errors;
+
+				auto entry_point    = build_amt(source, modules, errors);
+				auto result         = emit_amt_module(entry_point, modules, errors);
+
+				if(errors.errors.size() > 0)
+					throw errors;
+
+				return result;
 			}
 	};
 }}

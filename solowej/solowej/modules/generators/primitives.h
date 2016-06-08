@@ -31,17 +31,17 @@ namespace zzsystems { namespace solowej { namespace modules
 	using namespace math;
 	using namespace gorynych;
 
-	MODULE(spheres)
+	MODULE(mod_spheres)
 	{
 	public:
 		vreal frequency;
-		spheres(const vreal &frequency = 1.0f)
-			: cloneable(0), frequency(frequency)
+		mod_spheres(const vreal &frequency = 1.0f)
+			: BASE(mod_spheres)::cloneable(0), frequency(frequency)
 		{}
 
 		const json& operator<<(const json &source) override
 		{
-			frequency = source.value("frequency", 1.0f);
+			frequency = source.value<float>("frequency", 1.0f);
 			return source;
 		}
 
@@ -51,26 +51,26 @@ namespace zzsystems { namespace solowej { namespace modules
 
 			auto distFromCenter			= vsqrt(dot(_coords, _coords));
 			auto distFromSmallerSphere	= distFromCenter - vfloor(distFromCenter);
-			auto distFromLargerSphere	= cfl<vreal>::_1() - distFromSmallerSphere;
+			auto distFromLargerSphere	= cfl<vreal, 1>::val() - distFromSmallerSphere;
 
 			auto nearestDist			= vmin(distFromSmallerSphere, distFromLargerSphere);
 
 			// Puts it in the -1.0 to +1.0 range. [ 1 - (nearestDist * 4) ] => [ (-4 * nearestDist) + 1 ]
-			return vfmadd(nearestDist, -cfl<vreal>::_4(), cfl<vreal>::_1());
+			return vfmadd(nearestDist, -cfl<vreal, 4>::val(), cfl<vreal, 1>::val());
 		}
 	};
 
-	MODULE(cylinders)
+	MODULE(mod_cylinders)
 	{
 	public:
 		vreal frequency;
-		cylinders(const vreal &frequency = 1.0f)
-			: cloneable(0), frequency(frequency)
+		mod_cylinders(const vreal &frequency = 1.0f)
+			: BASE(mod_cylinders)::cloneable(0), frequency(frequency)
 		{}
 
 		const json& operator<<(const json &source) override
 		{
-			frequency = source.value("frequency", 1.0f);
+			frequency = source.value<float>("frequency", 1.0f);
 			return source;
 		}
 
@@ -78,26 +78,42 @@ namespace zzsystems { namespace solowej { namespace modules
 		{
 			auto distFromCenter			= vsqrt(coords.x * coords.x + coords.z * coords.z) * frequency;
 			auto distFromSmallerSphere	= distFromCenter - vfloor(distFromCenter);
-			auto distFromLargerSphere	= cfl<vreal>::_1() - distFromSmallerSphere;
+			auto distFromLargerSphere	= cfl<vreal, 1>::val() - distFromSmallerSphere;
 
 			auto nearestDist			= vmin(distFromSmallerSphere, distFromLargerSphere);
 
 			// Puts it in the -1.0 to +1.0 range. [ 1 - (nearestDist * 4) ] => [ (-4 * nearestDist) + 1 ]
-			return vfmadd(nearestDist, -cfl<vreal>::_4(), cfl<vreal>::_1());
+			return vfmadd(nearestDist, -cfl<vreal, 4>::val(), cfl<vreal, 1>::val());
 		}
 	};
 
-	MODULE(checkerboard)
+	MODULE(mod_checkerboard)
 	{
 	public:
 		vreal operator()(const vec3<vreal>& coords) const override
 		{
-			auto one = cfl<vint>::_();
+			auto one = cfl<vint, 1>::val();
 
 			// Equivalent to
 			// return (vint(coords.x) & 1 ^ vint(coords.y) & 1 ^ vint(coords.z) & 1) ? -1.0 : 1.0		
 			// ( And repeat that for each vector field :) )
-			return one - (((static_cast<vint>(coords.x) ^ static_cast<vint>(coords.y) ^ static_cast<vint>(coords.z)) & one) << one);
+			return one - (((static_cast<vint>(coords.x) ^ static_cast<vint>(coords.y) ^ static_cast<vint>(coords.z)) & one) << 1);
+		}
+	};
+
+	MODULE(mod_const)
+	{
+	public:
+		vreal value;
+		const json& operator<<(const json &source) override
+		{
+			value = source.value<float>("value", 0.0f);
+			return source;
+		}
+
+		vreal operator()(const vec3<vreal>& coords) const override
+		{
+			return value;
 		}
 	};
 }}}

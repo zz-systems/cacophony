@@ -1,66 +1,66 @@
 // Examples.cpp : Defines the entry point for the console application.
 //
 
+#ifdef WIN32
 #include "stdafx.h"
+#endif
 
 #include <iostream>
 
 #include "run.h"
-#include "wood.h"
-#include "granite.h"
-#include "planet.h"
-#include "run.h"
-#include "json.h"
+//#include "wood.h"
+//#include "granite.h"
+//#include "planet.h"
+//#include "run.h"
+//#include "json.h"
 
-#include "../submodules/gorynych/gorynych/gorynych.h"
-#include "../solowej/engine/all.h"
+//#include "../gorynych/gorynych/gorynych.h"
+//#include "../solowej/engine/all.h"
+#include "../solowej/library/solowejlib.h"
 
 namespace zzsystems { namespace solowej { namespace examples {
 	using namespace gorynych;
-	using namespace scheduler;
-
-	template<typename capability, typename vreal, typename vint>
-	auto exec(const scheduler_settings& settings)
-	{
-		cout << ">>dispatch: using " << static_dispatcher<capability>::unit_name() << " branch" << endl;
-
-		cpu_scheduler<vreal> s(
-			generate_from_json<vreal, vint>(),
-			nullptr,
-			settings
-			);
-
-		return s();
-	}
+	using namespace util;
 
 	void run()
 	{
 		system_info sysinfo;
 		cout << sysinfo;
 
-		engine e;
-		
-		e.compile_file("planet.json");
-		auto flags = e.info.feature_flags;
+		//engine e;
 
-		auto w = e.settings.dimensions.x, h = e.settings.dimensions.y;
+		//e.info.feature_flags = CAPABILITY_NONE;
+		//sysinfo.setFlag(CAPABILITY_AVX2, false);
+		//sysinfo.setFlag(CAPABILITY_AVX1, false);
+		//e.info.setFlag(CAPABILITY_SSE42, false);
+		//e.info.setFlag(CAPABILITY_SSE41, false);
+		//e.info.setFlag(CAPABILITY_FMA3, false);
+		//e.info.setFlag(CAPABILITY_FMA4, false);
+
+		solowej_get_engine("examples")->info.feature_flags = ( sysinfo.feature_flags);
+		solowej_get_engine("examples")->compile_file("config/planet.json");
+
+		auto flags = sysinfo.feature_flags;
+
+        auto d = solowej_get_engine("examples")->settings.dimensions;
 
 		auto f1 = [&]()
 		{
-			auto t = make_shared<vector<float>>(w * h * 1);
-			//e.info.setFlag(CAPABILITY_AVX2, false);			
-			e.info.feature_flags = flags;
-			e.run(&t->at(0), {0, 0, 0});
+			//std::vector<float, aligned_allocator<float, 32>> t(w * h * 1);
+			auto t = make_shared<vector<float>>(d.x * d.y * d.z);
+
+			::solowej_get_engine("examples")->info.feature_flags = (flags);
+			::solowej_run("examples", &t->at(0), 0, 0, 0);
 
 			return t;
 		};
 
 		auto f2 = [&]()
 		{
-			auto t = make_shared<vector<float>>(w * h * 1);
+			auto t = make_shared<vector<float>>(d.x * d.y * d.z);
 
-			e.info.feature_flags = CAPABILITY_NONE;		
-			e.run(&t->at(0), { 0, 0, 0 });
+			::solowej_get_engine("examples")->info.feature_flags = (CAPABILITY_NONE);
+			::solowej_run("examples", &t->at(0), 0, 0, 0);
 
 			return t;
 		};
@@ -76,7 +76,7 @@ namespace zzsystems { namespace solowej { namespace examples {
 			{ 1.01f, color_rgb(255, 176, 192, 255) }
 		};
 
-		run(w, h, f1, f2, grad);
+		zzsystems::solowej::examples::run(d.x, d.z, f1, f2, grad);
 	}
 }}}
 

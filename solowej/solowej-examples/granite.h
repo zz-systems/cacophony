@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../submodules/gorynych/gorynych/gorynych.h"
+#include "../gorynych/gorynych/gorynych.h"
 #include "../solowej/modules/all.h"
 #include "../solowej/util/color.h"
 
@@ -10,14 +10,14 @@ namespace zzsystems { namespace solowej { namespace examples {
 	using namespace gorynych;
 	using namespace util;
 
-	SIMD_ENABLE(vreal, vint)
+	SIMD_ENABLED
 		Module<vreal> generate_granite()
 	{
 		cout << "generate granite texture" << endl;
 
-		auto primaryGranite = billow<vreal, vint>(8.0, 2.18359375, 0.625, 6, 100);
-		auto baseGrains		= voronoi<vreal, vint>(16, 2, 1, true);
-		auto perturb		= turbulence<vreal, vint>(1.0 / 8.0, 6, 4.0, 2.0, 0.5, 2);
+		auto primaryGranite = mod_billow<vreal, vint>(8.0, 2.18359375, 0.625, 6, 100);
+		auto baseGrains		= mod_voronoi<vreal, vint>(16, 2, 1, true);
+		auto perturb		= mod_turbulence<vreal, vint>(1.0 / 8.0, 6, 4.0, 2.0, 0.5, 2);
 
 		Module<vreal> combinedGranite = [=](const vec3<vreal>& c) { return (primaryGranite(c) + baseGrains(c)) * static_cast<vreal>(-0.5f); };
 

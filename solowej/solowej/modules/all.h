@@ -37,6 +37,40 @@
 #include "modifiers/select.h"
 #include "modifiers/terrace.h"
 #include "modifiers/turbulence.h"
+#include "modifiers/displace.h"
 
 #include "caching/buffer.h"
 #include "caching/cache.h"
+
+
+#define EXTERN_MODULE_DEFS(vreal, vint) \
+    extern template class mod_perlin<vreal, vint>; \
+    extern template class mod_billow<vreal, vint>; \
+    extern template class mod_cylinders<vreal, vint>; \
+    extern template class mod_spheres<vreal, vint>; \
+    extern template class mod_ridged_multifractal<vreal, vint>; \
+    extern template class mod_voronoi<vreal, vint>; \
+    extern template class mod_curve<vreal, vint>; \
+    extern template class mod_rotate<vreal, vint>; \
+    extern template class mod_select<vreal, vint>; \
+    extern template class mod_terrace<vreal, vint>; \
+    extern template class mod_turbulence<vreal, vint>; \
+    extern template class mod_add<vreal, vint>; \
+    extern template class mod_sub<vreal, vint>; \
+    extern template class mod_mul<vreal, vint>; \
+    extern template class mod_div<vreal, vint>; \
+    extern template class mod_blend<vreal, vint>; \
+    extern template class mod_translate_input<vreal, vint>; \
+    extern template class mod_scale_input<vreal, vint>; \
+    extern template class mod_scale_output<vreal, vint>; \
+    extern template class mod_scale_output_biased<vreal, vint>; \
+    extern template class mod_min<vreal, vint>; \
+    extern template class mod_max<vreal, vint>; \
+    extern template class mod_clamp<vreal, vint>; \
+    extern template class mod_buffer<vreal, vint>; \
+    extern template class mod_cache<vreal, vint>
+
+
+
+
+

@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "../../submodules/gorynych/gorynych/gorynych.h"
+#include "../../gorynych/gorynych/gorynych.h"
 
 namespace zzsystems { namespace solowej { namespace math {
 	using namespace gorynych;
@@ -53,7 +53,7 @@ namespace zzsystems { namespace solowej { namespace math {
 	inline vreal lerp(const vreal& n0, const vreal& n1, const vreal& a)
 	{
 		// = n0 - a * n0 => -a * n0 + n0;
-		auto n = (cfl<vreal>::_1() - a) * n0;
+		auto n = (cfl<vreal, 1>::val() - a) * n0;
 		//auto n = fmadd(-a, n0, n0);
 		return vfmadd(a, n1, n);
 		//return (1 - a) * n0 + a * n1;
@@ -63,8 +63,8 @@ namespace zzsystems { namespace solowej { namespace math {
 	SIMD_ENABLED_F
 	inline vreal scurve3(const vreal& a)
 	{
-		// 3a² - 2a³
-		return (a * a * (cfl<vreal>::_3() - cfl<vreal>::_2() * a));
+		// 3aï¿½ - 2aï¿½
+		return (a * a * (cfl<vreal, 3>::val() - cfl<vreal, 2>::val() * a));
 	}
 
 	// SCurve5 =================================================================================================
@@ -76,10 +76,10 @@ namespace zzsystems { namespace solowej { namespace math {
 		auto a4 = a3 * a;
 		auto a5 = a4 * a;
 
-		auto q = cfl<vreal>::_10() * a3;
-		auto p = vfmadd(cfl<vreal>::_15(), a4, q);
+		auto q = cfl<vreal, 10>::val() * a3;
+		auto p = vfmadd(cfl<vreal, 15>::val(), a4, q);
 		
 		//return (6 * a5) - (15 * a4) + (10 * a3);
-		return vfmsub(cfl<vreal>::_6(), a5, p);
+		return vfmsub(cfl<vreal, 6>::val(), a5, p);
 	}
 }}};

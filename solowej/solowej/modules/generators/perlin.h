@@ -30,7 +30,7 @@ namespace zzsystems { namespace solowej { namespace modules {
 	using namespace gorynych;
 	using namespace math;
 
-	MODULE(perlin)
+	MODULE(mod_perlin)
 	{
 	public:
 		vreal   frequency, 
@@ -41,34 +41,34 @@ namespace zzsystems { namespace solowej { namespace modules {
 		vint seed;
 
 		Quality quality;
-		
 
-		perlin(float frequency = 1.0, float lacunarity = 2.0, float persistence = 0.5, int octaves = 6, int seed = 0, Quality quality = Quality::Standard)
-			: cloneable(0), frequency(frequency), lacunarity(lacunarity), persistence(persistence), seed(seed), octaves(octaves), quality(quality)
+
+		mod_perlin(float frequency = 1.0, float lacunarity = 2.0, float persistence = 0.5, int octaves = 6, int seed = 0, Quality quality = Quality::Standard)
+			: BASE(mod_perlin)::cloneable(0), frequency(frequency), lacunarity(lacunarity), persistence(persistence), seed(seed), octaves(octaves), quality(quality)
 		{}
 
 
-		perlin(const perlin<vreal, vint>& rhs)
+		mod_perlin(const mod_perlin<vreal, vint>& rhs)
 			: frequency(rhs.frequency), lacunarity(rhs.lacunarity), persistence(rhs.persistence), seed(rhs.seed), octaves(rhs.octaves), quality(rhs.quality)
 		{}
 				
 		const json& operator<<(const json &source) override
 		{
-			frequency = source.value("frequency", 1.0f);
-			lacunarity = source.value("lacunarity", 2.0f);
-			persistence = source.value("persistence", 0.5f);
+			frequency = source.value<float>("frequency", 1.0f);
+			lacunarity = source.value<float>("lacunarity", 2.0f);
+			persistence = source.value<float>("persistence", 0.5f);
 
-			seed = source.value("seed", 0);
-			octaves = source.value("octaves", 6);
-			quality  = static_cast<Quality>(source.value("quality", static_cast<int>(Quality::Standard)));
+			seed = source.value<int>("seed", 0);
+			octaves = source.value<int>("octaves", 6);
+			quality  = static_cast<Quality>(source.value<int>("quality", static_cast<int>(Quality::Standard)));
 
 			return source;
 		}
 
 		vreal operator()(const vec3<vreal>& c) const override
 		{
-			vreal	value = cfl<vreal>::_0(),
-					currentPersistence = cfl<vreal>::_1();
+			vreal	value = cfl<vreal, 0>::val(),
+					currentPersistence = cfl<vreal, 1>::val();
 
 			auto _coords = c * frequency;
 

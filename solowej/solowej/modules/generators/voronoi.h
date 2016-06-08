@@ -30,7 +30,7 @@ namespace zzsystems { namespace solowej { namespace modules {
 	using namespace gorynych;
 	using namespace math;
 
-	MODULE(voronoi)
+	MODULE(mod_voronoi)
 	{
 	public:
 		vreal	frequency,
@@ -39,17 +39,17 @@ namespace zzsystems { namespace solowej { namespace modules {
 		vint seed;
 		bool enableDistance;
 
-		voronoi(float frequency = 1.0, float displacement = 2.0, int seed = 0, bool enableDistance = false)
-			: cloneable(0), frequency(frequency), displacement(displacement), seed(seed), enableDistance(enableDistance)
+		mod_voronoi(float frequency = 1.0, float displacement = 2.0, int seed = 0, bool enableDistance = false)
+			: BASE(mod_voronoi)::cloneable(0), frequency(frequency), displacement(displacement), seed(seed), enableDistance(enableDistance)
 		{}
 
 		const json& operator <<(const json &source) override
 		{
-			frequency = source.value("frequency", 1.0f);
-			displacement = source.value("displacement", 2.0f);
+			frequency = source.value<float>("frequency", 1.0f);
+			displacement = source.value<float>("displacement", 2.0f);
 
-			seed = source.value("seed", 0);
-			enableDistance = source.value("enableDistance", false);
+			seed = source.value<int>("seed", 0);
+			enableDistance = source.value<bool>("enableDistance", false);
 
 			return source;
 		}
@@ -123,11 +123,11 @@ namespace zzsystems { namespace solowej { namespace modules {
 				auto absDiff	= vsqrt(dot(diff, diff));
 				
 				// value =  absDiff * sqrt3 - 1
-				value = vfmsub(absDiff, consts<vreal>::sqrt3(), cfl<vreal>::_1());
+				value = vfmsub(absDiff, consts<vreal>::sqrt3(), cfl<vreal, 1>::val());
 			}	
 			else
 			{
-				value = cfl<vreal>::_0();
+				value = cfl<vreal, 0>::val();
 			}
 
 			/*if (dim<vreal>() > 1)

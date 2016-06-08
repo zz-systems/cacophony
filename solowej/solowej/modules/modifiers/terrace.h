@@ -31,14 +31,14 @@ namespace zzsystems { namespace solowej { namespace modules {
 	
 	using namespace math;
 
-	MODULE(terrace)
+	MODULE(mod_terrace)
 	{
 	public:
 		vector<pair<const vreal, vreal>> points;
 		bool invert = false;
 
-		terrace(const initializer_list<pair<const vreal, vreal>> &points = {}, bool invert = false)
-			: cloneable(1), points(points), invert(invert)
+		mod_terrace(const initializer_list<pair<const vreal, vreal>> &points = {}, bool invert = false)
+			: BASE(mod_terrace)::cloneable(1), points(points), invert(invert)
 		{}
 
 		const json& operator <<(const json &source) override
@@ -64,7 +64,7 @@ namespace zzsystems { namespace solowej { namespace modules {
 			auto cpc = points.size();
 			assert(cpc >= 4);
 
-			vreal cp1, cp0, set_value, already_set = cfl<vreal>::_0();
+			vreal cp1, cp0, set_value, already_set = cfl<vreal, 0>::val();
 
 			size_t i0, i1;
 			auto val = get_source()(coords);
@@ -99,7 +99,7 @@ namespace zzsystems { namespace solowej { namespace modules {
 						
 			if (invert)
 			{
-				alpha = cfl<vreal>::_1() - alpha;
+				alpha = cfl<vreal, 1>::val() - alpha;
 				std::swap(cp0, cp1);
 			}
 

@@ -7,7 +7,7 @@
     "entryPoint": "finalGranite",
 
     "scheduler": {
-      "dimensions": [ 257, 256, 1 ],
+      "dimensions": [ 768, 768, 1 ],
 
       "scale": [ 1, 1, 1 ],
       "offset": [ 0, 0, 0 ],

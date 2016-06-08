@@ -34,7 +34,7 @@ namespace zzsystems { namespace solowej {	namespace modules {
 	// 1998.  Modified by jas for use with libnoise.
 	// Modified by Sergej Zuyev for use with solowej, gorynych
 
-	MODULE(ridged_multifractal)
+	MODULE(mod_ridged_multifractal)
 	{
 	public:
 		vreal frequency, lacunarity;
@@ -51,13 +51,13 @@ namespace zzsystems { namespace solowej {	namespace modules {
 			for (int i = 0; i < 30; i++)
 			{
 				// Compute weight for each frequency.
-				spectralWeights[i] = powf(freq, -h);
+				spectralWeights[i] = pow(freq, -h);
 				freq *= lacunarity;
 			}
 		}
 
-		ridged_multifractal(float frequency = 1.0, float lacunarity = 2.0, int seed = 0, int octaves = 6)
-			: cloneable(0), frequency(frequency), lacunarity(lacunarity), seed(seed), octaves(octaves)
+		mod_ridged_multifractal(float frequency = 1.0, float lacunarity = 2.0, int seed = 0, int octaves = 6)
+			: BASE(mod_ridged_multifractal)::cloneable(0), frequency(frequency), lacunarity(lacunarity), seed(seed), octaves(octaves)
 		{
 			init_spectral_weights(lacunarity);
 		}
@@ -65,11 +65,11 @@ namespace zzsystems { namespace solowej {	namespace modules {
 		const json& operator <<(const json &source) override
 		{
 			float sl;
-			frequency = source.value("frequency", 1.0f);			
-			lacunarity = sl = source.value("lacunarity", 2.0f);
-			seed = source.value("seed", 0);
-			octaves = source.value("octaves", 6);
-			quality  = static_cast<Quality>(source.value("quality", static_cast<int>(Quality::Standard)));
+			frequency = source.value<float>("frequency", 1.0f);
+			lacunarity = sl = source.value<float>("lacunarity", 2.0f);
+			seed = source.value<int>("seed", 0);
+			octaves = source.value<int>("octaves", 6);
+			quality  = static_cast<Quality>(source.value<int>("quality", static_cast<int>(Quality::Standard)));
 
 			init_spectral_weights(sl);
 
@@ -98,7 +98,7 @@ namespace zzsystems { namespace solowej {	namespace modules {
 				// Get the coherent-noise value.
 				signal = noisegen<SIMD_T>::gradient_coherent_3d(
 					clamp_int32<vreal>(_coords),
-					(_seed + currentOctave) & cfl<vint>::ones(),
+					(_seed + currentOctave) & ccl<vint>::ones(),
 					quality);
 
 				// Make the ridges.
@@ -113,7 +113,7 @@ namespace zzsystems { namespace solowej {	namespace modules {
 				signal *= weight;
 
 				// Weight successive contributions by the previous signal. 
-				weight = vclamp(signal * gain, cfl<vreal>::_0(), cfl<vreal>::_1());
+				weight = vclamp(signal * gain, cfl<vreal, 0>::val(), cfl<vreal, 1>::val());
 
 				// Add the signal to the output value. [value += (signal * spectralWeights[currentOctave]);]
 				value = vfmadd(signal, spectralWeights[currentOctave], value);
@@ -122,7 +122,7 @@ namespace zzsystems { namespace solowej {	namespace modules {
 			}
 
 			//return (value * 1.25f) - 1.0f;
-			return vfmsub(value, static_cast<vreal>(1.25f), cfl<vreal>::_1());
+			return vfmsub(value, static_cast<vreal>(1.25f), cfl<vreal, 1>::val());
 		}
 	};
 }}}

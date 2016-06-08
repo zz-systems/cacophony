@@ -24,6 +24,7 @@
 
 #pragma once
 
+
 #include "../math/interpolation.h"
 #include <vector>
 
@@ -32,7 +33,7 @@ namespace zzsystems { namespace solowej { namespace util {
 	using namespace gorynych;
 	using namespace math;
 
-	union ALIGN(32) color_rgb
+	union color_rgb
 	{
 		uint8_t components[4];
 		uint32_t integral;
@@ -73,8 +74,11 @@ namespace zzsystems { namespace solowej { namespace util {
 					break;
 			}
 
-			auto i0 = vclamp(index - 1, 0, (int)colors.size() - 1);
-			auto i1 = vclamp(index,     0, (int)colors.size() - 1);
+			auto i0 = vclamp<int>(index - 1, 0, (int)colors.size() - 1);
+			auto i1 = vclamp<int>(index,     0, (int)colors.size() - 1);
+
+			//auto i0 = std::max(0, std::min(index - 1, (int)colors.size() - 1));
+			//auto i1 = std::max(0, std::min(index    , (int)colors.size() - 1));
 
 			if (i0 == i1)
 				return colors[i1].second;
@@ -106,10 +110,10 @@ namespace zzsystems { namespace solowej { namespace util {
 			auto alpha = ((v - k0) / (k1 - k0));
 
 			color_rgb result(
-				static_cast<uint8_t>(lerp<float>(c0.r, c1.r, alpha)),
-				static_cast<uint8_t>(lerp<float>(c0.g, c1.g, alpha)),
-				static_cast<uint8_t>(lerp<float>(c0.b, c1.b, alpha)),
-				static_cast<uint8_t>(lerp<float>(c0.a, c1.a, alpha))
+				static_cast<uint8_t>(vclamp(lerp<float>(c0.r, c1.r, alpha), 0.0f, 255.0f)),
+				static_cast<uint8_t>(vclamp(lerp<float>(c0.g, c1.g, alpha), 0.0f, 255.0f)),
+				static_cast<uint8_t>(vclamp(lerp<float>(c0.b, c1.b, alpha), 0.0f, 255.0f)),
+				static_cast<uint8_t>(vclamp(lerp<float>(c0.a, c1.a, alpha), 0.0f, 255.0f))
 			);
 
 			return result;

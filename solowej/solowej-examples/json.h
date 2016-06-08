@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../submodules/gorynych/gorynych/gorynych.h"
-#include "../solowej/modules/all.h"
+//#include "../gorynych/gorynych/gorynych.h"
+//#include "../solowej/modules/all.h"
 #include "../solowej/util/color.h"
 #include "../solowej/engine/parser.h"
 #include <fstream>
@@ -12,7 +12,7 @@ namespace zzsystems { namespace solowej { namespace examples {
 	using namespace gorynych;
 	using namespace util;
 
-	SIMD_ENABLE(vreal, vint)
+	SIMD_ENABLED
 		Module<vreal> generate_from_json()
 	{
 		parser<vreal, vint> p;

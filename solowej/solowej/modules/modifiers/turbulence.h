@@ -31,7 +31,7 @@ namespace zzsystems { namespace solowej { namespace modules {
 	using namespace gorynych;	
 	using namespace math;
 
-	MODULE(turbulence)
+	MODULE(mod_turbulence)
 	{	
 	public:
 		vec3<vreal> power;
@@ -42,17 +42,16 @@ namespace zzsystems { namespace solowej { namespace modules {
 			vec3<vreal>(53820.0f, 11213.0f, 44845.0f) / vec3<vreal>(65536.0f)
 		};
 
-		turbulence(float power = 1.0, int roughness = 3, float frequency = 1.0, float lacunarity = 2.0, float persistence = 0.5, int seed = 0, Quality quality = Quality::Standard)
-			:
-			cloneable(1),
+		mod_turbulence(float power = 1.0, int roughness = 3, float frequency = 1.0, float lacunarity = 2.0, float persistence = 0.5, int seed = 0, Quality quality = Quality::Standard) :
+			BASE(mod_turbulence)::cloneable(1),
 			power(power),
 			_xdistort(frequency, lacunarity, persistence, seed, roughness, quality),
 			_ydistort(frequency, lacunarity, persistence, seed, roughness, quality),
 			_zdistort(frequency, lacunarity, persistence, seed, roughness, quality)
 		{}
 
-		turbulence(const turbulence<vreal, vint>& rhs)
-			: cloneable(rhs),
+		mod_turbulence(const mod_turbulence<vreal, vint>& rhs)
+			: BASE(mod_turbulence)::cloneable(rhs),
 			power(rhs.power),
 			_xdistort(rhs._xdistort), _ydistort(rhs._ydistort),	_zdistort(rhs._zdistort)
 		{}
@@ -62,12 +61,12 @@ namespace zzsystems { namespace solowej { namespace modules {
 		const json& operator <<(const json &source) override
 		{
 			json tmp = source;
-			tmp["octaves"] = tmp.value("roughness", 3);
+			tmp["octaves"] = tmp.value<int>("roughness", 3);
 
 			_xdistort << tmp;
 			_ydistort << tmp;
 			_zdistort << tmp;
-			power = vec3<vreal>(source.value("power", 1.0f));
+			power = vec3<vreal>(source.value<float>("power", 1.0f));
 
 			return source;
 		}
@@ -83,7 +82,7 @@ namespace zzsystems { namespace solowej { namespace modules {
 			return get_source()(coords + distortion);
 		}
 	private:
-		perlin<vreal, vint> _xdistort, _ydistort, _zdistort;
+		mod_perlin<vreal, vint> _xdistort, _ydistort, _zdistort;
 		// workaround to prevent VC 2015 linker crash (module obj -> module func)
 		//Module<vreal> _xdistort_workaround, _ydistort_workaround, _zdistort_workaround;
 	};
