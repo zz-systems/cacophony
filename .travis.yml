@@ -26,7 +26,7 @@ matrix:
       #    sources: ['llvm-toolchain-precise-3.5', 'ubuntu-toolchain-r-test']
       #    packages: ['clang-3.5']
       env:
-        - COMPILER='ccache clang++-3.5'
+        - COMPILER='ccache clang++'
         - BUILD_TYPE='Release'
         - LLVM_VERSION=3.5.0
         - LLVM_ARCHIVE_PATH=$HOME/clang+llvm.tar.xz
@@ -40,7 +40,7 @@ matrix:
       #addons: *clang35
       #env: COMPILER='ccache clang++-3.5' BUILD_TYPE='Debug'
       env:
-        - COMPILER='ccache clang++-3.5'
+        - COMPILER='ccache clang++'
         - BUILD_TYPE='Debug'
         - LLVM_VERSION=3.5.0
         - LLVM_ARCHIVE_PATH=$HOME/clang+llvm.tar.xz
@@ -58,7 +58,7 @@ matrix:
       #    packages: ['clang-3.6']
       #env: COMPILER='ccache clang++-3.6' BUILD_TYPE='Release'
       env:
-        - COMPILER='ccache clang++-3.6'
+        - COMPILER='ccache clang++'
         - BUILD_TYPE='Release'
         - LLVM_VERSION=3.6.0
         - LLVM_ARCHIVE_PATH=$HOME/clang+llvm.tar.xz
@@ -72,7 +72,7 @@ matrix:
       #addons: *clang36
       #env: COMPILER='ccache clang++-3.6' BUILD_TYPE='Debug'
       env:
-        - COMPILER='ccache clang++-3.6'
+        - COMPILER='ccache clang++'
         - BUILD_TYPE='Debug'
         - LLVM_VERSION=3.6.0
         - LLVM_ARCHIVE_PATH=$HOME/clang+llvm.tar.xz
@@ -90,7 +90,7 @@ matrix:
       #    packages: ['clang-3.7']
       #env: COMPILER='ccache clang++-3.7' BUILD_TYPE='Release'
       env:
-        - COMPILER='ccache clang++-3.7'
+        - COMPILER='ccache clang++'
         - BUILD_TYPE='Release'
         - LLVM_VERSION=3.7.0
         - LLVM_ARCHIVE_PATH=$HOME/clang+llvm.tar.xz
@@ -105,7 +105,7 @@ matrix:
       #addons: *clang37
       #env: COMPILER='ccache clang++-3.7' BUILD_TYPE='Debug'
       env:
-        - COMPILER='ccache clang++-3.7'
+        - COMPILER='ccache clang++'
         - BUILD_TYPE='Debug'
         - LLVM_VERSION=3.7.0
         - LLVM_ARCHIVE_PATH=$HOME/clang+llvm.tar.xz
@@ -124,7 +124,7 @@ matrix:
       #    packages: ['clang-3.8']
       #env: COMPILER='ccache clang++-3.8' BUILD_TYPE='Release'
       env:
-        - COMPILER='ccache clang++-3.8'
+        - COMPILER='ccache clang++'
         - BUILD_TYPE='Release'
         - LLVM_VERSION=3.8.0
         - LLVM_ARCHIVE_PATH=$HOME/clang+llvm.tar.xz
@@ -138,7 +138,7 @@ matrix:
       #addons: *clang38
       #env: COMPILER='ccache clang++-3.8' BUILD_TYPE='Debug'
       env:
-        - COMPILER='ccache clang++-3.8'
+        - COMPILER='ccache clang++'
         - BUILD_TYPE='Debug'
         - LLVM_VERSION=3.8.0
         - LLVM_ARCHIVE_PATH=$HOME/clang+llvm.tar.xz
