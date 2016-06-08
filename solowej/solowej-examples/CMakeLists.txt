@@ -2,8 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 project(solowej-examples)
 
 include(../gorynych/CMakeCommons)
-set(CMAKE_C_COMPILER "/usr/bin/clang" CACHE string "clang compiler" FORCE)
-set(CMAKE_CXX_COMPILER "/usr/bin/clang++" CACHE string "clang compiler" FORCE)
+
 
 set(CMAKE_CXX_FLAGS_DEBUG " -g -fsanitize=undefined -fsanitize=alignment")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
