@@ -28,7 +28,7 @@ set(BRANCH_ADDITIONAL_DEFS -DFASTFLOAT)
 #prepare_branches()
 
 
-list(APPEND SOURCE_FILES Examples.cpp)
+list(APPEND SOURCE_FILES solowej-examples.cpp)
 
 
 configure_file(config/granite.json ${CMAKE_CURRENT_BINARY_DIR}/config/granite.json)
