@@ -21,58 +21,131 @@ matrix:
     # 1/ Linux Clang Builds
     - os: linux
       compiler: clang
-      addons: &clang35
-        apt:
-          sources: ['llvm-toolchain-precise-3.5', 'ubuntu-toolchain-r-test']
-          packages: ['clang-3.5']
-      env: COMPILER='ccache clang++-3.5' BUILD_TYPE='Release'
+      #addons: &clang35
+      #  apt:
+      #    sources: ['llvm-toolchain-precise-3.5', 'ubuntu-toolchain-r-test']
+      #    packages: ['clang-3.5']
+      env:
+        - COMPILER='ccache clang++-3.5'
+        - BUILD_TYPE='Release'
+        - LLVM_VERSION=3.5.0
+        - LLVM_ARCHIVE_PATH=$HOME/clang+llvm.tar.xz
+        - CXX=$HOME/clang-$LLVM_VERSION/bin/clang++
+        - CPPFLAGS="-I $HOME/clang-$LLVM_VERSION/include/c++/v1"
+        - CXXFLAGS=-lc++
+        - LD_LIBRARY_PATH=$HOME/clang-$LLVM_VERSION/lib:$LD_LIBRARY_PATH
 
     - os: linux
       compiler: clang
-      addons: *clang35
-      env: COMPILER='ccache clang++-3.5' BUILD_TYPE='Debug'
-
-
-    - os: linux
-      compiler: clang
-      addons: &clang36
-        apt:
-          sources: ['llvm-toolchain-precise-3.6', 'ubuntu-toolchain-r-test']
-          packages: ['clang-3.6']
-      env: COMPILER='ccache clang++-3.6' BUILD_TYPE='Release'
-
-    - os: linux
-      compiler: clang
-      addons: *clang36
-      env: COMPILER='ccache clang++-3.6' BUILD_TYPE='Debug'
-
-
-    - os: linux
-      compiler: clang
-      addons: &clang37
-        apt:
-          sources: ['llvm-toolchain-precise-3.7', 'ubuntu-toolchain-r-test']
-          packages: ['clang-3.7']
-      env: COMPILER='ccache clang++-3.7' BUILD_TYPE='Release'
-
-    - os: linux
-      compiler: clang
-      addons: *clang37
-      env: COMPILER='ccache clang++-3.7' BUILD_TYPE='Debug'
+      #addons: *clang35
+      #env: COMPILER='ccache clang++-3.5' BUILD_TYPE='Debug'
+      env:
+        - COMPILER='ccache clang++-3.5'
+        - BUILD_TYPE='Debug'
+        - LLVM_VERSION=3.5.0
+        - LLVM_ARCHIVE_PATH=$HOME/clang+llvm.tar.xz
+        - CXX=$HOME/clang-$LLVM_VERSION/bin/clang++
+        - CPPFLAGS="-I $HOME/clang-$LLVM_VERSION/include/c++/v1"
+        - CXXFLAGS=-lc++
+        - LD_LIBRARY_PATH=$HOME/clang-$LLVM_VERSION/lib:$LD_LIBRARY_PATH
 
 
     - os: linux
       compiler: clang
-      addons: &clang38
-        apt:
-          sources: ['llvm-toolchain-precise', 'ubuntu-toolchain-r-test']
-          packages: ['clang-3.8']
-      env: COMPILER='ccache clang++-3.8' BUILD_TYPE='Release'
+      #addons: &clang36
+      #  apt:
+      #    sources: ['llvm-toolchain-precise-3.6', 'ubuntu-toolchain-r-test']
+      #    packages: ['clang-3.6']
+      #env: COMPILER='ccache clang++-3.6' BUILD_TYPE='Release'
+      env:
+        - COMPILER='ccache clang++-3.6'
+        - BUILD_TYPE='Release'
+        - LLVM_VERSION=3.6.0
+        - LLVM_ARCHIVE_PATH=$HOME/clang+llvm.tar.xz
+        - CXX=$HOME/clang-$LLVM_VERSION/bin/clang++
+        - CPPFLAGS="-I $HOME/clang-$LLVM_VERSION/include/c++/v1"
+        - CXXFLAGS=-lc++
+        - LD_LIBRARY_PATH=$HOME/clang-$LLVM_VERSION/lib:$LD_LIBRARY_PATH
 
     - os: linux
       compiler: clang
-      addons: *clang38
-      env: COMPILER='ccache clang++-3.8' BUILD_TYPE='Debug'
+      #addons: *clang36
+      #env: COMPILER='ccache clang++-3.6' BUILD_TYPE='Debug'
+      env:
+        - COMPILER='ccache clang++-3.6'
+        - BUILD_TYPE='Debug'
+        - LLVM_VERSION=3.6.0
+        - LLVM_ARCHIVE_PATH=$HOME/clang+llvm.tar.xz
+        - CXX=$HOME/clang-$LLVM_VERSION/bin/clang++
+        - CPPFLAGS="-I $HOME/clang-$LLVM_VERSION/include/c++/v1"
+        - CXXFLAGS=-lc++
+        - LD_LIBRARY_PATH=$HOME/clang-$LLVM_VERSION/lib:$LD_LIBRARY_PATH
+
+
+    - os: linux
+      compiler: clang
+      #addons: &clang37
+      #  apt:
+      #    sources: ['llvm-toolchain-precise-3.7', 'ubuntu-toolchain-r-test']
+      #    packages: ['clang-3.7']
+      #env: COMPILER='ccache clang++-3.7' BUILD_TYPE='Release'
+      env:
+        - COMPILER='ccache clang++-3.7'
+        - BUILD_TYPE='Release'
+        - LLVM_VERSION=3.7.0
+        - LLVM_ARCHIVE_PATH=$HOME/clang+llvm.tar.xz
+        - CXX=$HOME/clang-$LLVM_VERSION/bin/clang++
+        - CPPFLAGS="-I $HOME/clang-$LLVM_VERSION/include/c++/v1"
+        - CXXFLAGS=-lc++
+        - LD_LIBRARY_PATH=$HOME/clang-$LLVM_VERSION/lib:$LD_LIBRARY_PATH
+
+
+    - os: linux
+      compiler: clang
+      #addons: *clang37
+      #env: COMPILER='ccache clang++-3.7' BUILD_TYPE='Debug'
+      env:
+        - COMPILER='ccache clang++-3.7'
+        - BUILD_TYPE='Debug'
+        - LLVM_VERSION=3.7.0
+        - LLVM_ARCHIVE_PATH=$HOME/clang+llvm.tar.xz
+        - CXX=$HOME/clang-$LLVM_VERSION/bin/clang++
+        - CPPFLAGS="-I $HOME/clang-$LLVM_VERSION/include/c++/v1"
+        - CXXFLAGS=-lc++
+        - LD_LIBRARY_PATH=$HOME/clang-$LLVM_VERSION/lib:$LD_LIBRARY_PATH
+
+
+
+    - os: linux
+      compiler: clang
+      #addons: &clang38
+      #  apt:
+      #    sources: ['llvm-toolchain-precise', 'ubuntu-toolchain-r-test']
+      #    packages: ['clang-3.8']
+      #env: COMPILER='ccache clang++-3.8' BUILD_TYPE='Release'
+      env:
+        - COMPILER='ccache clang++-3.8'
+        - BUILD_TYPE='Release'
+        - LLVM_VERSION=3.8.0
+        - LLVM_ARCHIVE_PATH=$HOME/clang+llvm.tar.xz
+        - CXX=$HOME/clang-$LLVM_VERSION/bin/clang++
+        - CPPFLAGS="-I $HOME/clang-$LLVM_VERSION/include/c++/v1"
+        - CXXFLAGS=-lc++
+        - LD_LIBRARY_PATH=$HOME/clang-$LLVM_VERSION/lib:$LD_LIBRARY_PATH
+
+    - os: linux
+      compiler: clang
+      #addons: *clang38
+      #env: COMPILER='ccache clang++-3.8' BUILD_TYPE='Debug'
+      env:
+        - COMPILER='ccache clang++-3.8'
+        - BUILD_TYPE='Debug'
+        - LLVM_VERSION=3.8.0
+        - LLVM_ARCHIVE_PATH=$HOME/clang+llvm.tar.xz
+        - CXX=$HOME/clang-$LLVM_VERSION/bin/clang++
+        - CPPFLAGS="-I $HOME/clang-$LLVM_VERSION/include/c++/v1"
+        - CXXFLAGS=-lc++
+        - LD_LIBRARY_PATH=$HOME/clang-$LLVM_VERSION/lib:$LD_LIBRARY_PATH
 
 
     # 2/ Linux GCC Builds
@@ -140,6 +213,11 @@ matrix:
       compiler: clang
       env: COMPILER='ccache clang++' BUILD_TYPE='Release'
 
+before_install:
+  - wget http://llvm.org/releases/$LLVM_VERSION/clang+llvm-$LLVM_VERSION-x86_64-linux-gnu-ubuntu-14.04.tar.xz -O $LLVM_ARCHIVE_PATH
+  - mkdir $HOME/clang+llvm
+  - tar xf $LLVM_ARCHIVE_PATH -C $HOME/clang+llvm --strip-components 1
+  - export PATH=$HOME/clang+llvm/bin:$PATH
 
 install:
   - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
