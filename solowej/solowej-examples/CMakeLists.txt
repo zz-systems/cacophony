@@ -37,7 +37,9 @@ configure_file(config/planet.json ${CMAKE_CURRENT_BINARY_DIR}/config/planet.json
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../asyncplusplus ${CMAKE_BINARY_DIR}/async)
 
 add_executable(solowej-examples ${SOURCE_FILES})
-target_link_libraries(solowej-examples X11 jpeg png omp pthread)
+#disable OMP for now
+#target_link_libraries(solowej-examples X11 jpeg png omp pthread)
+target_link_libraries(solowej-examples X11 jpeg png pthread)
 target_compile_definitions(solowej-examples PUBLIC -DCOMPILE_FPU -DCOMPILE_SSE2 -DCOMPILE_SSE3 -DCOMPILE_SSSE3 -DCOMPILE_SSE4 -DCOMPILE_SSE4FMA -DCOMPILE_AVX1 -DCOMPILE_AVX2)
 
 target_link_libraries(solowej-examples Async++ solowej)
