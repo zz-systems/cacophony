@@ -45,7 +45,7 @@ using vint = static_dispatcher<capability>::vint;
 using sint = int;
 using sreal = float;
 
-    SIMD_ENABLED class noisegen_wrapper : public noisegen<SIMD_T>
+    VECTORIZED class noisegen_wrapper : public noisegen<SIMD_T>
     {
         //friend class TestNoise;
     };
@@ -208,15 +208,15 @@ using sreal = float;
     }*/
     TEST_CASE(TYPE_PREFIX" intvalue 3d", "[noise]")
     {
-        for (int zi = -2; zi <= 2; zi += 1)
-        for (int yi = -2; yi <= 2; yi += 1)
-        for (int xi = -2; xi <= 2; xi += 1)
-        {
-            gorynych::test::test<vint, sint>(
-                    [=]() { return noisegen_wrapper<sreal, sint>::intvalue_3d({ xi, yi, zi }, 1010); },
-                    [=]() { return noisegen_wrapper<vreal, vint>::intvalue_3d({ xi, yi, zi }, 1010); }
-            );
-        }
+//        for (int zi = -2; zi <= 2; zi += 1)
+//        for (int yi = -2; yi <= 2; yi += 1)
+//        for (int xi = -2; xi <= 2; xi += 1)
+//        {
+//            gorynych::test::test<vint, sint>(
+//                    [=]() { return noisegen_wrapper<sreal, sint>::intvalue_3d({ xi, yi, zi }, 1010); },
+//                    [=]() { return noisegen_wrapper<vreal, vint>::intvalue_3d({ xi, yi, zi }, 1010); }
+//            );
+//        }
     }
 
     TEST_CASE(TYPE_PREFIX" construct cube", "[noise]")

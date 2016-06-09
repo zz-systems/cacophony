@@ -30,7 +30,7 @@ namespace zzsystems { namespace solowej { namespace math {
 	using namespace gorynych;
 	// Cubic ===================================================================================================
 	
-	SIMD_ENABLED_F
+	VECTORIZED_F
 	inline vreal cerp(const vreal& n0, const vreal& n1, const vreal& n2, const vreal& n3, const vreal& a)
 	{
 		auto n0_n1 = n0 - n1;
@@ -49,7 +49,7 @@ namespace zzsystems { namespace solowej { namespace math {
 
 	// Linear ==================================================================================================
 	
-	SIMD_ENABLED_F
+	VECTORIZED_F
 	inline vreal lerp(const vreal& n0, const vreal& n1, const vreal& a)
 	{
 		// = n0 - a * n0 => -a * n0 + n0;
@@ -60,7 +60,7 @@ namespace zzsystems { namespace solowej { namespace math {
 	}
 	// SCurve3 =================================================================================================
 
-	SIMD_ENABLED_F
+	VECTORIZED_F
 	inline vreal scurve3(const vreal& a)
 	{
 		// 3a� - 2a�
@@ -69,7 +69,7 @@ namespace zzsystems { namespace solowej { namespace math {
 
 	// SCurve5 =================================================================================================
 	
-	SIMD_ENABLED_F
+	VECTORIZED_F
 	inline vreal scurve5(const vreal& a)
 	{
 		auto a3 = a * a * a;

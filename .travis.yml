@@ -117,17 +117,30 @@ matrix:
       addons: *gcc5
       env: COMPILER='ccache g++-5' BUILD_TYPE='Debug'
 
+    - os: linux
+      compiler: gcc
+      addons: &gcc6
+        apt:
+          sources: ['ubuntu-toolchain-r-test']
+          packages: ['g++-6']
+      env: COMPILER='ccache g++-6' BUILD_TYPE='Release'
+
+    - os: linux
+      compiler: gcc
+      addons: *gcc6
+      env: COMPILER='ccache g++-6' BUILD_TYPE='Debug'
+
 
     # 3/ OSX Clang Builds
-    - os: osx
-      osx_image: xcode6.4
-      compiler: clang
-      env: COMPILER='ccache clang++' BUILD_TYPE='Debug'
-
-    - os: osx
-      osx_image: xcode6.4
-      compiler: clang
-      env: COMPILER='ccache clang++' BUILD_TYPE='Release'
+#    - os: osx
+#      osx_image: xcode6.4
+#      compiler: clang
+#      env: COMPILER='ccache clang++' BUILD_TYPE='Debug'
+#
+#    - os: osx
+#      osx_image: xcode6.4
+#      compiler: clang
+#      env: COMPILER='ccache clang++' BUILD_TYPE='Release'
 
 
     - os: osx

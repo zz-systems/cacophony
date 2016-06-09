@@ -75,7 +75,7 @@ namespace zzsystems { namespace solowej {
 	constexpr T valuenoise_adjust() { return - 1.0f / 1073741824.0f; }
 #endif
 		
-	SIMD_ENABLED class noisegen
+	VECTORIZED class noisegen
 	{
 	public:
 		
@@ -243,7 +243,7 @@ namespace zzsystems { namespace solowej {
 
 #if defined(COMPILE_SSE2) || defined(COMPILE_SSE3) || defined(COMPILE_SSE4) || defined(COMPILE_SSE4FMA)
 		// For SSE case: No need to gather. Load 4 vectors and transpose them - omitting the last (0 0 0 0) row
-		FEATURE
+		DISPATCHED
 		static vec3<_float4> gather_randoms(_int4 &index)
 		{
 			//_mm_prefetch

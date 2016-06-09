@@ -39,38 +39,28 @@ namespace zzsystems { namespace solowej { namespace modules
 	using namespace math;
 	using json = nlohmann::json;
 
-	SIMD_ENABLED_F
+	VECTORIZED_F
 		//	template<typename vreal, typename enable = typename std::enable_if<std::is_floating_point<vreal>::value != 0>::type>
 		using Module = std::function<vreal(const vec3<vreal>)>;
 
-	SIMD_ENABLED_F
+	VECTORIZED_F
 		using Transformer = std::function<vec3<vreal>(const vec3<vreal>)>;
 
-	SIMD_ENABLED
+	VECTORIZED
 		using SeededModule = std::function<vreal(const vec3<vreal>&, const vint& seed)>;
 
 #define MODULE_PROPERTY(name, index) \
 	const Module<vreal> &get_##name() const { assert(this->get_modules()->size() > index); return this->get_modules()->at(index);} \
 	void set_##name(const Module<vreal> &value) { assert(this->get_modules()->size() > index); this->get_modules()->at(index) = value; }
 
-#if defined(COMPILE_AVX2) || defined(COMPILE_AVX1)
 #define MODULE(class_name) \
-	SIMD_ENABLED class alignas(32) class_name : \
+	VECTORIZED class SIMD_ALIGN class_name : \
 		public cloneable<module_base<SIMD_T>, class_name<SIMD_T>>
-#elif defined(COMPILE_SSE2) || defined(COMPILE_SSE3) || defined(COMPILE_SSSE3) || defined(COMPILE_SSE4) || defined(COMPILE_SSE4FMA)
-#define MODULE(class_name) \
-	SIMD_ENABLED class alignas(16) class_name : \
-		public cloneable<module_base<SIMD_T>, class_name<SIMD_T>>
-#else
-#define MODULE(class_name) \
-	SIMD_ENABLED class class_name : \
-		public cloneable<module_base<SIMD_T>, class_name<SIMD_T>>
-#endif
 
 #define BASE(class_name) cloneable<module_base<SIMD_T>, class_name<SIMD_T>>
 
-	SIMD_ENABLED
-	class module_base : 
+	VECTORIZED
+	class SIMD_ALIGN module_base :
 		public serializable<json>
 	{
 		typedef module_base<vreal, vint> self_t;

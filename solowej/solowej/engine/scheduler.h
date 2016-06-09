@@ -42,7 +42,7 @@ namespace zzsystems { namespace solowej {
 
 
 
-	SIMD_ENABLED_F
+	VECTORIZED_F
 	class cpu_scheduler
 		: public serializable<json>
 	{
@@ -116,7 +116,7 @@ namespace zzsystems { namespace solowej {
 			}
 		}
 
-		ANY(featuremask)
+		ANY(dispatch_mask)
 			static inline vec3<_float4> build_coords(const _float4 & x, const _float4 & y, const _float4 & z)
 		{
 			return vec3<_float4>(
@@ -126,7 +126,7 @@ namespace zzsystems { namespace solowej {
 				);
 		}
 
-		ANY(featuremask)
+		ANY(dispatch_mask)
 			static vec3<_float8> build_coords(const _float8 &x, const _float8 &y, const _float8 &z)
 		{
 			return vec3<_float8>(
@@ -208,27 +208,27 @@ namespace zzsystems { namespace solowej {
 
 
 //#if defined(COMPILE_SSE2) || defined(COMPILE_SSE3) || defined(COMPILE_SSE4) || defined(COMPILE_SSE4FMA)
-		ANY(featuremask)
+		ANY(dispatch_mask)
 			static inline void stream_result(float* stride, size_t x, const _float4 &r)
 		{
 			_mm_stream_ps(stride + x, r.val);
 		}
 
-		ANY(featuremask)
+		ANY(dispatch_mask)
 		static inline void store_result(float* stride, size_t x, const _float4 &r)
 		{
 			_mm_storeu_ps(stride + x, r.val);
 		}
 //#endif
 //#if defined(COMPILE_AVX1) || defined(COMPILE_AVX2)
-		ANY(featuremask)
+		ANY(dispatch_mask)
 			static void stream_result(float* stride, size_t x, const _float8 &r)
 		{
 			//_mm256_stream_ps(stride + x, r.val);
 			_mm256_storeu_ps(stride + x, r.val);
 		}
 
-		ANY(featuremask)
+		ANY(dispatch_mask)
 			static void store_result(float* stride, size_t x, const _float8 &r)
 		{
 			_mm256_storeu_ps(stride + x, r.val);

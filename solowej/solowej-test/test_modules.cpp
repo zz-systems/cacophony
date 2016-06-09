@@ -197,7 +197,7 @@ namespace zzsystems { namespace solowej { namespace test {
 
     TEST_CASE(TYPE_PREFIX"curve", "[modules][modifiers]")
     {
-        mod_curve<sreal, sint> scalar
+        mod_curve<sreal, sint> scalar(
         {
                 {-2,     -1.625},
                 {-1,     -1.375},
@@ -209,8 +209,8 @@ namespace zzsystems { namespace solowej { namespace test {
                 {0.75,   0.25},
                 {1,      0.5},
                 {2,      0.5}
-        };
-        mod_curve<vreal, vint> vectorized
+        });
+        mod_curve<vreal, vint> vectorized(
         {
                 {-2,     -1.625},
                 {-1,     -1.375},
@@ -222,7 +222,7 @@ namespace zzsystems { namespace solowej { namespace test {
                 {0.75,   0.25},
                 {1,      0.5},
                 {2,      0.5}
-        };
+        });
 
         scalar.set_source(src_s_a);
         vectorized.set_source(src_v_a);
@@ -278,7 +278,7 @@ namespace zzsystems { namespace solowej { namespace test {
 
     TEST_CASE(TYPE_PREFIX"terrace", "[modules][modifiers]")
     {
-        mod_terrace<sreal, sint> scalar
+        mod_terrace<sreal, sint> scalar(
                 {
                         {-2,     -1.625},
                         {-1,     -1.375},
@@ -290,8 +290,8 @@ namespace zzsystems { namespace solowej { namespace test {
                         {0.75,   0.25},
                         {1,      0.5},
                         {2,      0.5}
-                };
-        mod_terrace<vreal, vint> vectorized
+                });
+        mod_terrace<vreal, vint> vectorized(
                 {
                         {-2,     -1.625},
                         {-1,     -1.375},
@@ -303,7 +303,7 @@ namespace zzsystems { namespace solowej { namespace test {
                         {0.75,   0.25},
                         {1,      0.5},
                         {2,      0.5}
-                };
+                });
 
         scalar.set_source(src_s_a);
         vectorized.set_source(src_v_a);

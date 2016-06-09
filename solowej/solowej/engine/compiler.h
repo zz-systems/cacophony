@@ -124,7 +124,7 @@ namespace zzsystems { namespace solowej {
 		{}
 	};
 
-	SIMD_ENABLED class compiler
+	VECTORIZED class compiler
 	{
 		using tmodules          = std::map <string, std::shared_ptr<module_base<vreal, vint>>>;
 		using emitted_modules   = gorynych::aligned_map<string, gorynych::shared_ptr<module_base<vreal, vint>>>;
@@ -286,7 +286,11 @@ namespace zzsystems { namespace solowej {
                 // Pass module config to module-level parser
 				try
 				{
+#ifdef __GNUC__
+					node_module->operator<<(node->module_config);
+#else
 					*node_module << node->module_config;
+#endif
 				}
 				catch(exception ex)
 				{

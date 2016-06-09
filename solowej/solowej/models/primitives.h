@@ -29,14 +29,14 @@
 
 namespace zzsystems { namespace solowej { namespace models {
 
-	SIMD_ENABLED_F
+	VECTORIZED_F
 	struct line_settings
 	{
 		vec3<vreal> from, to;
 		bool attenuate = true;
 	};
 
-	SIMD_ENABLED_F
+	VECTORIZED_F
 	inline vreal line(const Module<vreal>& source, const line_settings<vreal>& settings, const vreal& pos)
 	{
 		auto coords = (settings.to - settings.from) * pos + settings.from;
@@ -47,13 +47,13 @@ namespace zzsystems { namespace solowej { namespace models {
 			: result;
 	}
 
-	SIMD_ENABLED_F
+	VECTORIZED_F
 	inline vreal plane(const Module<vreal>& source, const vec3<vreal>& pos)
 	{
 		return source(vreal(pos.x, 0, pos.y))
 	}
 
-	SIMD_ENABLED_F
+	VECTORIZED_F
 		inline vreal cylinder(const Module<vreal>& source, const vreal& angle, const vreal& height)
 	{
 		auto _angle = angle * DEG_TO_RAD;
@@ -70,7 +70,7 @@ namespace zzsystems { namespace solowej { namespace models {
 	}
 
 
-	SIMD_ENABLED_F
+	VECTORIZED_F
 	inline vreal sphere(const Module<vreal>& source, const vreal& lat, const vreal& lon)
 	{
 		vreal r, _lat = lat * DEG2RAD, _lon = lon * DEG2RAD;
