@@ -75,35 +75,7 @@ matrix:
 #      env: COMPILER='ccache clang++-3.8' BUILD_TYPE='Debug'
 
 
-    # 2/ Linux GCC Builds
-    - os: linux
-      compiler: gcc
-      addons: &gcc48
-        apt:
-         sources: ['ubuntu-toolchain-r-test']
-         packages: ['g++-4.8']
-      env: COMPILER='ccache g++-4.8' BUILD_TYPE='Release'
-
-    - os: linux
-      compiler: gcc
-      addons: *gcc48
-      env: COMPILER='ccache g++-4.8' BUILD_TYPE='Debug'
-
-
-    - os: linux
-      compiler: gcc
-      addons: &gcc49
-        apt:
-          sources: ['ubuntu-toolchain-r-test']
-          packages: ['g++-4.9']
-      env: COMPILER='ccache g++-4.9' BUILD_TYPE='Release'
-
-    - os: linux
-      compiler: gcc
-      addons: *gcc49
-      env: COMPILER='ccache g++-4.9' BUILD_TYPE='Debug'
-
-
+    # 2/ Linux GCC Builds - solowej won't compile with GCC < 5
     - os: linux
       compiler: gcc
       addons: &gcc5
