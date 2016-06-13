@@ -3,14 +3,14 @@
 #ifndef PROFILE
 
 #pragma warning(push, 0)
-#include "../CImg/CImg.h"
+#include "../dependencies/CImg/CImg.h"
 #pragma warning(pop)
 
 #endif
 
 #include <chrono>
 
-#include "../asyncplusplus/include/async++.h"
+#include "../dependencies/asyncplusplus/include/async++.h"
 
 #include <functional>
 #include <memory>

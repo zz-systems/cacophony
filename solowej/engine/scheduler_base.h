@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "../../json/src/json.hpp"
+#include "../../dependencies/json/src/json.hpp"
 #include "../math/vector.h"
 #include "../util/serializable.h"
 

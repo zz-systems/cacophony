@@ -23,7 +23,29 @@
 //
 
 #pragma once
+#include <memory>
+#include "../../dependencies/gorynych/gorynych/util/memory.h"
 
-#include "../../json/src/json.hpp"
-#include "../util/serializable.h"
-#include "../util/cloneable.h"
+namespace zzsystems { namespace solowej {
+		template<typename tbase, typename tconcrete>
+		class cloneable : public tbase {
+		public:
+			template<typename... Args>
+			cloneable(Args &&... args)
+					: tbase(std::forward<Args>(args)...) { }
+
+			virtual ~cloneable() {
+			}
+
+			virtual std::shared_ptr<tbase> clone() const {
+				_is_cloning = true;
+				auto result = gorynych::make_shared<tconcrete>(static_cast<tconcrete const &>(*this));
+				_is_cloning = false;
+
+				return result;
+			}
+
+		protected:
+			mutable bool _is_cloning;
+		};
+	}}

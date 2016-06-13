@@ -25,11 +25,11 @@
 #pragma once
 
 
-#include "../../asyncplusplus/include/async++.h"
+#include "../../dependencies/asyncplusplus/include/async++.h"
 
 #include <vector>
 #include <memory>
-#include "../../gorynych/gorynych/gorynych.h"
+#include "../../dependencies/gorynych/gorynych/gorynych.h"
 #include "../util/serializable.h"
 #include "../modules/module_base.h"
 #include "scheduler_base.h"

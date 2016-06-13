@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.3.2)
 project(solowej-test)
 
-include(../gorynych/CMakeCommons)
+include(../dependencies/gorynych/CMakeCommons)
 
 
 
@@ -21,9 +21,22 @@ set(BRANCHES_TO_COMPILE
         #avx1_branch
         avx2_branch)
 
-set(BRANCH_MODULES "interpolation_test\;test_interpolation.cpp" "modules_test\;test_modules.cpp" "noise_test\;test_noise.cpp" "gather_test\;test_gather_randoms.cpp" "compiler_test\;test_compiler.cpp")
+set(BRANCH_MODULES
+        "interpolation_test\;test_interpolation.cpp"
+        "modules_test\;test_modules.cpp"
+        "noise_test\;test_noise.cpp"
+        "gather_test\;test_gather_randoms.cpp"
+        "compiler_test\;test_compiler.cpp"
+    )
+
 prepare_branches()
 
 list(APPEND SOURCE_FILES unit_test.cpp)
 
 add_executable(solowej-test ${SOURCE_FILES})
+
+enable_testing()
+add_test(solowej-test solowej-test)
+
+add_custom_target(test_solowej COMMAND ${CMAKE_CTEST_COMMAND}
+        DEPENDS solowej-test)

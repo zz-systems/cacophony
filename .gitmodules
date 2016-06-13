@@ -1,15 +1,18 @@
 [submodule "solowej/gorynych"]
-	path = solowej/gorynych
+	path = dependencies/gorynych
 	url = https://github.com/zz-systems/gorynych.git
 [submodule "solowej/CImg"]
-	path = solowej/CImg
+	path = dependencies/CImg
 	url = https://github.com/dtschump/CImg.git
 [submodule "solowej/json"]
-	path = solowej/json
+	path = dependencies/json
 	url = https://github.com/nlohmann/json.git
 [submodule "solowej/Catch"]
-	path = solowej/Catch
+	path = dependencies/Catch
 	url = https://github.com/philsquared/Catch.git
 [submodule "solowej/asyncplusplus"]
-	path = solowej/asyncplusplus
+	path = dependencies/asyncplusplus
 	url = https://github.com/Amanieu/asyncplusplus.git
+[submodule "dependencies/Catch_Patch"]
+	path = dependencies/Catch_Patch
+	url = https://github.com/zz-systems/Catch.git

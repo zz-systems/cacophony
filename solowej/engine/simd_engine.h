@@ -27,7 +27,7 @@
 #include <fstream>
 #include "../math/vector.h"
 #include "../util/serializable.h"
-#include "../../json/src/json.hpp"
+#include "../../dependencies/json/src/json.hpp"
 
 namespace zzsystems { namespace solowej {
     using namespace math;

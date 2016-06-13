@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.3.2)
 project(solowej)
 
-include(../gorynych/CMakeCommons)
+include(../dependencies/gorynych/CMakeCommons)
 
 
 set(CMAKE_CXX_FLAGS_DEBUG " -g -fsanitize=undefined -fsanitize=alignment")

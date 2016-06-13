@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.3.2)
 project(solowej-examples)
 
-include(../gorynych/CMakeCommons)
+include(../dependencies/gorynych/CMakeCommons)
 
 
 set(CMAKE_CXX_FLAGS_DEBUG " -g -fsanitize=undefined -fsanitize=alignment")
@@ -34,7 +34,7 @@ configure_file(config/granite.json ${CMAKE_CURRENT_BINARY_DIR}/config/granite.js
 configure_file(config/perlin_test.json ${CMAKE_CURRENT_BINARY_DIR}/config/perlin_test.json)
 configure_file(config/planet.json ${CMAKE_CURRENT_BINARY_DIR}/config/planet.json)
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../asyncplusplus ${CMAKE_BINARY_DIR}/async)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../dependencies/asyncplusplus ${CMAKE_BINARY_DIR}/async)
 
 add_executable(solowej-examples ${SOURCE_FILES})
 #disable OMP for now

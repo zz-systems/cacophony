@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "../../gorynych/gorynych/gorynych.h"
+#include "../../dependencies/gorynych/gorynych/gorynych.h"
 
 namespace zzsystems { namespace solowej { namespace math {
 	using namespace gorynych;
