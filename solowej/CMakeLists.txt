@@ -24,7 +24,7 @@ set(BRANCHES_TO_COMPILE
 
 set(BRANCH_ADDITIONAL_DEFS -DFASTFLOAT)
 
-set(BRANCH_MODULES "solowej_objectdispatch\;library/objectdispatch.cpp")
+set(BRANCH_MODULES "solowej_dispatch\;library/dispatch.cpp")
 prepare_branches()
 
 

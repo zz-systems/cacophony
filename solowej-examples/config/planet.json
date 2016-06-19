@@ -9,7 +9,7 @@
       "seamless": true,
       "scale": [ 1, 5, 1 ],
       "offset": [ 0, 0, 0 ],
-      "use_threads": true
+      "use_threads": false
     }
   },
   "constants": {

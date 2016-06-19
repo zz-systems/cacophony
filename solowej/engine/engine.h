@@ -31,23 +31,23 @@
 
 #include "../../gorynych/gorynych/gorynych.h"
 
-#include "../library/objectdispatch.h"
-#include "simd_engine.h"
+#include "../library/dispatch.h"
+#include "engine_base.h"
 #include "scheduler_base.h"
 
-namespace zzsystems { namespace solowej
+namespace zzsystems { namespace solowej { namespace engine
 {
-	class engine :
-		public simd_engine
+	class simd_engine :
+		public engine_base
 	{		
 	public:
 		gorynych::system_info info;
 		std::string file_name;
 		scheduler_settings settings;
 
-		aligned_map<int, shared_ptr<simd_engine>> _engines;
+		aligned_map<int, shared_ptr<engine_base>> _engines;
 
-		engine()
+		simd_engine()
 		{
 #if defined(COMPILE_AVX2)
 				_engines[gorynych::capability_AVX2::value] 		= get_avx2_engine();
@@ -89,7 +89,7 @@ namespace zzsystems { namespace solowej
 
 
 			// For each valid branch
-			SIMD_BUILD(info,
+			DYNAMIC_DISPATCH_SOME(info,
 			{
 				_engines[capability::value]->compile(source);
 			});
@@ -97,7 +97,7 @@ namespace zzsystems { namespace solowej
 
 		float* run(const vec3<float> &origin)
 		{
-			SIMD_DISPATCH(info,
+			DYNAMIC_DISPATCH_ONE(info,
 			{
 				return _engines[capability::value]->run(origin);
 			});
@@ -107,11 +107,11 @@ namespace zzsystems { namespace solowej
 
 		void run(const vec3<float> &origin, float *target)
 		{
-			SIMD_DISPATCH(info,
+			DYNAMIC_DISPATCH_ONE(info,
 			{
 				_engines[capability::value]->run(origin, target);
 			});
 		}
 	private:
 	};
-}}
+}}}

@@ -25,15 +25,15 @@
 #pragma once
 
 
-#include "simd_engine.h"
+#include "engine_base.h"
 #include "scheduler.h"
 #include "compiler.h"
 
 namespace zzsystems {
-    namespace solowej {
+    namespace solowej { namespace engine {
 
         template<typename capability>
-        class specialized_simd_engine : public simd_engine
+        class SIMD_ALIGN specialized_simd_engine : public engine_base
         {
             using vreal = typename static_dispatcher<capability>::vreal;
             using vint  = typename static_dispatcher<capability>::vint;
@@ -64,7 +64,7 @@ namespace zzsystems {
             }
         private:
             cpu_scheduler<vreal> _scheduler;
-            compiler<vreal, vint> _compiler;
+            compiler<capability> _compiler;
         };
 
 #if defined(COMPILE_AVX2)
@@ -94,5 +94,5 @@ namespace zzsystems {
 #endif
 
 
-    }
+    }}
 }

@@ -25,10 +25,9 @@
 #pragma once
 
 #include "../../dependencies/json/src/json.hpp"
-#include "../math/vector.h"
 #include "../util/serializable.h"
 
-namespace zzsystems { namespace solowej {
+namespace zzsystems { namespace solowej { namespace engine {
     using namespace gorynych;
 
         struct scheduler_settings :
@@ -88,4 +87,4 @@ namespace zzsystems { namespace solowej {
             }
         };
 
-}}
+}}}

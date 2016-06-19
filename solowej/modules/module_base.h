@@ -29,15 +29,15 @@
 #include <vector>
 #include <memory>
 #include <functional>
-#include "../math/vector.h"
 
 #include "../../dependencies/json/src/json.hpp"
 
 namespace zzsystems { namespace solowej { namespace modules
 {
+			using namespace gorynych;
 	//using namespace std;
-	using namespace zzsystems::math;
-	using namespace math;
+	//using namespace zzsystems::math;
+
 	using json = nlohmann::json;
 
 	VECTORIZED_F

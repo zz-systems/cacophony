@@ -34,10 +34,10 @@
 #include "../modules/module_base.h"
 #include "scheduler_base.h"
 
-namespace zzsystems { namespace solowej {
+namespace zzsystems { namespace solowej { namespace engine {
 	using namespace async;
 	using namespace gorynych;
-	using namespace math;
+
 	using namespace modules;
 
 
@@ -338,4 +338,4 @@ namespace zzsystems { namespace solowej {
 			return result;
 		}
 	};	
-}}
+}}}

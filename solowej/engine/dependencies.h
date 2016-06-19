@@ -24,6 +24,7 @@
 
 #pragma once
 
+#include "../../dependencies/gorynych/gorynych/gorynych.h"
 #include "../../dependencies/json/src/json.hpp"
 
 #include "../util/serializable.h"

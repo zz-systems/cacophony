@@ -77,9 +77,12 @@ namespace zzsystems { namespace solowej { namespace modules {
 			auto cos = vec3<vreal>(::cos(angles.x), ::cos(angles.y), ::cos(angles.z));
 			auto sin = vec3<vreal>(::sin(angles.x), ::sin(angles.y), ::sin(angles.z));
 
-			rot._0 = vec3<vreal>{ sin.x * sin.y * sin.z + cos.y * cos.z,	cos.x * sin.z,		sin.y * cos.z - cos.y * sin.x * sin.z };
-			rot._1 = vec3<vreal>{ sin.y * sin.x * cos.z - cos.y * sin.z,	cos.x * cos.z,		-cos.y * sin.x * cos.z - sin.y * sin.z };
-			rot._2 = vec3<vreal>{ -sin.y * cos.x,							sin.x,				cos.y * cos.x };
+			rot =
+					{
+							{ sin.x * sin.y * sin.z + cos.y * cos.z,	cos.x * sin.z,		sin.y * cos.z - cos.y * sin.x * sin.z },
+							{ sin.y * sin.x * cos.z - cos.y * sin.z,	cos.x * cos.z,		-cos.y * sin.x * cos.z - sin.y * sin.z },
+							{ -sin.y * cos.x,							sin.x,				cos.y * cos.x }
+					};
 		}
 	};
 }}}

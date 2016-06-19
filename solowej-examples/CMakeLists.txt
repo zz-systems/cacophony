@@ -9,7 +9,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 set(CMAKE_BUILD_TYPE Release)
 set( CMAKE_VERBOSE_MAKEFILE on )
-set(CMAKE_CXX_FLAGS "-std=c++14 -march=x86-64 ")
+set(CMAKE_CXX_FLAGS "-std=c++14 -march=x86-64 -funroll-loops")
 
 set(BRANCHES_TO_COMPILE
         fpu_branch

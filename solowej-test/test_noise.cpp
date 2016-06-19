@@ -218,34 +218,34 @@ namespace zzsystems { namespace solowej { namespace  test {
             auto tested     = noisegen_wrapper<vreal, vint>::construct_cube({ x, y, z });
 
             gorynych::test::test<vreal, sreal>(
-                    [&]() { return expected._0.x; },
-                    [&]() { return tested._0.x; }
+                    [&]() { return expected(0, 0); },
+                    [&]() { return tested(0, 0); }
             );
 
             gorynych::test::test<vreal, sreal>(
-                    [&]() { return expected._0.y; },
-                    [&]() { return tested._0.y; }
+                    [&]() { return expected(0, 1); },
+                    [&]() { return tested(0, 1); }
             );
 
             gorynych::test::test<vreal, sreal>(
-                    [&]() { return expected._0.z; },
-                    [&]() { return tested._0.z; }
+                    [&]() { return expected(0, 2); },
+                    [&]() { return tested(0, 2); }
             );
 
 
             gorynych::test::test<vreal, sreal>(
-                    [&]() { return expected._1.x; },
-                    [&]() { return tested._1.x; }
+                    [&]() { return expected(1, 0); },
+                    [&]() { return tested(1, 0); }
             );
 
             gorynych::test::test<vreal, sreal>(
-                    [&]() { return expected._1.y; },
-                    [&]() { return tested._1.y; }
+                    [&]() { return expected(1, 2); },
+                    [&]() { return tested(1, 2); }
             );
 
             gorynych::test::test<vreal, sreal>(
-                    [&]() { return expected._1.z; },
-                    [&]() { return tested._1.z; }
+                    [&]() { return expected(1, 2); },
+                    [&]() { return tested(1, 2); }
             );
         }
     }

@@ -24,12 +24,12 @@
 
 #include "solowejlib.h"
 
-static zzsystems::gorynych::aligned_map<std::string, zzsystems::solowej::engine> _engines;
+static zzsystems::gorynych::aligned_map<std::string, zzsystems::solowej::engine::simd_engine> _engines;
 static std::string _error;
 
 extern "C" {
 
-	zzsystems::solowej::engine* solowej_get_engine(const std::string& instance_key)
+	zzsystems::solowej::engine::simd_engine* solowej_get_engine(const std::string& instance_key)
 	{
 		return &_engines[instance_key];
 	}
@@ -49,10 +49,15 @@ extern "C" {
 
 			return 0;
 		}
+		catch(zzsystems::solowej::engine::compilation_error  ex)
+		{
+			_error = ex.what();
+			return ex.error_code();
+		}
 		catch(std::exception ex)
 		{
 			_error = ex.what();
-			return 1;
+			return -1;
 		}
 	}
 
@@ -66,10 +71,15 @@ extern "C" {
 
 			return 0;
 		}
+		catch(zzsystems::solowej::engine::compilation_error  ex)
+		{
+			_error = ex.what();
+			return ex.error_code();
+		}
 		catch(std::exception ex)
 		{
 			_error = ex.what();
-			return 1;
+			return -1;
 		}
 	}
 
@@ -79,14 +89,19 @@ extern "C" {
 
 		try
 		{
-			_engines[instance_key].run(zzsystems::math::vec3<float>(origin_x, origin_y, origin_z), target);
+			_engines[instance_key].run(zzsystems::gorynych::vec3<float>(origin_x, origin_y, origin_z), target);
 
 			return 0;
+		}
+		catch(zzsystems::solowej::engine::compilation_error ex)
+		{
+			_error = ex.what();
+			return ex.error_code();
 		}
 		catch(std::exception ex)
 		{
 			_error = ex.what();
-			return 1;
+			return -1;
 		}
 	}
 }
