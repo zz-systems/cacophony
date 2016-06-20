@@ -6,8 +6,7 @@ include(../dependencies/gorynych/CMakeCommons)
 
 set(CMAKE_CXX_FLAGS_DEBUG " -g -fsanitize=undefined -fsanitize=alignment")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
-
-set(CMAKE_BUILD_TYPE Release)
+#set(CMAKE_BUILD_TYPE Debug)
 set( CMAKE_VERBOSE_MAKEFILE on )
 set(CMAKE_CXX_FLAGS "-std=c++14 -march=x86-64 -funroll-loops")
 
@@ -19,7 +18,8 @@ set(BRANCHES_TO_COMPILE
         sse4_branch
         sse4fma_branch
         avx1_branch
-        avx2_branch)
+        avx2_branch
+        )
 
 set(BRANCH_ADDITIONAL_DEFS -DFASTFLOAT)
 

@@ -40,7 +40,7 @@ namespace zzsystems { namespace solowej { namespace examples {
 		system_info sysinfo;
 		cout << sysinfo;
 
-		//engine e;
+		//platform e;
 
 		//e.info.feature_flags = CAPABILITY_NONE;
 		//sysinfo.setFlag(CAPABILITY_AVX2, false);
@@ -55,8 +55,8 @@ namespace zzsystems { namespace solowej { namespace examples {
 
 		auto flags = sysinfo.feature_flags;
 
-        auto d = solowej_get_engine("examples")->settings.dimensions;
-
+        auto d = solowej_get_engine("examples")->get_config().dimensions;
+		cerr << d.x << " " << d.y << " " << d.z << endl;
 		auto f1 = [&]()
 		{
 			//std::vector<float, aligned_allocator<float, 32>> t(w * h * 1);

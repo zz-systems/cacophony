@@ -29,56 +29,86 @@
 #include <fstream>
 #include <type_traits>
 
-#include "../../gorynych/gorynych/gorynych.h"
+#include "../../dependencies/gorynych/gorynych/gorynych.h"
 
-#include "../library/dispatch.h"
+//#include "../library/dispatch.h"
 #include "engine_base.h"
-#include "scheduler_base.h"
+#include "compilers/compiler.h"
+#include "scheduling/scheduler.h"
 
-namespace zzsystems { namespace solowej { namespace engine
+namespace zzsystems { namespace solowej { namespace platform
 {
+
+	template<typename capability>
+	class ALIGNED specialized_simd_engine : public engine_base
+	{
+		using vreal = typename static_dispatcher<capability>::vreal;
+		using vint  = typename static_dispatcher<capability>::vint;
+	public:
+		// COmpile from json object
+		virtual void compile(const nlohmann::json &source) override
+		{
+			cout << ">>compiling " << static_dispatcher<capability>::unit_name() << " branch" << endl;
+
+			_scheduler << source["environment"]["scheduler"];
+
+			_scheduler.set_source(_compiler.compile(source));
+			//_scheduler.transform = [](const auto&c) {return c;};
+
+			//return _scheduler.get_config();
+		}
+
+		// Run - generating an array inside
+		virtual float* run(const vec3<float> &origin) override
+		{
+			cout << ">>executing " << static_dispatcher<capability>::unit_name() << " branch" << endl;
+			return _scheduler(origin);
+		}
+
+		// Run in place
+		virtual void run(const vec3<float> &origin, float *target) override
+		{
+			cout << ">>executing " << static_dispatcher<capability>::unit_name() << " branch" << endl;
+			_scheduler.schedule(target, origin);
+		}
+	private:
+		scheduler<capability> _scheduler;
+		compiler<capability> _compiler;
+	};
+
+	namespace detail
+	{
+		template<typename capability>
+		std::shared_ptr<engine_base> get_engine();
+
+#define BRANCH_DEF(branch) template<> std::shared_ptr<engine_base> get_engine<capability_##branch>();
+				STATIC_DISPATCH_SOME_RAW();
+#undef BRANCH_DEF
+	}
+
 	class simd_engine :
 		public engine_base
-	{		
+	{
+	private:
+
 	public:
 		gorynych::system_info info;
 		std::string file_name;
-		scheduler_settings settings;
 
 		aligned_map<int, shared_ptr<engine_base>> _engines;
 
 		simd_engine()
 		{
-#if defined(COMPILE_AVX2)
-				_engines[gorynych::capability_AVX2::value] 		= get_avx2_engine();
-#endif
-#if defined(COMPILE_AVX1)
-				_engines[gorynych::capability_AVX1::value] 		= get_avx1_engine();
-#endif
-#if defined(COMPILE_SSE4FMA)
-				_engines[gorynych::capability_SSE4FMA::value] 	= get_sse4fma_engine();
-#endif
-#if defined(COMPILE_SSE4)
-				_engines[gorynych::capability_SSE4::value] 		= get_sse4_engine();
-#endif
-#if defined(COMPILE_SSSE3)
-				_engines[gorynych::capability_SSSE3::value] 	= get_ssse3_engine();
-#endif
-#if defined(COMPILE_SSE3)
-				_engines[gorynych::capability_SSE3::value] 		= get_sse3_engine();
-#endif
-#if defined(COMPILE_SSE2)
-				_engines[gorynych::capability_SSE2::value] 		= get_sse2_engine();
-#endif
-#if defined(COMPILE_FPU)
-				_engines[gorynych::capability_FPU::value] 		= get_fpu_engine();
-#endif
+			STATIC_DISPATCH_SOME(
+			{
+				_engines[capability::value] = detail::get_engine<capability>();
+			})
 		}
 
 		// COmpile from json object
 		void compile(const nlohmann::json &source)
 		{
-			settings << source["environment"]["scheduler"];
+			//settings << source["environment"]["scheduler"];
 			auto environment = source["environment"];
 
 			// No limits
@@ -87,8 +117,8 @@ namespace zzsystems { namespace solowej { namespace engine
 			// Restrict with extracted bitmask
 			info.feature_flags &= feature_set;
 
-
 			// For each valid branch
+			// TODO: downgrade when an unsupported feature is selected
 			DYNAMIC_DISPATCH_SOME(info,
 			{
 				_engines[capability::value]->compile(source);
@@ -97,6 +127,7 @@ namespace zzsystems { namespace solowej { namespace engine
 
 		float* run(const vec3<float> &origin)
 		{
+			// TODO: downgrade
 			DYNAMIC_DISPATCH_ONE(info,
 			{
 				return _engines[capability::value]->run(origin);
@@ -107,6 +138,7 @@ namespace zzsystems { namespace solowej { namespace engine
 
 		void run(const vec3<float> &origin, float *target)
 		{
+			// TODO: downgrade
 			DYNAMIC_DISPATCH_ONE(info,
 			{
 				_engines[capability::value]->run(origin, target);

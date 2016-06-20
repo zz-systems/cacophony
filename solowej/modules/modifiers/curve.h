@@ -96,7 +96,7 @@ namespace zzsystems { namespace solowej { namespace modules {
 			v1 = vsel(v2 == v1, v1 + v2, v1);
 
 			// blend results
-			auto alpha = (val - v1) / (v2 - v1 +numeric_limits<float>::epsilon());
+			auto alpha = (val - v1) / (v2 - v1 + numeric_limits<float>::epsilon());
 
 			//return vsel(result == ones, cerp(v0, v1, v2, v3, alpha), result);
 			return cerp(v0, v1, v2, v3, alpha);

@@ -24,9 +24,9 @@
 
 #pragma once
 
-#include "dependencies.h"
-#include "../modules/all.h"
-#include "../util/string.h"
+#include "../dependencies.h"
+#include "../../modules/all.h"
+#include "../../util/string.h"
 
 #include <iostream>
 #include <sstream>
@@ -34,15 +34,15 @@
 #include <unordered_set>
 #include <exception>
 
-#include "compilers/compiler_base.h"
-#include "compilers/compiler_v09.h"
+#include "compiler_base.h"
+#include "compiler_v09.h"
 
-namespace zzsystems { namespace solowej { namespace engine {
+namespace zzsystems { namespace solowej { namespace platform {
 
 	DISPATCHED class compiler
 	{
-		using vreal = typename static_dispatcher<dispatch_mask>::vreal;
-		using vint	= typename static_dispatcher<dispatch_mask>::vint;
+		using vreal = typename static_dispatcher<capability>::vreal;
+		using vint	= typename static_dispatcher<capability>::vint;
 
 	public:
 		compiler(bool aggregate_errors = false)
@@ -66,7 +66,7 @@ namespace zzsystems { namespace solowej { namespace engine {
 			return nullptr;
 		}
 
-		shared_ptr<compiler_base<dispatch_mask>> get_compiler(const string &version)
+		shared_ptr<compiler_base<capability>> get_compiler(const string &version)
 		{
 			if(registry.find(version) != registry.end())
 				return registry[version];
@@ -77,13 +77,13 @@ namespace zzsystems { namespace solowej { namespace engine {
 		template<template <typename> class cc, typename... Args>
 		void register_compiler_version(Args&&... args)
 		{
-			auto ptr = make_shared<cc<dispatch_mask>>(forward<Args>(args)...);
+			auto ptr = make_shared<cc<capability>>(forward<Args>(args)...);
 
 			registry[ptr->version()] = ptr;
 		}
 
 	private:
-		aligned_map<string, shared_ptr<compiler_base<dispatch_mask>>> registry;
+		aligned_map<string, shared_ptr<compiler_base<capability>>> registry;
 		bool _aggregate_errors;
 	};
 }}}

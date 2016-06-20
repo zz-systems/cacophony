@@ -35,18 +35,18 @@
 #include <exception>
 #include "compiler_base.h"
 
-namespace zzsystems { namespace solowej { namespace engine {
+namespace zzsystems { namespace solowej { namespace platform {
     using namespace modules;
 
-    DISPATCHED class compiler_v09 : public compiler_base<dispatch_mask>
+    DISPATCHED class compiler_v09 : public compiler_base<capability>
     {
-        using vreal = typename static_dispatcher<dispatch_mask>::vreal;
-        using vint	= typename static_dispatcher<dispatch_mask>::vint;
+        using vreal = typename static_dispatcher<capability>::vreal;
+        using vint	= typename static_dispatcher<capability>::vint;
     public:
         virtual const string version() const override { return "0.9"; }
 
         compiler_v09(bool aggregate_errors = false)
-                : compiler_base<dispatch_mask>(aggregate_errors)
+                : compiler_base<capability>(aggregate_errors)
         {
             this->add_module_map<mod_perlin>              ("generator/perlin");
             this->add_module_map<mod_billow>              ("generator/billow");
@@ -244,6 +244,7 @@ namespace zzsystems { namespace solowej { namespace engine {
             compiler_stage<SIMD_T> stage;
 
             auto entry_point    = build_amt(stage, source);
+
             auto result         = emit_amt_module(stage, entry_point);
 
             if(stage.errors.errors.size() > 0)

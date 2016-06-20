@@ -28,13 +28,13 @@
 #include "../dependencies/gorynych/gorynych-test/test_extensions.h"
 
 #include "../solowej/noise/noisegenerators.h"
-#include "../solowej/engine/compiler.h"
+#include "../solowej/platform/compilers/compiler.h"
 
 
 namespace zzsystems { namespace solowej { namespace  test {
     using namespace gorynych;
     using namespace gorynych::test;
-    using namespace solowej::engine;
+    using namespace solowej::platform;
 
 #define TYPE_PREFIX TEST_PREFIX("compiler")
 

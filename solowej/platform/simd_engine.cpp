@@ -23,43 +23,20 @@
 //
 
 
-#pragma once
+#include "simd_engine.h"
+//
+namespace zzsystems { namespace solowej { namespace platform {
 
-#include "../engine/specialized_simd_engines.h"
+#define BRANCH_DEF(branch) \
+    template<> \
+    std::shared_ptr<engine_base> detail::get_engine<capability_##branch>() \
+    { \
+        return static_pointer_cast<engine_base>( \
+            make_shared<specialized_simd_engine<capability_##branch>>() \
+        ); \
+    }
 
-namespace zzsystems { namespace solowej {
- using namespace engine;
+    STATIC_DISPATCH_ONE_RAW()
 
-//#define instantiation \
-    //{ \
-    //    template class parser<vreal, vint>; \
-    //   template class cpu_scheduler<vreal>;\
-    //}
-
-        //void instantiate() {
-
-#if defined(COMPILE_AVX2)
-    std::shared_ptr<engine_base> get_avx2_engine();
-#endif
-#if defined(COMPILE_AVX1)
-    std::shared_ptr<engine_base> get_avx1_engine();
-#endif
-#if defined(COMPILE_SSE4FMA)
-    std::shared_ptr<engine_base> get_sse4fma_engine();
-#endif
-#if defined(COMPILE_SSE4)
-    std::shared_ptr<engine_base> get_sse4_engine();
-#endif
-#if defined(COMPILE_SSSE3)
-    std::shared_ptr<engine_base> get_ssse3_engine();
-#endif
-#if defined(COMPILE_SSE3)
-    std::shared_ptr<engine_base> get_sse3_engine();
-#endif
-#if defined(COMPILE_SSE2)
-    std::shared_ptr<engine_base> get_sse2_engine();
-#endif
-    std::shared_ptr<engine_base> get_fpu_engine();
-
-
-    }}
+#undef BRANCH_DEF
+}}}

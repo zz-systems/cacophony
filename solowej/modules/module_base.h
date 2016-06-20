@@ -34,14 +34,11 @@
 
 namespace zzsystems { namespace solowej { namespace modules
 {
-			using namespace gorynych;
-	//using namespace std;
-	//using namespace zzsystems::math;
+	using namespace gorynych;
 
 	using json = nlohmann::json;
 
 	VECTORIZED_F
-		//	template<typename vreal, typename enable = typename std::enable_if<std::is_floating_point<vreal>::value != 0>::type>
 		using Module = std::function<vreal(const vec3<vreal>)>;
 
 	VECTORIZED_F
@@ -55,13 +52,13 @@ namespace zzsystems { namespace solowej { namespace modules
 	void set_##name(const Module<vreal> &value) { assert(this->get_modules()->size() > index); this->get_modules()->at(index) = value; }
 
 #define MODULE(class_name) \
-	VECTORIZED class SIMD_ALIGN class_name : \
+	VECTORIZED class ALIGNED class_name : \
 		public cloneable<module_base<SIMD_T>, class_name<SIMD_T>>
 
 #define BASE(class_name) cloneable<module_base<SIMD_T>, class_name<SIMD_T>>
 
 	VECTORIZED
-	class SIMD_ALIGN module_base :
+	class ALIGNED module_base :
 		public serializable<json>
 	{
 		typedef module_base<vreal, vint> self_t;

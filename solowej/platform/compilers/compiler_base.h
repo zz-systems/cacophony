@@ -15,7 +15,7 @@
 #include <unordered_set>
 #include <exception>
 
-namespace zzsystems { namespace solowej { namespace engine {
+namespace zzsystems { namespace solowej { namespace platform {
         using namespace modules;
 
         /// @brief abstract module tree node
@@ -192,8 +192,8 @@ namespace zzsystems { namespace solowej { namespace engine {
 
         DISPATCHED class compiler_base
         {
-            using vreal = typename static_dispatcher<dispatch_mask>::vreal;
-            using vint	= typename static_dispatcher<dispatch_mask>::vint;
+            using vreal = typename static_dispatcher<capability>::vreal;
+            using vint	= typename static_dispatcher<capability>::vint;
         public:
             virtual Module<vreal> compile(const json &source) const = 0;
 
