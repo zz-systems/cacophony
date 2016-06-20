@@ -28,12 +28,13 @@
 #include "../dependencies/gorynych/gorynych-test/test_extensions.h"
 
 #include "../solowej/noise/noisegenerators.h"
-#include "../solowej/engine/compiler.h"
+#include "../solowej/platform/compilers/compiler.h"
 
 
 namespace zzsystems { namespace solowej { namespace  test {
     using namespace gorynych;
     using namespace gorynych::test;
+    using namespace solowej::platform;
 
 #define TYPE_PREFIX TEST_PREFIX("compiler")
 
@@ -78,7 +79,7 @@ namespace zzsystems { namespace solowej { namespace  test {
 
             INFO("Compiling: " << source.dump(4));
 
-            compiler<SIMD_T> cc(false);
+            compiler<capability> cc(false);
 
             REQUIRE_NOTHROW(cc.compile(source));
         }
@@ -128,7 +129,7 @@ namespace zzsystems { namespace solowej { namespace  test {
 
             INFO("Compiling: " << source.dump(4));
 
-            compiler<SIMD_T> cc(false);
+            compiler<capability> cc(false);
 
             REQUIRE_THROWS_AS(cc.compile(source), unresolved_node_reference_error);
         }
@@ -173,7 +174,7 @@ namespace zzsystems { namespace solowej { namespace  test {
 
             INFO("Compiling: " << source.dump(4));
 
-            compiler<SIMD_T> cc(false);
+            compiler<capability> cc(false);
 
             REQUIRE_THROWS_AS(cc.compile(source), invalid_entry_point_error);
         }
@@ -216,7 +217,7 @@ namespace zzsystems { namespace solowej { namespace  test {
                 }
             };
 
-            compiler<SIMD_T> cc(false);
+            compiler<capability> cc(false);
 
             // TODO
             //REQUIRE_THROWS_AS(cc.compile(source), invalid_entry_point_error);
@@ -277,7 +278,7 @@ namespace zzsystems { namespace solowej { namespace  test {
 
             INFO("Compiling: " << source.dump(4));
 
-            compiler<SIMD_T> cc(false);
+            compiler<capability> cc(false);
 
             REQUIRE_THROWS_AS(cc.compile(source), duplicate_module_error);
         }
@@ -323,7 +324,7 @@ namespace zzsystems { namespace solowej { namespace  test {
 
             INFO("Compiling: " << source.dump(4));
 
-            compiler<SIMD_T> cc(false);
+            compiler<capability> cc(false);
 
             REQUIRE_THROWS_AS(cc.compile(source), unresolved_module_reference_error);
         }
@@ -385,7 +386,7 @@ namespace zzsystems { namespace solowej { namespace  test {
 
             INFO("Compiling: " << source.dump(4));
 
-            compiler<SIMD_T> cc(false);
+            compiler<capability> cc(false);
 
             REQUIRE_THROWS_AS(cc.compile(source), invalid_module_error);
         }
@@ -441,7 +442,7 @@ namespace zzsystems { namespace solowej { namespace  test {
 
             INFO("Compiling: " << source.dump(4));
 
-            compiler<SIMD_T> cc(false);
+            compiler<capability> cc(false);
 
             REQUIRE_THROWS_AS(cc.compile(source), invalid_module_error);
         }
@@ -492,7 +493,7 @@ namespace zzsystems { namespace solowej { namespace  test {
 
             INFO("Compiling: " << source.dump(4));
 
-            compiler<SIMD_T> cc(false);
+            compiler<capability> cc(false);
 
             REQUIRE_THROWS_AS(cc.compile(source), cyclic_module_ref_error);
         }

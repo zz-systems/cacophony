@@ -35,13 +35,21 @@ public:
 
 	virtual const tserializer& operator<<(const tserializer& serializer)
 	{
-		// nop;
+		deserialize(serializer);
+
 		return serializer;
 	}
 
 	virtual tserializer& operator>> (tserializer &serializer)
 	{
-		// nop;
+		serialize(serializer);
+
 		return serializer;
 	}
+
+	virtual void deserialize(const tserializer& serializer)
+	{}
+
+	virtual void serialize(tserializer &serializer)
+	{}
 };

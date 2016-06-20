@@ -75,9 +75,9 @@ namespace zzsystems { namespace solowej { namespace modules {
 		vreal operator()(const vec3<vreal> &coords) const override
 		{	
 			auto distortion = power * vec3<vreal>(
-				_xdistort(dinput._0 + coords),
-				_ydistort(dinput._1 + coords),
-				_zdistort(dinput._2 + coords));
+				_xdistort(dinput.get_row(0) + coords),
+				_ydistort(dinput.get_row(1) + coords),
+				_zdistort(dinput.get_row(2) + coords));
 			
 			return get_source()(coords + distortion);
 		}

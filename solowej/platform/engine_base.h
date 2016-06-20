@@ -25,22 +25,29 @@
 #pragma once
 
 #include <fstream>
-#include "../math/vector.h"
 #include "../util/serializable.h"
 #include "../../dependencies/json/src/json.hpp"
+#include "scheduling/scheduler_base.h"
+#include "dependencies.h"
 
-namespace zzsystems { namespace solowej {
-    using namespace math;
+namespace zzsystems { namespace solowej { namespace platform {
+    using namespace gorynych;
 
-    class simd_engine : serializable<nlohmann::json>
+    class engine_base : serializable<nlohmann::json>
     {
+    protected:
+        scheduler_config config;
     public:
-        const nlohmann::json &operator<<(const nlohmann::json &source) override
+        const scheduler_config &get_config()
         {
+            return config;
+        }
+
+        virtual void deserialize(const nlohmann::json &source) override
+        {
+            config << source["environment"]["scheduler"];
             // Build modules
             compile(source);
-
-            return source;
         }
 
         // COmpile from file
@@ -49,6 +56,7 @@ namespace zzsystems { namespace solowej {
             std::ifstream file(path);
             nlohmann::json source(file);
 
+            config << source["environment"]["scheduler"];
             compile(source);
         }
         // Compile from immediate string
@@ -56,6 +64,7 @@ namespace zzsystems { namespace solowej {
         {
             auto source = nlohmann::json::parse(content);
 
+            config << source["environment"]["scheduler"];
             compile(source);
         }
 
@@ -68,4 +77,4 @@ namespace zzsystems { namespace solowej {
         // Run in place
         virtual void run(const vec3<float> &origin, float *target) = 0;
     };
-}}
+}}}

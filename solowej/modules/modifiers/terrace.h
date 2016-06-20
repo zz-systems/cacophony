@@ -74,9 +74,9 @@ namespace zzsystems { namespace solowej { namespace modules {
 				// Point > supplied values?
 				set_value = points[i].first > val;
 
-				// Get indeces				
+				// Get indexces
 				i1 = vclamp<size_t>(i - 1, 0, points.size() - 1);
-				i0 = vclamp<size_t>(i, 0, points.size() - 1);
+				i0 = vclamp<size_t>(i,     0, points.size() - 1);
 
 				// Set values if not set yet
 				

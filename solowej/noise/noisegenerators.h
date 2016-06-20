@@ -27,8 +27,6 @@
 #include <iostream>
 
 #include "../math/interpolation.h"
-#include "../math/vector.h"
-#include "../math/matrix.h"
 #include "vectortable.h"
 
 #define NOISE_VERSION 2
@@ -36,6 +34,7 @@
 namespace zzsystems { namespace solowej {	
 	using namespace gorynych;
 	using namespace math;
+
 
 	enum Quality {
 		Fast,
@@ -82,7 +81,7 @@ namespace zzsystems { namespace solowej {
 		static vreal gradient_3d(const vec3<vreal>& input, const vec3<vint>& nearby, const vint &seed)
 		{
 			auto word = dim<vreal>();
-			auto vi = (SEED_NOISE_GEN<vint>() * seed + dot(NOISE_GEN<vint>(), nearby)) & static_cast<vint>(0xFFFFFFFF);//ccl<vint>::ones();
+			auto vi = (SEED_NOISE_GEN<vint>() * seed + NOISE_GEN<vint>().dot(nearby)) & static_cast<vint>(0xFFFFFFFF);//ccl<vint>::ones();
 			auto diff = input - static_cast<vec3<vreal>>(nearby);
 
 			vi ^= (vi >> SHIFT_NOISE_GEN);
@@ -99,7 +98,7 @@ namespace zzsystems { namespace solowej {
 
 		static vreal gradient_coherent_3d(const vec3<vreal>& c,	const vint &seed, Quality quality)
 		{
-			mat3x2<vint> cube = construct_cube(c);
+			mat2x3<vint> cube = construct_cube(c);
 
 			vec3<vreal> s = map_coord_diff(c, cube, quality);
 
@@ -110,24 +109,24 @@ namespace zzsystems { namespace solowej {
 			vreal n0, n1, ix0, ix1, iy0, iy1;
 
 
-			n0 = gradient_3d(c, { cube._0.x, cube._0.y, cube._0.z }, seed);
-			n1 = gradient_3d(c, { cube._1.x, cube._0.y, cube._0.z }, seed);
+			n0 = gradient_3d(c, { cube(0, 0), cube(0, 1), cube(0, 2) }, seed);
+			n1 = gradient_3d(c, { cube(1, 0), cube(0, 1), cube(0, 2) }, seed);
 
 			ix0 = lerp(n0, n1, s.x);
 
-			n0 = gradient_3d(c, { cube._0.x, cube._1.y, cube._0.z }, seed);
-			n1 = gradient_3d(c, { cube._1.x, cube._1.y, cube._0.z }, seed);
+			n0 = gradient_3d(c, { cube(0, 0), cube(1, 2), cube(0, 2) }, seed);
+			n1 = gradient_3d(c, { cube(1, 0), cube(1, 2), cube(0, 2) }, seed);
 
 			ix1 = lerp(n0, n1, s.x);
 			iy0 = lerp(ix0, ix1, s.y);
 
-			n0 = gradient_3d(c, { cube._0.x, cube._0.y, cube._1.z }, seed);
-			n1 = gradient_3d(c, { cube._1.x, cube._0.y, cube._1.z }, seed);
+			n0 = gradient_3d(c, { cube(0, 0), cube(0, 1), cube(1, 2) }, seed);
+			n1 = gradient_3d(c, { cube(1, 0), cube(0, 1), cube(1, 2) }, seed);
 
 			ix0 = lerp(n0, n1, s.x);
 
-			n0 = gradient_3d(c, { cube._0.x, cube._1.y, cube._1.z }, seed);
-			n1 = gradient_3d(c, { cube._1.x, cube._1.y, cube._1.z }, seed);
+			n0 = gradient_3d(c, { cube(0, 0), cube(1, 2), cube(1, 2) }, seed);
+			n1 = gradient_3d(c, { cube(1, 0), cube(1, 2), cube(1, 2) }, seed);
 
 			ix1 = lerp(n0, n1, s.x);
 			iy1 = lerp(ix0, ix1, s.y);
@@ -137,7 +136,7 @@ namespace zzsystems { namespace solowej {
 
 		static vint intvalue_3d(const vec3<vint>& c, const vint &seed)
 		{
-			vint n = (SEED_NOISE_GEN<vint>() * seed + dot(NOISE_GEN<vint>(), c)) & numeric_limits<int>::max();//& static_cast<vint>(0x7fffffff);// ccl<vint>::max();
+			vint n = (SEED_NOISE_GEN<vint>() * seed + NOISE_GEN<vint>().dot(c)) & numeric_limits<int>::max();//& static_cast<vint>(0x7fffffff);// ccl<vint>::max();
 
 			n ^= (n >> 13);
 
@@ -159,30 +158,30 @@ namespace zzsystems { namespace solowej {
 
 		static vreal value_coherent_3d(const vec3<vreal>& c, const vint &seed, Quality quality)
 		{
-			mat3x2<vint> cube = construct_cube(c);
+			mat2x3<vint> cube = construct_cube(c);
 
 			vec3<vreal> s = map_coord_diff(c, cube, quality);
 
 			vreal n0, n1, ix0, ix1, iy0, iy1;
 
-			n0 = realvalue_3d({ cube._0.x, cube._0.y, cube._0.z }, seed);
-			n1 = realvalue_3d({ cube._1.x, cube._0.y, cube._0.z }, seed);
+			n0 = realvalue_3d({ cube(0, 0), cube(0, 1), cube(0, 2) }, seed);
+			n1 = realvalue_3d({ cube(1, 0), cube(0, 1), cube(0, 2) }, seed);
 
 			ix0 = lerp(n0, n1, s.x);
 
-			n0 = realvalue_3d({ cube._0.x, cube._1.y, cube._0.z }, seed);
-			n1 = realvalue_3d({ cube._1.x, cube._1.y, cube._0.z }, seed);
+			n0 = realvalue_3d({ cube(0, 0), cube(1, 2), cube(0, 2) }, seed);
+			n1 = realvalue_3d({ cube(1, 0), cube(1, 2), cube(0, 2) }, seed);
 
 			ix1 = lerp(n0, n1, s.x);
 			iy0 = lerp(ix0, ix1, s.y);
 
-			n0 = realvalue_3d({ cube._0.x, cube._0.y, cube._1.z }, seed);
-			n1 = realvalue_3d({ cube._1.x, cube._0.y, cube._1.z }, seed);
+			n0 = realvalue_3d({ cube(0, 0), cube(0, 1), cube(1, 2) }, seed);
+			n1 = realvalue_3d({ cube(1, 0), cube(0, 1), cube(1, 2) }, seed);
 
 			ix0 = lerp(n0, n1, s.x);
 
-			n0 = realvalue_3d({ cube._0.x, cube._1.y, cube._1.z }, seed);
-			n1 = realvalue_3d({ cube._1.x, cube._1.y, cube._1.z }, seed);
+			n0 = realvalue_3d({ cube(0, 0), cube(1, 2), cube(1, 2) }, seed);
+			n1 = realvalue_3d({ cube(1, 0), cube(1, 2), cube(1, 2) }, seed);
 
 			ix1 = lerp(n0, n1, s.y);
 			iy1 = lerp(ix0, ix1, s.y);
@@ -192,7 +191,7 @@ namespace zzsystems { namespace solowej {
 	public:
 		// Create a unit-length cube aligned along an integer boundary.  This cube
 		// surrounds the input point.
-		static mat3x2<vint> construct_cube(const vec3<vreal>& c)
+		static mat2x3<vint> construct_cube(const vec3<vreal>& c)
 		{
 			vec3<vint> lowerEdge
 			(
@@ -201,17 +200,17 @@ namespace zzsystems { namespace solowej {
 				static_cast<vint>(vfloor(c.z))//*/ (vint)c.z - vsel(c.z > cfl<vreal, 0>::val(), cfl<vint, 0>::val(), cfl<vint, 1>::val())
 			);
 
-			return mat3x2<vint>(
-				lowerEdge,
-				lowerEdge + cfl<vint, 1>::val()
-				);
+			return mat2x3<vint>({
+										lowerEdge,
+										lowerEdge + cfl<vint, 1>::val()
+								});
 		}
 
 		// Map the difference between the coordinates of the input value and the
 		// coordinates of the cube's outer-lower-left vertex onto an S-curve.
-		static vec3<vreal> map_coord_diff(const vec3<vreal>& c,	const mat3x2<vint>& cube, Quality quality)
+		static vec3<vreal> map_coord_diff(const vec3<vreal>& c,	const mat2x3<vint>& cube, Quality quality)
 		{			
-			auto s = c - static_cast<vec3<vreal>>(cube._0);
+			auto s = c - static_cast<vec3<vreal>>(cube.get_row(0));
 
 			switch (quality) {
 			case Quality::Fast:

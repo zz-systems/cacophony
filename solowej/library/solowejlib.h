@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "../engine/engine.h"
+#include "../platform/simd_engine.h"
 
 
 #ifdef WIN32
@@ -40,7 +40,7 @@
 extern "C" {
 
 	SOLOWEJDLL_API const char* solowej_get_error();
-	SOLOWEJDLL_API zzsystems::solowej::engine* solowej_get_engine(const std::string& instance_key);
+	SOLOWEJDLL_API zzsystems::solowej::platform::simd_engine* solowej_get_engine(const std::string& instance_key);
 	SOLOWEJDLL_API int solowej_compile_immediate(const char* instance_key, const char* content);
 	SOLOWEJDLL_API int solowej_compile_file(const char* instance_key, const char* path);
 	SOLOWEJDLL_API int solowej_run(const char*instance_key, float* target, float origin_x, float origin_y, float origin_z);

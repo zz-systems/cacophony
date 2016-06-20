@@ -24,13 +24,13 @@
 
 #pragma once
 
+#define COMPAT_OLD_LINAL
+
 #include <vector>
 #include "../../dependencies/gorynych/gorynych/gorynych.h"
 
 #include "../util/cloneable.h"
 #include "../util/serializable.h"
-#include "../math/vector.h"
-#include "../math/matrix.h"
 
 #include "../noise/noisegenerators.h"
 #include "module_base.h"

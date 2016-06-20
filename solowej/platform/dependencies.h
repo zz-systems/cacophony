@@ -2,7 +2,7 @@
 // Vectorized and parallelized version of libnoise using the gorynych SIMD toolkit
 // Copyright (C) 2015-2016 Sergej Zuyev (sergej.zuyev - at - zz-systems.net)
 //
-// Original libnoise:
+// Original libnoise: 
 // Copyright (C) 2003, 2004 Jason Bevins
 // The developer's email is jlbezigvins@gmzigail.com (for great email, take
 // off every 'zig'.)
@@ -22,44 +22,10 @@
 // Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
-
 #pragma once
 
-#include "../engine/specialized_simd_engines.h"
+#include "../../dependencies/gorynych/gorynych/gorynych.h"
+#include "../../dependencies/json/src/json.hpp"
 
-namespace zzsystems { namespace solowej {
-
-
-//#define instantiation \
-    //{ \
-    //    template class parser<vreal, vint>; \
-    //   template class cpu_scheduler<vreal>;\
-    //}
-
-        //void instantiate() {
-
-#if defined(COMPILE_AVX2)
-    std::shared_ptr<simd_engine> get_avx2_engine();
-#endif
-#if defined(COMPILE_AVX1)
-    std::shared_ptr<simd_engine> get_avx1_engine();
-#endif
-#if defined(COMPILE_SSE4FMA)
-    std::shared_ptr<simd_engine> get_sse4fma_engine();
-#endif
-#if defined(COMPILE_SSE4)
-    std::shared_ptr<simd_engine> get_sse4_engine();
-#endif
-#if defined(COMPILE_SSSE3)
-    std::shared_ptr<simd_engine> get_ssse3_engine();
-#endif
-#if defined(COMPILE_SSE3)
-    std::shared_ptr<simd_engine> get_sse3_engine();
-#endif
-#if defined(COMPILE_SSE2)
-    std::shared_ptr<simd_engine> get_sse2_engine();
-#endif
-    std::shared_ptr<simd_engine> get_fpu_engine();
-
-
-    }}
+#include "../util/serializable.h"
+#include "../util/cloneable.h"
