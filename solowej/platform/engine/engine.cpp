@@ -23,7 +23,7 @@
 //
 
 
-#include "simd_engine.h"
+#include "engine.h"
 //
 namespace zzsystems { namespace solowej { namespace platform {
 
@@ -32,7 +32,7 @@ namespace zzsystems { namespace solowej { namespace platform {
     std::shared_ptr<engine_base> detail::get_engine<capability_##branch>() \
     { \
         return static_pointer_cast<engine_base>( \
-            make_shared<specialized_simd_engine<capability_##branch>>() \
+            make_shared<simd_engine<capability_##branch>>() \
         ); \
     }
 

@@ -53,7 +53,7 @@ namespace zzsystems { namespace solowej { namespace  test {
             {
                 auto s = scalar({x / d, y / d, 0});
                 auto v = vectorized({x / d, y / d, 0});
-                float e[dim<vreal>()];
+                ALIGNED float e[dim<vreal>()];
                 extract(v, e);
                 gorynych::test::test<vreal, sreal>([&]() { return s; }, [&]() { return v; });
 
@@ -78,7 +78,7 @@ namespace zzsystems { namespace solowej { namespace  test {
             {
                 auto s = scalar({x / d, y / d, 0});
                 auto v = vectorized({x / d, y / d, 0});
-                float e[dim<vreal>()];
+                ALIGNED float e[dim<vreal>()];
                 extract(v, e);
                 gorynych::test::test<vreal, sreal>([&]() { return s; }, [&]() { return v; });
 
@@ -102,7 +102,7 @@ namespace zzsystems { namespace solowej { namespace  test {
             {
                 auto s = scalar({x / d, y / d, 0});
                 auto v = vectorized({x / d, y / d, 0});
-                float e[dim<vreal>()];
+                ALIGNED float e[dim<vreal>()];
                 extract(v, e);
                 gorynych::test::test<vreal, sreal>([&]() { return s; }, [&]() { return v; });
 
@@ -126,7 +126,7 @@ namespace zzsystems { namespace solowej { namespace  test {
             {
                 auto s = scalar({x / d, y / d, 0});
                 auto v = vectorized({x / d, y / d, 0});
-                float e[dim<vreal>()];
+                ALIGNED float e[dim<vreal>()];
                 extract(v, e);
                 gorynych::test::test<vreal, sreal>([&]() { return s; }, [&]() { return v; });
 
@@ -147,7 +147,7 @@ namespace zzsystems { namespace solowej { namespace  test {
             {
                 auto s = scalar({x / d, y / d, 0});
                 auto v = vectorized({x / d, y / d, 0});
-                float e[dim<vreal>()];
+                ALIGNED float e[dim<vreal>()];
                 extract(v, e);
                 gorynych::test::test<vreal, sreal>([&]() { return s; }, [&]() { return v; });
 
@@ -169,7 +169,7 @@ namespace zzsystems { namespace solowej { namespace  test {
             {
                 auto s = scalar({x / d, y / d, 0});
                 auto v = vectorized({x / d, y / d, 0});
-                float e[dim<vreal>()];
+                ALIGNED float e[dim<vreal>()];
                 extract(v, e);
                 gorynych::test::test<vreal, sreal>([&]() { return s; }, [&]() { return v; });
 
@@ -228,10 +228,10 @@ namespace zzsystems { namespace solowej { namespace  test {
             {
                 auto s = scalar({x / d, y / d, 0});
                 auto v = vectorized({x / d, y / d, 0});
-                float e[dim<vreal>()];
+                ALIGNED float e[dim<vreal>()];
                 extract(v, e);
 
-
+                //cerr << "for [" << x << ", " << y << "] scalar: " << s << " vector: " << e[0] << " " << e[1] << " " << e[2] << " " << e[3] << endl;
                 gorynych::test::test<vreal, sreal>([&]() { return s; }, [&]() { return v; });
 
                 //cout << "scalar: " << s << " vectorized: " << e[0] << endl;
@@ -256,7 +256,7 @@ namespace zzsystems { namespace solowej { namespace  test {
             {
                 auto s = scalar({x / d, y / d, 0});
                 auto v = vectorized({x / d, y / d, 0});
-                float e[dim<vreal>()];
+                ALIGNED float e[dim<vreal>()];
                 extract(v, e);
 
 
@@ -271,31 +271,31 @@ namespace zzsystems { namespace solowej { namespace  test {
     TEST_CASE(TYPE_PREFIX"terrace", "[modules][modifiers]")
     {
         mod_terrace<sreal, sint> scalar(
-                {
-                        {-2,     -1.625},
-                        {-1,     -1.375},
-                        {0,      -0.375},
-                        {0.0625, -0.125},
-                        {0.125,  0.25},
-                        {0.25,   1.0},
-                        {0.5,    0.25},
-                        {0.75,   0.25},
-                        {1,      0.5},
-                        {2,      0.5}
-                });
+        {
+            -1.625,
+            -1.375,
+            -0.375,
+            -0.125,
+             0.25,
+             1.0,
+             0.25,
+             0.25,
+             0.5,
+             0.5
+        });
         mod_terrace<vreal, vint> vectorized(
-                {
-                        {-2,     -1.625},
-                        {-1,     -1.375},
-                        {0,      -0.375},
-                        {0.0625, -0.125},
-                        {0.125,  0.25},
-                        {0.25,   1.0},
-                        {0.5,    0.25},
-                        {0.75,   0.25},
-                        {1,      0.5},
-                        {2,      0.5}
-                });
+        {
+            -1.625,
+            -1.375,
+            -0.375,
+            -0.125,
+            0.25,
+            1.0,
+            0.25,
+            0.25,
+            0.5,
+            0.5
+        });
 
         scalar.set_source(src_s_a);
         vectorized.set_source(src_v_a);
@@ -309,7 +309,7 @@ namespace zzsystems { namespace solowej { namespace  test {
             {
                 auto s = scalar({x / d, y / d, 0});
                 auto v = vectorized({x / d, y / d, 0});
-                float e[dim<vreal>()];
+                ALIGNED float e[dim<vreal>()];
                 extract(v, e);
 
 
@@ -337,7 +337,7 @@ namespace zzsystems { namespace solowej { namespace  test {
             {
                 auto s = scalar({x / d, y / d, 0});
                 auto v = vectorized({x / d, y / d, 0});
-                float e[dim<vreal>()];
+                ALIGNED float e[dim<vreal>()];
                 extract(v, e);
 
 
@@ -370,7 +370,7 @@ namespace zzsystems { namespace solowej { namespace  test {
             {
                 auto s = scalar({x / d, y / d, 0});
                 auto v = vectorized({x / d, y / d, 0});
-                float e[dim<vreal>()];
+                ALIGNED float e[dim<vreal>()];
                 extract(v, e);
 
 
@@ -430,7 +430,7 @@ namespace zzsystems { namespace solowej { namespace  test {
             {
                 auto s = scalar({x / d, y / d, 0});
                 auto v = vectorized({x / d, y / d, 0});
-                float e[dim<vreal>()];
+                ALIGNED float e[dim<vreal>()];
                 extract(v, e);
 
 
@@ -459,7 +459,7 @@ namespace zzsystems { namespace solowej { namespace  test {
             {
                 auto s = scalar({x / d, y / d, 0});
                 auto v = vectorized({x / d, y / d, 0});
-                float e[dim<vreal>()];
+                ALIGNED float e[dim<vreal>()];
                 extract(v, e);
 
 
@@ -488,7 +488,7 @@ namespace zzsystems { namespace solowej { namespace  test {
             {
                 auto s = scalar({x / d, y / d, 0});
                 auto v = vectorized({x / d, y / d, 0});
-                float e[dim<vreal>()];
+                ALIGNED float e[dim<vreal>()];
                 extract(v, e);
 
 

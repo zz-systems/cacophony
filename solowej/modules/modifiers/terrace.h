@@ -34,10 +34,11 @@ namespace zzsystems { namespace solowej { namespace modules {
 	MODULE(mod_terrace)
 	{
 	public:
-		vector<pair<const vreal, vreal>> points;
+		vector<vreal, aligned_allocator<vreal, 32>> points;
+
 		bool invert = false;
 
-		mod_terrace(const initializer_list<pair<const vreal, vreal>> &points = {}, bool invert = false)
+		mod_terrace(const initializer_list<vreal> &points = {}, bool invert = false)
 			: BASE(mod_terrace)::cloneable(1), points(points), invert(invert)
 		{}
 
@@ -47,10 +48,7 @@ namespace zzsystems { namespace solowej { namespace modules {
 			{
 				for (auto point : source["points"])
 				{
-					points.push_back(
-						make_pair<vreal, vreal>(
-							point["in"].get<float>(),
-							point["out"].get<float>()));
+					points.push_back(point.get<float>());
 				}
 			}
 
@@ -64,7 +62,9 @@ namespace zzsystems { namespace solowej { namespace modules {
 			auto cpc = points.size();
 			assert(cpc >= 4);
 
-			vreal cp1, cp0, set_value, already_set = cfl<vreal, 0>::val();
+			vreal out1, out0, set_value, already_set;
+
+			out1 = out0 = already_set = cfl<vreal, 0>::val();
 
 			size_t i0, i1;
 			auto val = get_source()(coords);
@@ -72,16 +72,18 @@ namespace zzsystems { namespace solowej { namespace modules {
 			for (size_t i = 0; i < points.size(); i++)
 			{
 				// Point > supplied values?
-				set_value = points[i].first > val;
+				set_value = points[i] > val;
 
 				// Get indexces
 				i1 = vclamp<size_t>(i - 1, 0, points.size() - 1);
 				i0 = vclamp<size_t>(i,     0, points.size() - 1);
 
+				// mask out already set values
+				auto select_new = set_value && !already_set;
+
 				// Set values if not set yet
-				
-				cp1 = vsel(set_value && !already_set, points[i1].second, cp1);
-				cp0 = vsel(set_value && !already_set, points[i0].second, cp0);
+				out1 = vsel(set_value && !already_set, points[i1], out1);
+				out0 = vsel(set_value && !already_set, points[i0], out0);
 
 				// Fill accumulating mask
 				already_set = already_set || set_value;
@@ -91,21 +93,19 @@ namespace zzsystems { namespace solowej { namespace modules {
 					break;
 			}
 
-			// prevent division by zero by adding an offset
-			cp0 = vsel(cp0 == cp1, cp1 + cp0, cp0);
 
 			// blend results
-			auto alpha = (val - cp0) / (cp1 - cp0);// +numeric_limits<float>::epsilon());
+			auto alpha = (val - out0) / (out1 - out0);
 						
 			if (invert)
 			{
 				alpha = cfl<vreal, 1>::val() - alpha;
-				std::swap(cp0, cp1);
+				std::swap(out0, out1);
 			}
 
 			alpha *= alpha;
 
-			return lerp(cp0, cp1, alpha);
+			return vsel(out1 == out0, out0, lerp(out0, out1, alpha));
 		}		
 	};	
 }}}

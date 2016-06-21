@@ -24,12 +24,12 @@
 
 #include "solowejlib.h"
 
-static zzsystems::gorynych::aligned_map<std::string, zzsystems::solowej::platform::simd_engine> _engines;
+static zzsystems::gorynych::aligned_map<std::string, zzsystems::solowej::platform::engine> _engines;
 static std::string _error;
 
 extern "C" {
 
-	zzsystems::solowej::platform::simd_engine* solowej_get_engine(const std::string& instance_key)
+	zzsystems::solowej::platform::engine* solowej_get_engine(const std::string& instance_key)
 	{
 		return &_engines[instance_key];
 	}

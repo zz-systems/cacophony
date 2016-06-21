@@ -5,7 +5,7 @@ include(../dependencies/gorynych/CMakeCommons)
 
 
 set(CMAKE_CXX_FLAGS_DEBUG " -g -fsanitize=undefined -fsanitize=alignment")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 ")
 
 #set(CMAKE_BUILD_TYPE Release)
 #set(CMAKE_BUILD_TYPE Debug)
@@ -24,7 +24,7 @@ set(BRANCHES_TO_COMPILE
 
 set(BRANCH_ADDITIONAL_DEFS -DFASTFLOAT)
 
-set(BRANCH_MODULES "engine_dispatch\;platform/simd_engine.cpp")
+set(BRANCH_MODULES "engine_dispatch\;platform/engine/engine.cpp")
 prepare_branches()
 
 

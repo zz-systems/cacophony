@@ -2,7 +2,7 @@
 // Vectorized and parallelized version of libnoise using the gorynych SIMD toolkit
 // Copyright (C) 2015-2016 Sergej Zuyev (sergej.zuyev - at - zz-systems.net)
 //
-// Original libnoise: 
+// Original libnoise:
 // Copyright (C) 2003, 2004 Jason Bevins
 // The developer's email is jlbezigvins@gmzigail.com (for great email, take
 // off every 'zig'.)
@@ -24,24 +24,4 @@
 
 #pragma once
 
-#include "../platform/engine/engine.h"
-
-
-#ifdef WIN32
-#ifdef SOLOWEJ_EXPORTS
-#define SOLOWEJDLL_API __declspec(dllexport) 
-#else
-#define SOLOWEJDLL_API __declspec(dllimport) 
-#endif
-#else
-#define SOLOWEJDLL_API
-#endif
-
-extern "C" {
-
-	SOLOWEJDLL_API const char* solowej_get_error();
-	SOLOWEJDLL_API zzsystems::solowej::platform::engine* solowej_get_engine(const std::string& instance_key);
-	SOLOWEJDLL_API int solowej_compile_immediate(const char* instance_key, const char* content);
-	SOLOWEJDLL_API int solowej_compile_file(const char* instance_key, const char* path);
-	SOLOWEJDLL_API int solowej_run(const char*instance_key, float* target, float origin_x, float origin_y, float origin_z);
-}
+#include "engine/engine.h"

@@ -59,30 +59,41 @@ namespace zzsystems { namespace solowej { namespace modules {
 
 		vreal operator()(const vec3<vreal>& coords) const override
 		{
+			auto cpc = points.size();
+			assert(cpc >= 4);
+
 			auto val = get_source()(coords);
 			
-			vreal v3, v2, v1, v0, set_value, already_set = cfl<vreal, 0>::val();
-		
+			vreal in1, in0, out3, out2, out1, out0, set_value, already_set;
+
+			in1 = in0 = out3 = out2 = out1 = out0 = already_set = cfl<vreal, 0>::val();
+
 			size_t i0, i1, i2, i3;
 
 			// TODO: bounds
-			for (size_t i = 0; i < points.size(); i++)
+			for (int i = 0; i < points.size(); i++)
 			{
 				// Point > supplied values?
-				set_value = points[i].first > val;	
+				set_value = points[i].first > val;
 
 				// Get indeces
-				i3 = vclamp<size_t>(i + 1, 0, points.size() - 1);
-				i2 = vclamp<size_t>(i,		0, points.size() - 1);
-				i1 = vclamp<size_t>(i - 1, 0, points.size() - 1);
-				i0 = vclamp<size_t>(i - 2, 0, points.size() - 1);
-				
-				// Set values if not set yet
-				v3 = vsel(set_value && !already_set, points[i3].second, v3);
-				v2 = vsel(set_value && !already_set, points[i2].second, v2);
+				i3 = vclamp<int>(i + 1, 0, points.size() - 1);
+				i2 = vclamp<int>(i,	    0, points.size() - 1);
+				i1 = vclamp<int>(i - 1, 0, points.size() - 1);
+				i0 = vclamp<int>(i - 2, 0, points.size() - 1);
 
-				v1 = vsel(set_value && !already_set, points[i1].second, v1);
-				v0 = vsel(set_value && !already_set, points[i0].second, v0);				
+				// mask out already set values
+				auto select_new = set_value && !already_set;
+
+				// Set values if not set yet
+				in1 = vsel(select_new, points[i2].first, in1);
+				in0 = vsel(select_new, points[i1].first, in0);
+
+				out3 = vsel(select_new, points[i3].second, out3);
+				out2 = vsel(select_new, points[i2].second, out2);
+
+				out1 = vsel(select_new, points[i1].second, out1);
+				out0 = vsel(select_new, points[i0].second, out0);
 
 				// Fill accumulating mask
 				already_set = already_set || set_value;
@@ -92,14 +103,11 @@ namespace zzsystems { namespace solowej { namespace modules {
 					break;
 			}
 
-			// prevent division by zero by adding an offset
-			v1 = vsel(v2 == v1, v1 + v2, v1);
-
 			// blend results
-			auto alpha = (val - v1) / (v2 - v1 + numeric_limits<float>::epsilon());
+			auto alpha = (val - in0) / (in1 - in0);
 
-			//return vsel(result == ones, cerp(v0, v1, v2, v3, alpha), result);
-			return cerp(v0, v1, v2, v3, alpha);
+			// return either out1 (when no proper value is found) or the cubic interpolated blended result
+			return vsel(in0 == in1, out1, cerp(out0, out1, out2, out3, alpha));
 		}
 	};	
 }}}

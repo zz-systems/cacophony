@@ -25,22 +25,20 @@
 #pragma once
 
 
-#include "dependencies.h"
+#include "../dependencies.h"
 #include <fstream>
 #include <type_traits>
 
-#include "../../dependencies/gorynych/gorynych/gorynych.h"
+#include "../../../dependencies/gorynych/gorynych/gorynych.h"
 
 //#include "../library/dispatch.h"
 #include "engine_base.h"
-#include "compilers/compiler.h"
-#include "scheduling/scheduler.h"
+#include "../compilers/compiler.h"
+#include "../scheduling/scheduler.h"
 
 namespace zzsystems { namespace solowej { namespace platform
 {
-
-	template<typename capability>
-	class ALIGNED specialized_simd_engine : public engine_base
+	DISPATCHED class ALIGNED simd_engine : public engine_base
 	{
 		using vreal = typename static_dispatcher<capability>::vreal;
 		using vint  = typename static_dispatcher<capability>::vint;
@@ -86,7 +84,7 @@ namespace zzsystems { namespace solowej { namespace platform
 #undef BRANCH_DEF
 	}
 
-	class simd_engine :
+	class engine :
 		public engine_base
 	{
 	private:
@@ -97,7 +95,7 @@ namespace zzsystems { namespace solowej { namespace platform
 
 		aligned_map<int, shared_ptr<engine_base>> _engines;
 
-		simd_engine()
+		engine()
 		{
 			STATIC_DISPATCH_SOME(
 			{

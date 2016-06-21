@@ -25,10 +25,10 @@
 #pragma once
 
 #include <fstream>
-#include "../util/serializable.h"
-#include "../../dependencies/json/src/json.hpp"
-#include "scheduling/scheduler_base.h"
-#include "dependencies.h"
+#include "../../util/serializable.h"
+#include "../../../dependencies/json/src/json.hpp"
+#include "../scheduling/scheduler_base.h"
+#include "../dependencies.h"
 
 namespace zzsystems { namespace solowej { namespace platform {
     using namespace gorynych;
