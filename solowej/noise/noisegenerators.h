@@ -93,7 +93,7 @@ namespace zzsystems { namespace solowej {
 			
 			//return dot(gradients, diff) * static_cast<vreal>(2.12f);
 
-			return dot(grad, diff) * 2.12f;
+			return grad.dot(diff) * 2.12f;
 		}
 
 		static vreal gradient_coherent_3d(const vec3<vreal>& c,	const vint &seed, Quality quality)
@@ -321,6 +321,6 @@ namespace zzsystems { namespace solowej {
 
 		//return dot(gradients, diff) * static_cast<vreal>(2.12f);
 
-		return dot(grad, diff) * 2.12f;
+		return grad.dot(diff) * 2.12f;
 	}
 }}

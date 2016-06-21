@@ -49,7 +49,7 @@ namespace zzsystems { namespace solowej { namespace modules
 		{
 			auto _coords = coords * frequency;
 
-			auto distFromCenter			= vsqrt(dot(_coords, _coords));
+			auto distFromCenter			= _coords.magnitude();
 			auto distFromSmallerSphere	= distFromCenter - vfloor(distFromCenter);
 			auto distFromLargerSphere	= cfl<vreal, 1>::val() - distFromSmallerSphere;
 
