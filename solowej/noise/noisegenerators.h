@@ -81,12 +81,12 @@ namespace zzsystems { namespace solowej {
 		static vreal gradient_3d(const vec3<vreal>& input, const vec3<vint>& nearby, const vint &seed)
 		{
 			auto word = dim<vreal>();
-			auto vi = (SEED_NOISE_GEN<vint>() * seed + NOISE_GEN<vint>().dot(nearby)) & static_cast<vint>(0xFFFFFFFF);//ccl<vint>::ones();
+			auto vi = (SEED_NOISE_GEN<vint>() * seed + NOISE_GEN<vint>().dot(nearby)) & /*static_cast<vint>(0xFFFFFFFF);//*/ccl<vint>::ones();
 			auto diff = input - static_cast<vec3<vreal>>(nearby);
 
 			vi ^= (vi >> SHIFT_NOISE_GEN);
 
-			vi &= static_cast<vint>(0xFF);
+			vi &= cfl<vint, 0xFF>::val();// static_cast<vint>(0xFF);
 			vi <<= 2;
 
 			auto grad = gather_randoms(vi);	
@@ -141,7 +141,7 @@ namespace zzsystems { namespace solowej {
 			n ^= (n >> 13);
 
 			//return (n * (n * n * 60493 + 19990303) + 1376312589) & 0x7fffffff;
-			return (n * (n * n * 1087 + 2749) + 3433) & numeric_limits<int>::max();// & static_cast<vint>(0x7FFFFFFF); // & ccl<vint>::max();
+			return (n * (n * n * 1087 + 2749) + 3433) & cfl<vint, 0x7FFFFFFF>::val();
 		}
 
 		static vreal realvalue_3d(const vec3<vint>& c, const vint &seed)
