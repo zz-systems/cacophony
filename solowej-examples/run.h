@@ -10,7 +10,7 @@
 
 #include <chrono>
 
-#include "../dependencies/asyncplusplus/include/async++.h"
+//#include "../dependencies/asyncplusplus/include/async++.h"
 
 #include <functional>
 #include <memory>
@@ -59,7 +59,7 @@ namespace zzsystems { namespace solowej { namespace examples {
 		cimg_library::CImg<uint8_t> img1(w, h, 1, 3), img2(w, h, 1, 3);
 
 		//async::parallel_for(async::irange(0, w * h), [&](const auto i)
-//#pragma omp parallel for
+		#pragma omp parallel for
 		for (int i = 0; i < w * h; i++)
 		{
 			int x = i % w;

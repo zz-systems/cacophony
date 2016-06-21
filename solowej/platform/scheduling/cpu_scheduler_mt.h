@@ -43,7 +43,9 @@ namespace zzsystems { namespace solowej { namespace platform {
 
             if(d.z >= d.y)
             {
-                parallel_for(irange(0, d.z), [&](const int z)
+                //parallel_for(irange(0, d.z), [&](const int z)
+                #pragma omp parallel for
+                for(int z = 0; z < d.z; z++)
                 {
                     _MM_SET_ROUNDING_MODE(_MM_ROUND_TOWARD_ZERO);
                     _MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_ON);
@@ -67,7 +69,7 @@ namespace zzsystems { namespace solowej { namespace platform {
                             this->write_result(d, stride, remainder, x, r);
                         }
                     }
-                });
+                }//);
             }
             else
             {
@@ -75,7 +77,10 @@ namespace zzsystems { namespace solowej { namespace platform {
                 {
                     auto depth = z * d.y;
 
-                    parallel_for(irange(0, d.y), [&](const int y)
+
+                    //parallel_for(irange(0, d.y), [&](const int y)
+                    #pragma omp parallel for
+                    for(int y = 0; y < d.y; y++)
                     {
                         _MM_SET_ROUNDING_MODE(_MM_ROUND_TOWARD_ZERO);
                         _MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_ON);
@@ -96,7 +101,7 @@ namespace zzsystems { namespace solowej { namespace platform {
 
                             this->write_result(d, stride, remainder, x, r);
                         }
-                    });
+                    }//);
                 }
             }
         }
