@@ -27,5 +27,19 @@ set_openmp()
 
 add_executable(solowej-examples ${SOURCE_FILES})
 
-target_link_libraries(solowej-examples X11 jpeg png solowej)
-target_compile_definitions(solowej-examples PUBLIC -DCOMPILE_FPU -DCOMPILE_SSE2 -DCOMPILE_SSE3 -DCOMPILE_SSSE3 -DCOMPILE_SSE4 -DCOMPILE_SSE4FMA -DCOMPILE_AVX1 -DCOMPILE_AVX2)
+if(WIN32)
+	target_link_libraries(solowej-examples solowej)
+else()
+	target_link_libraries(solowej-examples X11 jpeg png solowej)
+endif(WIN32)
+
+target_compile_definitions(solowej-examples PUBLIC 
+	-DCOMPILE_FPU 
+	-DCOMPILE_SSE2 
+	-DCOMPILE_SSE3 
+	-DCOMPILE_SSSE3 
+	-DCOMPILE_SSE4 
+	-DCOMPILE_SSE4FMA
+	-DCOMPILE_AVX1
+	-DCOMPILE_AVX2
+	)

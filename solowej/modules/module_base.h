@@ -84,7 +84,7 @@ namespace zzsystems { namespace solowej { namespace modules
 
 		virtual inline operator Module<vreal>() const
 		{ 
-			return [this](const auto c)
+			return [this](const auto &c)
 			{
 				return this->operator()(c);
 			};

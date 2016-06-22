@@ -97,10 +97,13 @@ namespace zzsystems { namespace solowej { namespace platform
 
 		engine()
 		{
-			STATIC_DISPATCH_SOME(
+			// Disable avx1. Current emulated int8 works like shit. E.g doesnt work at all. Or at least correctly. And is very slow.
+			info.setFlag(CAPABILITY_AVX1, false);
+
+			DYNAMIC_DISPATCH_SOME(info,
 			{
 				_engines[capability::value] = detail::get_engine<capability>();
-			})
+			});
 		}
 
 		// COmpile from json object

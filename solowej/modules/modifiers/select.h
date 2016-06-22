@@ -101,7 +101,7 @@ namespace zzsystems { namespace solowej { namespace modules {
 		inline vreal interpolate_bounds(const vreal& from,
 			const vreal& to,
 			const vreal& control,
-			vreal bound, vreal edgeFalloff) const
+			const vreal& bound, const vreal& edgeFalloff) const
 		{
 			auto lowerCurve = bound - edgeFalloff;
 			auto upperCurve = bound + edgeFalloff;

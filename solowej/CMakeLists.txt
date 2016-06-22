@@ -11,7 +11,8 @@ set(BRANCHES_TO_COMPILE
         sse4_branch
         sse4fma_branch
         avx1_branch
-        avx2_branch)
+        avx2_branch
+		)
 
 set(BRANCH_ADDITIONAL_DEFS -DFASTFLOAT)
 
@@ -24,4 +25,14 @@ prepare_branches()
 list(APPEND SOURCE_FILES library/solowejlib.cpp library/dllmain.cpp)
 
 add_library(solowej SHARED ${SOURCE_FILES})
-target_compile_definitions(solowej PUBLIC -DFASTFLOAT -DCOMPILE_FPU -DCOMPILE_SSE2 -DCOMPILE_SSE3 -DCOMPILE_SSSE3 -DCOMPILE_SSE4 -DCOMPILE_SSE4FMA -DCOMPILE_AVX1 -DCOMPILE_AVX2)
+target_compile_definitions(solowej PUBLIC 
+					-DFASTFLOAT 
+					-DCOMPILE_FPU 
+					-DCOMPILE_SSE2 
+					-DCOMPILE_SSE3 
+					-DCOMPILE_SSSE3 
+					-DCOMPILE_SSE4 
+					-DCOMPILE_SSE4FMA 
+					-DCOMPILE_AVX1 
+					-DCOMPILE_AVX2
+					)
