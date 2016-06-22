@@ -39,10 +39,10 @@ namespace zzsystems { namespace solowej { namespace modules
 	using json = nlohmann::json;
 
 	VECTORIZED_F
-		using Module = std::function<vreal(const vec3<vreal>)>;
+		using Module = std::function<vreal(const vec3<vreal>&)>;
 
 	VECTORIZED_F
-		using Transformer = std::function<vec3<vreal>(const vec3<vreal>)>;
+		using Transformer = std::function<vec3<vreal>(const vec3<vreal>&)>;
 
 	VECTORIZED
 		using SeededModule = std::function<vreal(const vec3<vreal>&, const vint& seed)>;
