@@ -40,7 +40,7 @@ namespace zzsystems { namespace solowej { namespace examples {
 
 		//e.info.feature_flags = CAPABILITY_NONE;
 		//sysinfo.setFlag(CAPABILITY_AVX2, false);
-		sysinfo.setFlag(CAPABILITY_AVX1, false);
+		//sysinfo.setFlag(CAPABILITY_AVX1, false);
 		//e.info.setFlag(CAPABILITY_SSE42, false);
 		//e.info.setFlag(CAPABILITY_SSE41, false);
 		//e.info.setFlag(CAPABILITY_FMA3, false);
