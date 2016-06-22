@@ -16,6 +16,8 @@ set(BRANCHES_TO_COMPILE
 set(BRANCH_ADDITIONAL_DEFS -DFASTFLOAT)
 
 set(BRANCH_MODULES "engine_dispatch\;platform/engine/engine.cpp")
+
+set_openmp()
 prepare_branches()
 
 
@@ -23,5 +25,3 @@ list(APPEND SOURCE_FILES library/solowejlib.cpp library/dllmain.cpp)
 
 add_library(solowej SHARED ${SOURCE_FILES})
 target_compile_definitions(solowej PUBLIC -DFASTFLOAT -DCOMPILE_FPU -DCOMPILE_SSE2 -DCOMPILE_SSE3 -DCOMPILE_SSSE3 -DCOMPILE_SSE4 -DCOMPILE_SSE4FMA -DCOMPILE_AVX1 -DCOMPILE_AVX2)
-
-target_link_libraries(solowej omp)
