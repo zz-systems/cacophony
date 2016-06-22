@@ -27,14 +27,12 @@
 #include <vector>
 #include <memory>
 
-#include "../../../dependencies/asyncplusplus/include/async++.h"
 #include "../../../dependencies/gorynych/gorynych/gorynych.h"
 #include "../../util/serializable.h"
 #include "../../modules/module_base.h"
 
 
 namespace zzsystems { namespace solowej { namespace platform {
-    using namespace async;
     using namespace gorynych;
     using namespace modules;
     using json = nlohmann::json;

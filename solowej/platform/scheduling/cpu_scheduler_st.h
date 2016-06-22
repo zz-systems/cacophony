@@ -25,7 +25,6 @@
 #pragma once
 
 namespace zzsystems { namespace solowej { namespace platform {
-    using namespace async;
     using namespace gorynych;
     using namespace modules;
 

@@ -93,7 +93,7 @@ namespace zzsystems { namespace solowej { namespace modules {
 						pos.z = cur_r.z + noisegen<SIMD_T>::realvalue_3d(cur, _seed.z);
 
 						dist = pos - _coords;
-						absDist = dot(dist, dist);
+						absDist = dist.dot(dist);
 
 						//select_candidate(absDist, pos, minDist, candidate);
 						auto mask = absDist < minDist;
@@ -120,7 +120,7 @@ namespace zzsystems { namespace solowej { namespace modules {
 			if (this->enableDistance)
 			{
 				auto diff		= candidate - _coords;
-				auto absDiff	= vsqrt(dot(diff, diff));
+				auto absDiff	= diff.magnitude();
 				
 				// value =  absDiff * sqrt3 - 1
 				value = vfmsub(absDiff, consts<vreal>::sqrt3(), cfl<vreal, 1>::val());
