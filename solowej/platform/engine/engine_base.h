@@ -76,5 +76,6 @@ namespace zzsystems { namespace solowej { namespace platform {
 
         // Run in place
         virtual void run(const vec3<float> &origin, float *target) = 0;
+        virtual void run(const vec3<float> &origin, int *target) = 0;
     };
 }}}

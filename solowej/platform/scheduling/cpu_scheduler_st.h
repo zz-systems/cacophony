@@ -67,5 +67,38 @@ namespace zzsystems { namespace solowej { namespace platform {
                 }
             }
         }
+
+        virtual void schedule(int *target, const vec3<float> &origin) /*const*/ override
+        {
+            size_t word		= dim<vreal>();
+            auto d			= this->config.dimensions;
+            auto remainder	= d.x % word;
+            auto adjust		= remainder > 0 ? word - remainder : 0;
+
+            _MM_SET_ROUNDING_MODE(_MM_ROUND_TOWARD_ZERO);
+            _MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_ON);
+
+            for (int z = 0; z < d.z; z++)
+            {
+                auto depth = z * d.y;
+
+                for (int y = 0; y < d.y; y++)
+                {
+                    auto stride = target + (depth + y) * d.x;
+
+                    for (size_t x = 0; x < d.x + adjust; x += word)
+                    {
+                        auto coords = this->transform(this->build_coords(
+                                static_cast<vreal>(static_cast<int>(x)),
+                                static_cast<vreal>(y),
+                                static_cast<vreal>(z)));
+
+                        vint r = vround(this->source(static_cast<vec3<vreal>>(origin) + coords));
+
+                        this->write_result(d, stride, remainder, x, r);
+                    }
+                }
+            }
+        }
     };
 }}}

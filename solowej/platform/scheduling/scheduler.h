@@ -64,6 +64,14 @@ namespace zzsystems { namespace solowej { namespace platform {
                 scheduler_st->schedule(target, origin);
         }
 
+        virtual void schedule(int *target, const vec3<float> &origin) /*const*/ override
+        {
+            if(multithreaded)
+                scheduler_mt->schedule(target, origin);
+            else
+                scheduler_st->schedule(target, origin);
+        }
+
         virtual void set_source(Module<vreal> source) override
         {
             scheduler_st->set_source(source);

@@ -69,6 +69,13 @@ namespace zzsystems { namespace solowej { namespace platform
 			cout << ">>executing " << static_dispatcher<capability>::unit_name() << " branch" << endl;
 			_scheduler.schedule(target, origin);
 		}
+
+		// Run in place
+		virtual void run(const vec3<float> &origin, int *target) override
+		{
+			cout << ">>executing " << static_dispatcher<capability>::unit_name() << " branch" << endl;
+			_scheduler.schedule(target, origin);
+		}
 	private:
 		scheduler<capability> _scheduler;
 		compiler<capability> _compiler;
@@ -140,6 +147,15 @@ namespace zzsystems { namespace solowej { namespace platform
 		}
 
 		void run(const vec3<float> &origin, float *target)
+		{
+			// TODO: downgrade
+			DYNAMIC_DISPATCH_ONE(info,
+			{
+				_engines[capability::value]->run(origin, target);
+			});
+		}
+
+		void run(const vec3<float> &origin, int *target)
 		{
 			// TODO: downgrade
 			DYNAMIC_DISPATCH_ONE(info,

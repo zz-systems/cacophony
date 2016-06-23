@@ -104,5 +104,27 @@ extern "C" {
 			return -1;
 		}
 	}
+
+	int solowej_run_cvti(const char* instance_key, int* target, float origin_x, float origin_y, float origin_z)
+	{
+		_error = "";
+
+		try
+		{
+			_engines[instance_key].run(zzsystems::gorynych::vec3<float>(origin_x, origin_y, origin_z), target);
+
+			return 0;
+		}
+		catch(zzsystems::solowej::platform::compilation_error ex)
+		{
+			cerr << (_error = ex.what()) << endl;
+			return ex.error_code();
+		}
+		catch(std::exception ex)
+		{
+			cerr << (_error = ex.what()) << endl;
+			return -1;
+		}
+	}
 }
 	
