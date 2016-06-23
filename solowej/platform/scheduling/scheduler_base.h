@@ -62,7 +62,7 @@ namespace zzsystems { namespace solowej { namespace platform {
                            ? vec3<float>(offset[0].get<float>(), offset[1].get<float>(), offset[2].get<float>())
                            : vec3<float>(0);
 
-            this->make_seam     = source.value<bool>("seamless", true);
+            this->make_seam     = source.value<bool>("make_seam", true);
 
             if(make_seam)
             {

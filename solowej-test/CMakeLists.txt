@@ -14,12 +14,12 @@ set(CMAKE_CXX_FLAGS "-std=c++14 -march=x86-64")
 
 set(BRANCHES_TO_COMPILE
         sse2_branch
-        #sse3_branch
-        #ssse3_branch
-        #sse4_branch
-        #sse4fma_branch
+        sse3_branch
+        ssse3_branch
+        sse4_branch
+        sse4fma_branch
         #avx1_branch
-        #avx2_branch
+        avx2_branch
         )
 
 set(BRANCH_MODULES
