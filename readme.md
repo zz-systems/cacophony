@@ -21,6 +21,8 @@ LibSolowej is a config-driven, parallelized, vectorized, partially extended, par
 
 If you develop with Unity, please take a look at [LibSolowej.Unity](https://github.com/zz-systems/LibSolowej.Unity) as it is basically an efficient .NET wrapper around libsolowej.
 
+Please keep in mind, that this release is a **Preview/Alpha Release** and feel free to report issues and bugs to the [Issue tracker on GitHub](https://github.com/zz-systems/solowej/issues)
+
 ## Features
 
 * Config driven (*.json file)
@@ -134,3 +136,40 @@ The config compiler can and will emit the following errors for malconfigured fil
 * Duplicate node               (The node names MUST be unique)
 * Invalid entry point          (When no entry point is set, otherwise 'Unresolved node reference')
 * Cyclic module reference      (Having infinite cycles in a compute tree... have fun)
+
+___
+
+## Available modules 
+Type, name are the config fields for a module
+
+### Generators (type = generator)
+
+* Perlin
+* Billow
+* Voronoi
+* Ridged multifractal
+* Spheres
+* Cylinders
+* Checkerboard
+* Constant
+
+### modifiers (type = modifier)
+* Curve 
+* Rotate
+* Select
+* Terrace 
+* Turbulence
+* Displace
+* Add 
+* Sub 
+* Mul 
+* Div 
+* Abs 
+* Min 
+* Max 
+* Clamp
+* Blend
+* Translate input
+* Scale input 
+* Scale output
+* Scale output biased
