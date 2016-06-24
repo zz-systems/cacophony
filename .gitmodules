@@ -16,3 +16,6 @@
 [submodule "dependencies/Catch_Patch"]
 	path = dependencies/Catch_Patch
 	url = https://github.com/zz-systems/Catch.git
+[submodule "dependencies/Custom_Catch"]
+	path = dependencies/Custom_Catch
+	url = https://github.com/zz-systems/Catch.git
