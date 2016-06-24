@@ -45,6 +45,8 @@ namespace zzsystems { namespace solowej { namespace platform {
     public:
         virtual const string version() const override { return "0.9"; }
 
+        /// @brief main constructor
+        /// @param aggregate_errors if set to true, the compiler tries to continue and accumulate the errors
         compiler_v09(bool aggregate_errors = false)
                 : compiler_base<capability>(aggregate_errors)
         {
@@ -82,8 +84,8 @@ namespace zzsystems { namespace solowej { namespace platform {
             this->add_module_map<mod_scale_output_biased> ("modifier/scale_output_biased");
         }
     private:
-        // Prepares a flat node list
-        // Builds an abstract module tree
+        /// @brief Prepares a flat node list
+        /// @returns abstract module tree root
         virtual shared_ptr<amt_node> build_amt(compiler_stage<SIMD_T> &stage, const json &source) const override
         {
             shared_ptr<amt_node> entry_point;
@@ -134,7 +136,8 @@ namespace zzsystems { namespace solowej { namespace platform {
         }
 
 
-        // Emits a real functor from abstract module tree node
+        /// @brief Emits a real functor from abstract module tree node
+        /// @returns built module (sub) tree
         virtual Module<vreal> emit_amt_module(compiler_stage<SIMD_T> &stage, shared_ptr<amt_node> node) const override
         {
             auto node_module 	= stage.emitted[node->instance_name];
@@ -167,9 +170,9 @@ namespace zzsystems { namespace solowej { namespace platform {
         }
 
 
-        // Builds a node tree from a flat config
-        // Checks for cyclic references
-        // Checks for existing refereces
+        /// @brief Builds a node tree from a flat config
+        /// Checks for cyclic references
+        /// Checks for existing refereces
         virtual void build_amt_node(compiler_stage<SIMD_T> &stage, shared_ptr<amt_node> node,
                                     unordered_set<shared_ptr<amt_node>> cycle_check // each stage should have it's own chain
         ) const override

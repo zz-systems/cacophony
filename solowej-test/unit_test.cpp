@@ -23,6 +23,7 @@
 //
 
 #define CATCH_CONFIG_MAIN
-#include "../dependencies/Catch/single_include/catch.hpp"
+//#include "../dependencies/Catch/single_include/catch.hpp"
+#include "../dependencies/Custom_Catch/single_include/catch.hpp"
 
 

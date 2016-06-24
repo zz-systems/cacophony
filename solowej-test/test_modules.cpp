@@ -22,7 +22,6 @@
 // Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
-#include "../dependencies/Catch/single_include/catch.hpp"
 #include "../dependencies/gorynych/gorynych/gorynych.h"
 #include "../dependencies/gorynych/gorynych-test/test_extensions.h"
 
