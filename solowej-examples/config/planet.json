@@ -6,34 +6,11 @@
     "entryPoint": "output",
     "scheduler": {
       "dimensions": [ 1257, 1, 1257 ],
-      "seamless": true,
+      "make_seam": true,
       "scale": [ 1, 5, 1 ],
       "offset": [ 0, 0, 0 ],
       "use_threads": false
     }
-  },
-  "constants": {
-    "PLANET_CIRCUMFERENCE": 44236800.0,
-    "MIN_ELEV": -8192.0,
-    "MAX_ELEV": 8192.0,
-    "CONTINENT_FREQUENCY": 1.0,
-    "CONTINENT_LACUNARITY": 2.208984375,
-    "MOUNTAIN_LACUNARITY": 2.142578125,
-    "HILLS_LACUNARITY": 2.162109375,
-    "PLAINS_LACUNARITY": 2.314453125,
-    "BADLANDS_LACUNARITY": 2.212890625,
-    "MOUNTAINS_TWIST": 1.0,
-    "HILLS_TWIST": 1.0,
-    "BADLANDS_TWIST": 1.0,
-    "SEA_LEVEL": 0.0,
-    "SHELF_LEVEL": -0.375,
-    "MOUNTAINS_AMOUNT": 0.5,
-    "HILLS_AMOUNT": 0.75,
-    "BADLANDS_AMOUNT": 0.03125,
-    "TERRAIN_OFFSET": 1.0,
-    "MOUNTAIN_GLACIATION": 1.375,
-    "CONTINENT_HEIGHT_SCALE": 0.25,
-    "RIVER_DEPTH": 0.0234375
   },
   "modules": [
     {
