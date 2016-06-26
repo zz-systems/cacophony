@@ -63,7 +63,8 @@ namespace zzsystems { namespace solowej { namespace platform {
 				return compiler->compile(source);
 
 			// TODO: error  handling
-			return nullptr;
+			// Return a dummy for now to prevevnt crashes
+			return [](const auto& c){return 0};
 		}
 
 		shared_ptr<compiler_base<capability>> get_compiler(const string &version)

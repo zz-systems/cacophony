@@ -43,6 +43,7 @@ namespace zzsystems { namespace solowej { namespace platform {
         enum compiler_error_codes
         {
             NONE,                   ///< No error. Dummy 0
+            GENERIC_ERROR,          ///< Generic unknown error
             AGGREGATE_ERROR,        ///< Aggregate error. Check other bits.
             INVALID_MODULE,         ///< Invalid module configuration
             UNRESOLVED_MODULE_REF,  ///< Unresolved module reference (e.g wrong module name, type)
@@ -59,7 +60,7 @@ namespace zzsystems { namespace solowej { namespace platform {
 
             compilation_error(string message) : runtime_error("Compilation error: " + message) { }
 
-            virtual int error_code() const { return NONE; }
+            virtual int error_code() const { return GENERIC_ERROR; }
         };
 
         /// @brief Aggregate error. Check nested errors
