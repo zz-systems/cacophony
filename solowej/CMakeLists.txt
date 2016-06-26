@@ -35,4 +35,5 @@ target_compile_definitions(solowej PUBLIC
 					-DCOMPILE_SSE4FMA 
 					-DCOMPILE_AVX1 
 					-DCOMPILE_AVX2
+					-DSOLOWEJ_EXPORTS
 					)
