@@ -1,0 +1,128 @@
+{
+  "version": "0.9",
+  "id": "597C0CF5-D13D-4379-87DF-665C1ADE7B77",
+  "environment": {
+    "max_feature_set": -1,
+    "entryPoint": "output",
+    "scheduler": {
+      "dimensions": [ 1257, 1, 1257 ],
+      "make_seam": true,
+      "scale": [ 1, 5, 1 ],
+      "offset": [ 0, 0, 0 ],
+      "use_threads": false
+    }
+  },
+  "modules": [
+    {
+      "name": "baseContinentDef_pe0",
+      "type": "generator",
+      "module": "perlin",
+      "settings": {
+        "frequency": 1.0,
+        "lacunarity": 2.208984375,
+        "persistence": 0.5,
+        "octaves": 14,
+        "seed": 0
+      }
+    },
+    {
+      "name": "baseContinentDef_cu",
+      "type": "modifier",
+      "module": "curve",
+      "source": [ "baseContinentDef_pe0" ],
+      "settings": {
+        "points": [
+          {
+            "in": -2,
+            "out": -1.625
+          },
+          {
+            "in": -1,
+            "out": -1.375
+          },
+          {
+            "in": 0,
+            "out": -0.375
+          },
+          {
+            "in": 0.0625,
+            "out": -0.125
+          },
+          {
+            "in": 0.125,
+            "out": 0.25
+          },
+          {
+            "in": 0.25,
+            "out": 1.0
+          },
+          {
+            "in": 0.5,
+            "out": 0.25
+          },
+          {
+            "in": 0.75,
+            "out": 0.25
+          },
+          {
+            "in": 1,
+            "out": 0.5
+          },
+          {
+            "in": 2,
+            "out": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "name": "baseContinentDef_pe1",
+      "type": "generator",
+      "module": "perlin",
+      "settings": {
+        "frequency": 4.34375,
+        "lacunarity": 2.208984375,
+        "persistence": 0.5,
+        "octaves": 11,
+        "seed": 111
+      }
+    },
+    {
+      "name": "baseContinentDef_sb",
+      "type": "modifier",
+      "module": "scale_output_biased",
+      "source": [ "baseContinentDef_pe1" ],
+      "settings": {
+        "scale": 0.375,
+        "bias": 0.625
+      }
+    },
+    {
+      "name": "baseContinentDef_mi",
+      "type": "modifier",
+      "module": "min",
+      "source": [ "baseContinentDef_sb", "baseContinentDef_cu" ],
+      "settings": { }
+    },
+    {
+      "name": "baseContinentDef_cl",
+      "type": "modifier",
+      "module": "clamp",
+      "source": [ "baseContinentDef_mi" ],
+      "settings": {
+        "min": -1,
+        "max": 1
+      }
+    },
+    {
+      "name": "output",
+      "type": "modifier",
+      "module": "scale_output_biased",
+      "source": [ "baseContinentDef_cl" ],
+      "settings": {
+        "scale": 0.5,
+        "bias": 0.5
+      }
+    }
+  ]
+}
