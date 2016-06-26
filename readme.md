@@ -35,6 +35,8 @@ Please keep in mind, that this release is a **Preview/Alpha Release** and feel f
 ## Current state
 
 * In development! The API should not break that much anymore, but there's still a lot to do! 
+* Cache module not exposed
+* Ridged multifractal unit test fails, FPU and FMA ( + AVX) value difference is larger than Epsilon (But still a good value to be visually indistinguishable)
 
 ### Compiles & runs on:
 * Linux 64 bit, CLANG 3.8 (preferred, the built binary is faster than with GCC!)
