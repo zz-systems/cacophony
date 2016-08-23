@@ -54,37 +54,42 @@ namespace zzsystems { namespace solowej { namespace modules {
 				
 		const json& operator<<(const json &source) override
 		{
-			frequency = source.value<float>("frequency", 1.0f);
-			lacunarity = source.value<float>("lacunarity", 2.0f);
+			frequency 	= source.value<float>("frequency", 1.0f);
+			lacunarity 	= source.value<float>("lacunarity", 2.0f);
 			persistence = source.value<float>("persistence", 0.5f);
 
-			seed = source.value<int>("seed", 0);
-			octaves = source.value<int>("octaves", 6);
-			quality  = static_cast<Quality>(source.value<int>("quality", static_cast<int>(Quality::Standard)));
+			seed 		= source.value<int>("seed", 0);
+			octaves		= source.value<int>("octaves", 6);
+			quality  	= static_cast<Quality>(source.value<int>("quality", static_cast<int>(Quality::Standard)));
 
 			return source;
 		}
 
 		vreal operator()(const vec3<vreal>& c) const override
 		{
-			vreal	value = cfl<vreal, 0>::val(),
-					currentPersistence = cfl<vreal, 1>::val();
+			REGISTER_CL_FUNC(float, "mod_perlin", (float3 c), 
+				CAPTURE_CL_PARAMS(NV(frequency), NV(lacunarity), NV(persistence), NV(seed), NV(octaves), NV(quality)), 				
+				{			
+					vreal	value = cfl<vreal, 0>::val(),
+							currentPersistence = cfl<vreal, 1>::val();
 
-			auto _coords = c * frequency;
+					vec3<vreal> _coords = c * frequency;
 
-			for (int curOctave = 0; curOctave < octaves; curOctave++)
-			{
-				value += currentPersistence * noisegen<SIMD_T>::gradient_coherent_3d(
-					clamp_int32<vreal>(_coords),
-					seed + curOctave, //& 0xffffffff,
-					quality);
+					for (int curOctave = 0; curOctave < octaves; curOctave++)
+					{
+						value += currentPersistence * noisegen<SIMD_T>::gradient_coherent_3d(
+							clamp_int32(_coords),
+							seed + curOctave, //& 0xffffffff,
+							quality);
 
-				// Prepare the next octave.
-				_coords *= lacunarity;
-				currentPersistence *= persistence;
-			}
+						// Prepare the next octave.
+						_coords *= lacunarity;
+						currentPersistence *= persistence;
+					}
 
-			return value;
+					return value;
+				}
+			);
 		}
 	};	
 }}}

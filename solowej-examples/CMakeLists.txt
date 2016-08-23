@@ -23,15 +23,25 @@ configure_file(config/granite.json ${CMAKE_CURRENT_BINARY_DIR}/config/granite.js
 configure_file(config/perlin_test.json ${CMAKE_CURRENT_BINARY_DIR}/config/perlin_test.json)
 configure_file(config/planet.json ${CMAKE_CURRENT_BINARY_DIR}/config/planet.json)
 
-set_openmp()
+
 
 add_executable(solowej-examples ${SOURCE_FILES})
+
 
 if(WIN32)
 	target_link_libraries(solowej-examples solowej)
 else()
-	target_link_libraries(solowej-examples X11 jpeg png solowej)
+	target_link_libraries(solowej-examples X11 jpeg png solowej uuid)
 endif(WIN32)
+
+set_openmp()
+set_opencl()
+
+
+if(OpenCL_FOUND)
+	message("opencl")
+	target_link_libraries(solowej-examples ${OpenCL_LIBRARIES})
+endif(OpenCL_FOUND)
 
 target_compile_definitions(solowej-examples PUBLIC 
 	-DCOMPILE_FPU 

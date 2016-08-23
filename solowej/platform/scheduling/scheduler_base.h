@@ -35,6 +35,8 @@
 namespace zzsystems { namespace solowej { namespace platform {
     using namespace gorynych;
     using namespace modules;
+    using namespace gorynych::io;
+
     using json = nlohmann::json;
 
     struct scheduler_config : serializable<json>
@@ -69,16 +71,12 @@ namespace zzsystems { namespace solowej { namespace platform {
                 seam_dimensions.x = vmax(seam_dimensions.x - 1, 1);
                 seam_dimensions.y = vmax(seam_dimensions.y - 1, 1);
                 seam_dimensions.z = vmax(seam_dimensions.z - 1, 1);
-            }
-
-            cout << "dimensions: [ " << this->dimensions.x << ", " << this->dimensions.y << ", " << this->dimensions.z << " ]" << endl;
-            cout << "scale: [ " << this->scale.x << ", " << this->scale.y << ", " << this->scale.z << " ]" << endl;
-            cout << "offset: [ " << this->offset.x << ", " << this->offset.y << ", " << this->offset.z << " ]" << endl;
+            }            
         }
     };
 
     DISPATCHED class ALIGNED scheduler_base :
-        public gorynych::platform::scheduler_base<capability>,
+        public gorynych::platform::cpu_scheduler_base<capability>,
         public serializable<json>
     {
         using vreal = typename static_dispatcher<capability>::vreal;
@@ -130,30 +128,33 @@ namespace zzsystems { namespace solowej { namespace platform {
     protected:
         Transformer<vreal> build_transform(Transformer<vreal> transformer)
         {
-            cout << "building input transform..." << endl;
-
-            cout << boolalpha << "has seam: " << config.make_seam << endl;
-
             auto scale              = config.scale;
             auto offset             = config.offset;
             auto dimensions         = config.dimensions;
             auto seam_dimensions    = config.seam_dimensions;
 
+
+            cout << green << ">>>building input transformer" << def << endl;
+            cout << "has seam:   "  << boolcolor(config.make_seam)  << endl;
+            cout << "dimensions: "  << dimensions                   << endl;
+            cout << "scale:      "  << scale                        << endl;
+            cout << "offset:     "  << offset                       << endl;            
+
             if (static_cast<bool>(transformer))
             {
                 if (scale != vec3<float>(1) && offset != vec3<float>(0))
                 {
-                    cout << "user defined transformer: scaled, biased" << endl;
+                    cout << "transformer: scaled, biased" << endl;
                     return [seam_dimensions, scale, offset, transformer](const auto&c) { return transformer(c) / static_cast<vec3<vreal>>(seam_dimensions) * static_cast<vec3<vreal>>(scale) + static_cast<vec3<vreal>>(offset); };
                 }
                 if (scale != vec3<float>(1))
                 {
-                    cout << "user defined transformer: scaled" << endl;
+                    cout << "transformer: scaled" << endl;
                     return [seam_dimensions, scale, transformer](const auto&c) { return transformer(c) / static_cast<vec3<vreal>>(seam_dimensions) * static_cast<vec3<vreal>>(scale); };
                 }
                 if (offset != vec3<float>(0))
                 {
-                    cout << "user defined transformer: biased" << endl;
+                    cout << "transformer: biased" << endl;
                     return [seam_dimensions, offset, transformer](const auto&c) { return transformer(c) / static_cast<vec3<vreal>>(seam_dimensions) + static_cast<vec3<vreal>>(offset); };
                 }
             }
@@ -161,22 +162,22 @@ namespace zzsystems { namespace solowej { namespace platform {
             {
                 if (scale != vec3<float>(1) && offset != vec3<float>(0))
                 {
-                    cout << "default transformer: scaled, biased" << endl;
+                    cout << "transformer: default, scaled, biased" << endl;
                     return [seam_dimensions, scale, offset](const auto&c) { return c / static_cast<vec3<vreal>>(seam_dimensions) * static_cast<vec3<vreal>>(scale) + static_cast<vec3<vreal>>(offset); };
                 }
                 if (scale != vec3<float>(1))
                 {
-                    cout << "default transformer: scaled" << endl;
+                    cout << "transformer: default, scaled" << endl;
                     return [seam_dimensions, scale](const auto&c) { return c / static_cast<vec3<vreal>>(seam_dimensions) * static_cast<vec3<vreal>>(scale); };
                 }
                 if (offset != vec3<float>(0))
                 {
-                    cout << "default transformer: biased" << endl;
+                    cout << "transformer: default, biased" << endl;
                     return [seam_dimensions, offset](const auto&c) { return c / static_cast<vec3<vreal>>(seam_dimensions) + static_cast<vec3<vreal>>(offset); };
                 }
             }
 
-            cout << "default transformer" << endl;
+            cout << "transformer: default" << endl;
             return [seam_dimensions](const auto &c)  { return c / static_cast<vec3<vreal>>(seam_dimensions); };
         }
     };

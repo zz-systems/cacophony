@@ -46,20 +46,25 @@ namespace zzsystems { namespace solowej { namespace examples {
 		//e.info.setFlag(CAPABILITY_FMA3, false);
 		//e.info.setFlag(CAPABILITY_FMA4, false);
 
-		solowej_get_engine("examples")->info.feature_flags &= sysinfo.feature_flags;
-		solowej_get_engine("examples")->compile_file("config/planet.json");
+		auto fpu_engine 	= solowej_get_engine("examples-fpu-reference");
+		auto dynamic_engine = solowej_get_engine("examples-dynamic-reference");
 
-		auto flags = solowej_get_engine("examples")->info.feature_flags;
+		fpu_engine->info.feature_flags = CAPABILITY_NONE;
+		dynamic_engine->info.feature_flags &= sysinfo.feature_flags;
 
-        auto d = solowej_get_engine("examples")->get_config().dimensions;
+		fpu_engine->compile_file("config/planet.json");
+		dynamic_engine->compile_file("config/planet.json");
+
+		//auto flags = solowej_get_engine("examples")->info.feature_flags;
+
+        auto d = fpu_engine->get_config().dimensions;
 		cerr << d.x << " " << d.y << " " << d.z << endl;
 		auto f1 = [&]()
 		{
 			//std::vector<float, aligned_allocator<float, 32>> t(w * h * 1);
 			auto t = make_shared<vector<float>>(d.x * d.y * d.z);
-
-			::solowej_get_engine("examples")->info.feature_flags = flags;
-			::solowej_run("examples", &t->at(0), 0, 0, 0);
+			
+			solowej_run("examples-dynamic-reference", &t->at(0), 0, 0, 0);
 
 			return t;
 		};
@@ -67,9 +72,8 @@ namespace zzsystems { namespace solowej { namespace examples {
 		auto f2 = [&]()
 		{
 			auto t = make_shared<vector<float>>(d.x * d.y * d.z);
-
-			::solowej_get_engine("examples")->info.feature_flags = (CAPABILITY_NONE);
-			::solowej_run("examples", &t->at(0), 0, 0, 0);
+			
+			solowej_run("examples-fpu-reference", &t->at(0), 0, 0, 0);
 
 			return t;
 		};

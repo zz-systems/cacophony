@@ -44,7 +44,7 @@ namespace zzsystems { namespace solowej { namespace platform {
         {
             scheduler_st    = gorynych::make_shared<cpu_scheduler_st<capability>>();
             scheduler_mt    = gorynych::make_shared<cpu_scheduler_mt<capability>>();
-            //scheduler_gpu   = gorynych::make_shared<gpu_scheduler<capability>>();
+            //scheduler_cl    = gorynych::make_shared<cl_scheduler<capability>>();
         }
 
         virtual void deserialize(const json &source) override
@@ -52,8 +52,11 @@ namespace zzsystems { namespace solowej { namespace platform {
             multithreaded   = source.value<bool>("use_threads", true);
 
             this->config    << source;
-            (*scheduler_st) << source;
-            (*scheduler_mt) << source;
+            
+            if(multithreaded)                
+                (*scheduler_mt) << source;
+            else 
+                (*scheduler_st) << source;
         }
 
         virtual void schedule(float *target, const vec3<float> &origin) /*const*/ override

@@ -84,7 +84,11 @@ namespace zzsystems { namespace solowej { namespace platform
 	namespace detail
 	{
 		template<typename capability>
-		std::shared_ptr<engine_base> get_engine();
+		std::shared_ptr<engine_base> get_engine()
+		{
+			//throw std::runtime_error("Engine not implemented");
+			return nullptr;
+		}
 
 #define BRANCH_DEF(branch) template<> std::shared_ptr<engine_base> get_engine<capability_##branch>();
 				STATIC_DISPATCH_SOME_RAW();
@@ -129,40 +133,100 @@ namespace zzsystems { namespace solowej { namespace platform
 
 			// For each valid branch
 			// TODO: downgrade when an unsupported feature is selected
-			DYNAMIC_DISPATCH_SOME(info,
-			{
-				_engines[capability::value]->compile(source);
-			});
+			//DYNAMIC_DISPATCH_SOME(info,
+			//{
+			// 	if(_engines[capability::value] != nullptr)
+			//		 _engines[capability::value]->compile(source);
+			 	//find_engine(info)
+			//});
+
+			_engine = find_engine(info);
+			_engine->compile(source);
 		}
 
 		float* run(const vec3<float> &origin)
 		{
 			// TODO: downgrade
-			DYNAMIC_DISPATCH_ONE(info,
-			{
-				return _engines[capability::value]->run(origin);
-			});
+			// DYNAMIC_DISPATCH_ONE(info,
+			// {
+			// 	return _engines[capability::value]->run(origin);
+			// });
 
-			return nullptr;
+			// return nullptr;
+
+			return _engine->run(origin);
 		}
 
 		void run(const vec3<float> &origin, float *target)
 		{
 			// TODO: downgrade
-			DYNAMIC_DISPATCH_ONE(info,
-			{
-				_engines[capability::value]->run(origin, target);
-			});
+			// DYNAMIC_DISPATCH_ONE(info,
+			// {
+			// 	_engines[capability::value]->run(origin, target);
+			// });
+
+			_engine->run(origin, target);
 		}
 
 		void run(const vec3<float> &origin, int *target)
 		{
 			// TODO: downgrade
-			DYNAMIC_DISPATCH_ONE(info,
+			// DYNAMIC_DISPATCH_ONE(info,
+			// {
+			// 	_engines[capability::value]->run(origin, target);
+			// });
+
+			_engine->run(origin, target);
+		}
+
+		shared_ptr<engine_base> find_engine(const system_info &info)
+		{
+			int capability = info.feature_flags;
+			auto ii = info;
+			shared_ptr<engine_base> engine = nullptr;
+			
+			do
 			{
-				_engines[capability::value]->run(origin, target);
-			});
+				DYNAMIC_DISPATCH_ONE(ii, 
+				{
+					engine = _engines[capability::value];					
+				});
+
+				if(engine == nullptr)
+				{
+					cerr << "[Warning] Engine for [" << system_info::getName((capabilities)hibit(ii.feature_flags)) << "] branch not found" << endl;
+
+					ii.feature_flags = unsetHighestBit(ii.feature_flags);
+				}
+			}
+			while(engine == nullptr);
+
+			return engine;
 		}
 	private:
+
+		template<typename T> T unsetHighestBit(T val) 
+		{
+			for(uint32_t i = sizeof(T) * numeric_limits<char>::digits - 1; i >= 0; i--) 
+			{
+				if(val & (1 << i)) 
+				{
+					val &= ~(1 << i);
+					break;
+				}
+			}
+			return val;
+		}
+
+		int hibit(unsigned int n) {
+			n |= (n >>  1);
+			n |= (n >>  2);
+			n |= (n >>  4);
+			n |= (n >>  8);
+			n |= (n >> 16);
+			return n - (n >> 1);
+		}
+
+		shared_ptr<engine_base> _engine;
 	};
 }}}
