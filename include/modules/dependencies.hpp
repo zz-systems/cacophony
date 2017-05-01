@@ -2,7 +2,7 @@
 // Vectorized and parallelized version of libnoise using the zacc SIMD toolkit
 // Copyright (C) 2015-2016 Sergej Zuyev (sergej.zuyev - at - zz-systems.net)
 //
-// Original libnoise:
+// Original libnoise: 
 // Copyright (C) 2003, 2004 Jason Bevins
 // The developer's email is jlbezigvins@gmzigail.com (for great email, take
 // off every 'zig'.)
@@ -24,32 +24,16 @@
 
 #pragma once
 
-#include "../dependencies.h"
-#include "../generators/perlin.h"
+#define COMPAT_OLD_LINAL
 
-namespace zzsystems { namespace solowej { namespace modules {
-    using namespace zacc;
-    using namespace math;
+#include <vector>
+#include <algorithm>
 
-    MODULE(mod_displace)
-    {
-    public:
-        mod_displace() :
-                BASE(mod_displace)::cloneable(4)
-        {}
+#include "zacc.hpp"
+#include "math/interpolation.hpp"
 
-        MODULE_PROPERTY(source, 0)
-        MODULE_PROPERTY(x, 1)
-        MODULE_PROPERTY(y, 2)
-        MODULE_PROPERTY(z, 3)
+#include "util/cloneable.h"
+#include "util/serializable.h"
 
-
-        // Apply turbulence to the source input
-        vreal operator()(const vec3<vreal> &coords) const override
-        {
-            vec3<vreal> distortion( get_x()(coords), get_y()(coords), get_z()(coords) );
-
-            return get_source()(coords + distortion);
-        }
-    };
-}}}
+#include "noise/noisegenerators.hpp"
+#include "module_base.hpp"

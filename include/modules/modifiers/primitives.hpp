@@ -24,9 +24,9 @@
 
 #pragma once
 
-#include "../dependencies.h"
+#include "modules/dependencies.hpp"
 
-namespace zzsystems { namespace solowej {	namespace modules {
+namespace cacophony {	namespace modules {
 	using namespace zacc;
 	using namespace math;
 
@@ -38,7 +38,7 @@ namespace zzsystems { namespace solowej {	namespace modules {
 
 		pow() : cloneable(2) {}
 
-		vreal operator()(const vec3<vreal> &coords) const override
+		zfloat operator()(const vec3<zfloat> &coords) const override
 		{
 			return vpow(get_a()(coords) , get_b()(coords));
 		}
@@ -52,7 +52,7 @@ namespace zzsystems { namespace solowej {	namespace modules {
 
 		mod_add() : BASE(mod_add)::cloneable(2) {}
 
-		vreal operator()(const vec3<vreal> &coords) const override
+		zfloat operator()(const vec3<zfloat> &coords) const override
 		{
 			return get_a()(coords) + get_b()(coords);
 		}
@@ -66,7 +66,7 @@ namespace zzsystems { namespace solowej {	namespace modules {
 
 		mod_sub() : BASE(mod_sub)::cloneable(2) {}
 
-		vreal operator()(const vec3<vreal> &coords) const override
+		zfloat operator()(const vec3<zfloat> &coords) const override
 		{
 			return get_a()(coords) - get_b()(coords);
 		}
@@ -80,7 +80,7 @@ namespace zzsystems { namespace solowej {	namespace modules {
 
 		mod_mul() : BASE(mod_mul)::cloneable(2) {}
 
-		vreal operator()(const vec3<vreal> &coords) const override
+		zfloat operator()(const vec3<zfloat> &coords) const override
 		{
 			return get_a()(coords) * get_b()(coords);
 		}
@@ -94,7 +94,7 @@ namespace zzsystems { namespace solowej {	namespace modules {
 
 		mod_div() : BASE(mod_div)::cloneable(2) {}
 
-		vreal operator()(const vec3<vreal> &coords) const override
+		zfloat operator()(const vec3<zfloat> &coords) const override
 		{
 			return get_a()(coords) / get_b()(coords);
 		}
@@ -109,12 +109,12 @@ namespace zzsystems { namespace solowej {	namespace modules {
 
 		mod_blend() : BASE(mod_blend)::cloneable(3) {}
 
-		vreal operator()(const vec3<vreal> &coords) const override
+		zfloat operator()(const vec3<zfloat> &coords) const override
 		{
 			//return lerp(v0, v1, (alpha + 1.0) / 2.0);
 			return lerp(get_a()(coords),
 						get_b()(coords), 
-						(get_alpha()(coords) + cfl<vreal, 1>::val()) / cfl<vreal, 2>::val()
+						(get_alpha()(coords) + 1) / 2
 				);
 		}
 	};
@@ -122,28 +122,27 @@ namespace zzsystems { namespace solowej {	namespace modules {
 	MODULE(mod_translate_input)
 	{
 	public:
-		vec3<vreal> offset;
-		mod_translate_input(const vec3<vreal> &offset = vec3<vreal>(0.0f)) :
+		vec3<zfloat> offset;
+		mod_translate_input(const vec3<zfloat> &offset = vec3<zfloat>(0.0f)) :
 			BASE(mod_translate_input)::cloneable(1),
 			offset(offset)
 		{}
 
-		mod_translate_input(const mod_translate_input<SIMD_T> &rhs) :
+		mod_translate_input(const mod_translate_input<branch> &rhs) :
 			BASE(mod_translate_input)::cloneable(rhs), offset(rhs.offset)
 		{}
 		
-		const json& operator <<(const json &source) override
+		void deserialize(const json &source) override
 		{
 			auto so = source["offset"];
 // TODO: add "value" default read
-			offset = vec3<vreal>(so[0].get<float>(), so[1].get<float>(), so[2].get<float>());
+			offset = vec3<zfloat>(so[0].get<float>(), so[1].get<float>(), so[2].get<float>());
 
-			return source;
 		}
 
 		MODULE_PROPERTY(a, 0);
 
-		vreal operator()(const vec3<vreal> &coords) const override
+		zfloat operator()(const vec3<zfloat> &coords) const override
 		{
 			return get_a()(coords + offset);
 		}
@@ -152,8 +151,8 @@ namespace zzsystems { namespace solowej {	namespace modules {
 	MODULE(mod_scale_input)
 	{
 	public:
-		vec3<vreal> scale;
-		mod_scale_input(const vec3<vreal> &scale = vec3<vreal>(1.0f)) :
+		vec3<zfloat> scale;
+		mod_scale_input(const vec3<zfloat> &scale = vec3<zfloat>(1.0f)) :
 			BASE(mod_scale_input)::cloneable(1), scale(scale)
 		{}
 
@@ -161,17 +160,16 @@ namespace zzsystems { namespace solowej {	namespace modules {
 			BASE(mod_scale_input)::cloneable(rhs), scale(rhs.scale)
 		{}
 
-		const json& operator <<(const json &source) override
+		void deserialize(const json &source) override
 		{
 			auto so = source["scale"];
 // TODO: add "value" default read
-			scale = vec3<vreal>(so[0].get<float>(), so[1].get<float>(), so[2].get<float>());
-			return source;
+			scale = vec3<zfloat>(so[0].get<float>(), so[1].get<float>(), so[2].get<float>());
 		}
 
 		MODULE_PROPERTY(a, 0);
 		
-		vreal operator()(const vec3<vreal> &coords) const override
+		zfloat operator()(const vec3<zfloat> &coords) const override
 		{
 			return get_a()(coords * scale);
 		}
@@ -180,8 +178,8 @@ namespace zzsystems { namespace solowej {	namespace modules {
 	MODULE(mod_scale_output)
 	{
 	public:
-		vreal scale;
-		mod_scale_output(const vreal &scale = 1.0f) :
+		zfloat scale;
+		mod_scale_output(const zfloat &scale = 1.0f) :
 			BASE(mod_scale_output)::cloneable(1), scale(scale)
 		{}
 
@@ -189,15 +187,14 @@ namespace zzsystems { namespace solowej {	namespace modules {
 			BASE(mod_scale_output)::cloneable(rhs), scale(rhs.scale)
 		{}
 
-		const json& operator <<(const json &source) override
+		void deserialize(const json &source) override
 		{
 			scale = source.value<float>("scale", 1.0f);
-			return source;
 		}
 
 		MODULE_PROPERTY(a, 0);
 
-		vreal operator()(const vec3<vreal> &coords) const override
+		zfloat operator()(const vec3<zfloat> &coords) const override
 		{
 			return get_a()(coords) * scale;
 		}
@@ -206,8 +203,8 @@ namespace zzsystems { namespace solowej {	namespace modules {
 	MODULE(mod_scale_output_biased)
 	{
 	public:
-		vreal scale, bias;
-		mod_scale_output_biased(const vreal &scale = 1.0f, const vreal &bias = 0.0f) :
+		zfloat scale, bias;
+		mod_scale_output_biased(const zfloat &scale = 1.0f, const zfloat &bias = 0.0f) :
 			BASE(mod_scale_output_biased)::cloneable(1), scale(scale), bias(bias)
 		{}
 
@@ -215,16 +212,15 @@ namespace zzsystems { namespace solowej {	namespace modules {
 			BASE(mod_scale_output_biased)::cloneable(rhs), scale(rhs.scale), bias(rhs.bias)
 		{}
 
-		const json& operator <<(const json &source) override
+		void deserialize(const json &source) override
 		{
 			scale = source.value<float>("scale", 1.0f);
 			bias = source.value<float>("bias", 0.0f);
-			return source;
 		}
 		
 		MODULE_PROPERTY(a, 0);
 
-		vreal operator()(const vec3<vreal> &coords) const override
+		zfloat operator()(const vec3<zfloat> &coords) const override
 		{
 			return vfmadd(get_a()(coords), scale, bias);
 		}
@@ -237,7 +233,7 @@ namespace zzsystems { namespace solowej {	namespace modules {
 
 		mod_abs() : BASE(mod_abs)::cloneable(1) {}
 
-		vreal operator()(const vec3<vreal> &coords) const override
+		zfloat operator()(const vec3<zfloat> &coords) const override
 		{
 			return vabs(get_a()(coords));
 		}
@@ -251,7 +247,7 @@ namespace zzsystems { namespace solowej {	namespace modules {
 
 		mod_min() : BASE(mod_min)::cloneable(2) {}
 
-		vreal operator()(const vec3<vreal> &coords) const override 
+		zfloat operator()(const vec3<zfloat> &coords) const override
 		{
 			return vmin(get_a()(coords), get_b()(coords));
 		}
@@ -265,7 +261,7 @@ namespace zzsystems { namespace solowej {	namespace modules {
 
 		mod_max() : BASE(mod_max)::cloneable(2) {}
 
-		vreal operator()(const vec3<vreal> &coords) const override
+		zfloat operator()(const vec3<zfloat> &coords) const override
 		{
 			return vmax(get_a()(coords), get_b()(coords));
 		}
@@ -274,8 +270,8 @@ namespace zzsystems { namespace solowej {	namespace modules {
 	MODULE(mod_clamp)
 	{
 	public:
-		vreal min, max;
-		mod_clamp(const vreal &min = -1.0f, const vreal &max = 1.0f) :
+		zfloat min, max;
+		mod_clamp(const zfloat &min = -1.0f, const zfloat &max = 1.0f) :
 			BASE(mod_clamp)::cloneable(1), min(min), max(max)
 		{}
 
@@ -283,18 +279,17 @@ namespace zzsystems { namespace solowej {	namespace modules {
 			BASE(mod_clamp)::cloneable(rhs), min(rhs.min), max(rhs.max)
 		{}
 
-		const json& operator <<(const json &source) override
+		void deserialize(const json &source) override
 		{
 			min = source.value<float>("min", -1.0f);
 			max = source.value<float>("max", 1.0f);
-			return source;
 		}
 
 		MODULE_PROPERTY(a, 0);
 
-		vreal operator()(const vec3<vreal> &coords) const override
+		zfloat operator()(const vec3<zfloat> &coords) const override
 		{
 			return vclamp(get_a()(coords), min, max);
 		}
 	};
-}}}
+}}

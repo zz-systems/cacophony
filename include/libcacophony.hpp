@@ -2,7 +2,7 @@
 // Vectorized and parallelized version of libnoise using the zacc SIMD toolkit
 // Copyright (C) 2015-2016 Sergej Zuyev (sergej.zuyev - at - zz-systems.net)
 //
-// Original libnoise:
+// Original libnoise: 
 // Copyright (C) 2003, 2004 Jason Bevins
 // The developer's email is jlbezigvins@gmzigail.com (for great email, take
 // off every 'zig'.)
@@ -24,32 +24,25 @@
 
 #pragma once
 
-#include "../dependencies.h"
-#include "../generators/perlin.h"
-
-namespace zzsystems { namespace solowej { namespace modules {
-    using namespace zacc;
-    using namespace math;
-
-    MODULE(mod_displace)
-    {
-    public:
-        mod_displace() :
-                BASE(mod_displace)::cloneable(4)
-        {}
-
-        MODULE_PROPERTY(source, 0)
-        MODULE_PROPERTY(x, 1)
-        MODULE_PROPERTY(y, 2)
-        MODULE_PROPERTY(z, 3)
+#include "platform/engine/engine.hpp"
 
 
-        // Apply turbulence to the source input
-        vreal operator()(const vec3<vreal> &coords) const override
-        {
-            vec3<vreal> distortion( get_x()(coords), get_y()(coords), get_z()(coords) );
+#ifdef WIN32
+    #ifdef CACOPHONY_EXPORTS
+        #define CACOPHONY_DLL_API __declspec(dllexport) 
+    #else
+        #define CACOPHONY_DLL_API __declspec(dllimport) 
+    #endif
+#else
+    #define CACOPHONY_DLL_API
+#endif
 
-            return get_source()(coords + distortion);
-        }
-    };
-}}}
+extern "C" {
+
+	CACOPHONY_DLL_API const char* cacophony_get_error();
+	CACOPHONY_DLL_API cacophony::platform::engine*  cacophony_get_engine        (const std::string& instance_key);
+	CACOPHONY_DLL_API int                           cacophony_compile_immediate (const char* instance_key, const char* content);
+	CACOPHONY_DLL_API int                           cacophony_compile_file      (const char* instance_key, const char* path);
+	CACOPHONY_DLL_API int                           cacophony_run		        (const char*instance_key, float* target, float origin_x, float origin_y, float origin_z);
+	CACOPHONY_DLL_API int                           cacophony_run_cvti	        (const char*instance_key, int* target,   float origin_x, float origin_y, float origin_z);
+}

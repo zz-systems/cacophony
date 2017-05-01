@@ -22,34 +22,16 @@
 // Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
-#pragma once
 
-#include "../dependencies.h"
-#include "../generators/perlin.h"
-
-namespace zzsystems { namespace solowej { namespace modules {
-    using namespace zacc;
-    using namespace math;
-
-    MODULE(mod_displace)
-    {
-    public:
-        mod_displace() :
-                BASE(mod_displace)::cloneable(4)
-        {}
-
-        MODULE_PROPERTY(source, 0)
-        MODULE_PROPERTY(x, 1)
-        MODULE_PROPERTY(y, 2)
-        MODULE_PROPERTY(z, 3)
+#include "system/branch.hpp"
+#include "platform/engine/engine.hpp"
 
 
-        // Apply turbulence to the source input
-        vreal operator()(const vec3<vreal> &coords) const override
-        {
-            vec3<vreal> distortion( get_x()(coords), get_y()(coords), get_z()(coords) );
-
-            return get_source()(coords + distortion);
-        }
-    };
-}}}
+template<>
+std::shared_ptr<zacc::entrypoint> zacc::system::resolve_entrypoint<zacc::branch::types>()
+{
+    std::cout << "Creating engine for " << zacc::branch::types::major_branch_name() << std::endl;
+    return std::static_pointer_cast<zacc::entrypoint>(
+            zacc::make_shared<cacophony::platform::simd_engine<zacc::branch::types>>()
+    );
+}

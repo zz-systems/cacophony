@@ -24,49 +24,48 @@
 
 #pragma once
 
-#include "../dependencies.h"
+#include "modules/dependencies.hpp"
 
-namespace zzsystems { namespace solowej { namespace modules {
+namespace cacophony { namespace modules {
 	using namespace zacc;
 	using namespace math;
 
 	MODULE(mod_curve)
 	{
 	public:
-		vector<pair<const vreal, vreal>, aligned_allocator<vreal, 32>> points;
+		std::vector<std::pair<const zfloat, zfloat>, aligned_allocator<zfloat, 32>> points;
 
 		MODULE_PROPERTY(source, 0)
 
-		mod_curve(const initializer_list<pair<const vreal, vreal>>& points = {})
+		mod_curve(const std::initializer_list<std::pair<const zfloat, zfloat>>& points = {})
 			: BASE(mod_curve)::cloneable(1), points(points)
 		{}
 
-		const json& operator <<(const json &source) override
+		void deserialize(const json &source) override
 		{
 			if (source["points"] != nullptr && source["points"].is_array()) 
 			{
 				for (auto point : source["points"])
 				{
 					points.push_back(
-						make_pair<vreal, vreal>(
+						std::make_pair<zfloat, zfloat>(
 							point["in"].get<float>(),
 							point["out"].get<float>()));
 				}
 			}
 
-			return source;
 		}
 
-		vreal operator()(const vec3<vreal>& coords) const override
+		zfloat operator()(const vec3<zfloat>& coords) const override
 		{
 			auto cpc = points.size();
 			assert(cpc >= 4);
 
 			auto val = get_source()(coords);
 			
-			vreal in1, in0, out3, out2, out1, out0, set_value, already_set;
+			zfloat in1, in0, out3, out2, out1, out0, set_value, already_set;
 
-			in1 = in0 = out3 = out2 = out1 = out0 = already_set = cfl<vreal, 0>::val();
+			in1 = in0 = out3 = out2 = out1 = out0 = already_set = 0;
 
 			size_t i0, i1, i2, i3;
 
@@ -110,4 +109,4 @@ namespace zzsystems { namespace solowej { namespace modules {
 			return vsel(in0 == in1, out1, cerp(out0, out1, out2, out3, alpha));
 		}
 	};	
-}}}
+}}

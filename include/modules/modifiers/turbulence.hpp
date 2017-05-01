@@ -24,22 +24,22 @@
 
 #pragma once
 
-#include "../dependencies.h"
-#include "../generators/perlin.h"
+#include "modules/dependencies.hpp"
+#include "modules/generators/perlin.hpp"
 
-namespace zzsystems { namespace solowej { namespace modules {
+namespace cacophony { namespace modules {
 	using namespace zacc;
 	using namespace math;
 
 	MODULE(mod_turbulence)
 	{	
 	public:
-		vec3<vreal> power;
+		vec3<zfloat> power;
 
-		mat3x3<vreal> dinput = {
-			vec3<vreal>(12414.0f, 65124.0f, 31337.0f) / vec3<vreal>(65536.0f),
-			vec3<vreal>(26519.0f, 18128.0f, 60493.0f) / vec3<vreal>(65536.0f),
-			vec3<vreal>(53820.0f, 11213.0f, 44845.0f) / vec3<vreal>(65536.0f)
+		mat3x3<zfloat> dinput = {
+			vec3<zfloat>(12414.0f, 65124.0f, 31337.0f) / vec3<zfloat>(65536.0f),
+			vec3<zfloat>(26519.0f, 18128.0f, 60493.0f) / vec3<zfloat>(65536.0f),
+			vec3<zfloat>(53820.0f, 11213.0f, 44845.0f) / vec3<zfloat>(65536.0f)
 		};
 
 		mod_turbulence(float power = 1.0, int roughness = 3, float frequency = 1.0, float lacunarity = 2.0, float persistence = 0.5, int seed = 0, Quality quality = Quality::Standard) :
@@ -50,7 +50,7 @@ namespace zzsystems { namespace solowej { namespace modules {
 			_zdistort(frequency, lacunarity, persistence, seed, roughness, quality)
 		{}
 
-		mod_turbulence(const mod_turbulence<vreal, vint>& rhs)
+		mod_turbulence(const mod_turbulence<branch>& rhs)
 			: BASE(mod_turbulence)::cloneable(rhs),
 			power(rhs.power),
 			_xdistort(rhs._xdistort), _ydistort(rhs._ydistort),	_zdistort(rhs._zdistort)
@@ -58,7 +58,7 @@ namespace zzsystems { namespace solowej { namespace modules {
 
 		MODULE_PROPERTY(source, 0)
 
-		const json& operator <<(const json &source) override
+		void deserialize(const json &source) override
 		{
 			json tmp = source;
 			tmp["octaves"] = tmp.value<int>("roughness", 3);
@@ -66,15 +66,14 @@ namespace zzsystems { namespace solowej { namespace modules {
 			_xdistort << tmp;
 			_ydistort << tmp;
 			_zdistort << tmp;
-			power = vec3<vreal>(source.value<float>("power", 1.0f));
+			power = vec3<zfloat>(source.value<float>("power", 1.0f));
 
-			return source;
 		}
 
 		// Apply turbulence to the source input
-		vreal operator()(const vec3<vreal> &coords) const override
+		zfloat operator()(const vec3<zfloat> &coords) const override
 		{	
-			auto distortion = power * vec3<vreal>(
+			auto distortion = power * vec3<zfloat>(
 				_xdistort(dinput.get_row(0) + coords),
 				_ydistort(dinput.get_row(1) + coords),
 				_zdistort(dinput.get_row(2) + coords));
@@ -82,8 +81,8 @@ namespace zzsystems { namespace solowej { namespace modules {
 			return get_source()(coords + distortion);
 		}
 	private:
-		mod_perlin<vreal, vint> _xdistort, _ydistort, _zdistort;
+		mod_perlin<branch> _xdistort, _ydistort, _zdistort;
 		// workaround to prevent VC 2015 linker crash (module obj -> module func)
-		//Module<vreal> _xdistort_workaround, _ydistort_workaround, _zdistort_workaround;
+		//Module<branch> _xdistort_workaround, _ydistort_workaround, _zdistort_workaround;
 	};
-}}}
+}}

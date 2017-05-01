@@ -24,32 +24,4 @@
 
 #pragma once
 
-#include "../dependencies.h"
-#include "../generators/perlin.h"
-
-namespace zzsystems { namespace solowej { namespace modules {
-    using namespace zacc;
-    using namespace math;
-
-    MODULE(mod_displace)
-    {
-    public:
-        mod_displace() :
-                BASE(mod_displace)::cloneable(4)
-        {}
-
-        MODULE_PROPERTY(source, 0)
-        MODULE_PROPERTY(x, 1)
-        MODULE_PROPERTY(y, 2)
-        MODULE_PROPERTY(z, 3)
-
-
-        // Apply turbulence to the source input
-        vreal operator()(const vec3<vreal> &coords) const override
-        {
-            vec3<vreal> distortion( get_x()(coords), get_y()(coords), get_z()(coords) );
-
-            return get_source()(coords + distortion);
-        }
-    };
-}}}
+#include "platform/engine/engine.hpp"

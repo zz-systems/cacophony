@@ -24,9 +24,9 @@
 
 #pragma once
 
-#include "../dependencies.h"
+#include "modules/dependencies.hpp"
 
-namespace zzsystems { namespace solowej { namespace modules {
+namespace cacophony { namespace modules {
 	using namespace zacc;
 	
 	using namespace math;
@@ -34,15 +34,15 @@ namespace zzsystems { namespace solowej { namespace modules {
 	MODULE(mod_terrace)
 	{
 	public:
-		vector<vreal, aligned_allocator<vreal, 32>> points;
+		std::vector<zfloat, aligned_allocator<zfloat, 32>> points;
 
 		bool invert = false;
 
-		mod_terrace(const initializer_list<vreal> &points = {}, bool invert = false)
+		mod_terrace(const std::initializer_list<zfloat> &points = {}, bool invert = false)
 			: BASE(mod_terrace)::cloneable(1), points(points), invert(invert)
 		{}
 
-		const json& operator <<(const json &source) override
+		void deserialize(const json &source) override
 		{
 			if (source["points"] != nullptr && source["points"].is_array())
 			{
@@ -52,19 +52,18 @@ namespace zzsystems { namespace solowej { namespace modules {
 				}
 			}
 
-			return source;
 		}
 
 		MODULE_PROPERTY(source, 0)
 
-		vreal operator()(const vec3<vreal>& coords) const override
+		zfloat operator()(const vec3<zfloat>& coords) const override
 		{
 			auto cpc = points.size();
 			assert(cpc >= 4);
 
-			vreal out1, out0, set_value, already_set;
+			zfloat out1, out0, set_value, already_set;
 
-			out1 = out0 = already_set = cfl<vreal, 0>::val();
+			out1 = out0 = already_set = 0;
 
 			size_t i0, i1;
 			auto val = get_source()(coords);
@@ -99,7 +98,7 @@ namespace zzsystems { namespace solowej { namespace modules {
 						
 			if (invert)
 			{
-				alpha = cfl<vreal, 1>::val() - alpha;
+				alpha = 1 - alpha;
 				std::swap(out0, out1);
 			}
 
@@ -108,4 +107,4 @@ namespace zzsystems { namespace solowej { namespace modules {
 			return vsel(out1 == out0, out0, lerp(out0, out1, alpha));
 		}		
 	};	
-}}}
+}}

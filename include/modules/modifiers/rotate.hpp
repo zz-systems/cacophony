@@ -24,9 +24,9 @@
 
 #pragma once
 
-#include "../dependencies.h"
+#include "modules/dependencies.hpp"
 
-namespace zzsystems { namespace solowej { namespace modules {
+namespace cacophony { namespace modules {
 	using namespace zacc;
 	
 	using namespace math;
@@ -34,7 +34,7 @@ namespace zzsystems { namespace solowej { namespace modules {
 	MODULE(mod_rotate)
 	{
 	public:
-		mat3x3<vreal> rot;
+		mat3x3<zfloat> rot;
 		vec3<float>  angles;
 
 		mod_rotate() : mod_rotate({ 0.0f, 0.0f, 0.0f }) {}
@@ -46,13 +46,13 @@ namespace zzsystems { namespace solowej { namespace modules {
 			build_rot_matrix(angles);
 		}
 
-		mod_rotate(const mod_rotate<vreal, vint> &rhs) :
+		mod_rotate(const mod_rotate<branch> &rhs) :
 			BASE(mod_rotate)::cloneable(rhs),
 			rot(rhs.rot), 
 			angles(rhs.angles)
 		{}
 
-		const json& operator <<(const json &source) override
+		void deserialize(const json &source) override
 		{
 			if (source["angles"] != nullptr && source["angles"].is_object())
 			{
@@ -62,20 +62,19 @@ namespace zzsystems { namespace solowej { namespace modules {
 			}
 
 			build_rot_matrix(angles);
-			return source;
 		}
 
 		MODULE_PROPERTY(source, 0)
 
-		vreal operator()(const vec3<vreal>& coords) const override
+		zfloat operator()(const vec3<zfloat>& coords) const override
 		{
 			return get_source()(rot * coords);
 		}
 	private:
 		void build_rot_matrix(const vec3<float>& angles)
 		{
-			auto cos = vec3<vreal>(::cos(angles.x), ::cos(angles.y), ::cos(angles.z));
-			auto sin = vec3<vreal>(::sin(angles.x), ::sin(angles.y), ::sin(angles.z));
+			auto cos = vec3<zfloat>(::cos(angles.x), ::cos(angles.y), ::cos(angles.z));
+			auto sin = vec3<zfloat>(::sin(angles.x), ::sin(angles.y), ::sin(angles.z));
 
 			rot =
 					{
@@ -85,4 +84,4 @@ namespace zzsystems { namespace solowej { namespace modules {
 					};
 		}
 	};
-}}}
+}}

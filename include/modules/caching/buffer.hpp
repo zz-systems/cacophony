@@ -2,7 +2,7 @@
 // Vectorized and parallelized version of libnoise using the zacc SIMD toolkit
 // Copyright (C) 2015-2016 Sergej Zuyev (sergej.zuyev - at - zz-systems.net)
 //
-// Original libnoise:
+// Original libnoise: 
 // Copyright (C) 2003, 2004 Jason Bevins
 // The developer's email is jlbezigvins@gmzigail.com (for great email, take
 // off every 'zig'.)
@@ -24,32 +24,43 @@
 
 #pragma once
 
-#include "../dependencies.h"
-#include "../generators/perlin.h"
+#include "modules/dependencies.hpp"
 
-namespace zzsystems { namespace solowej { namespace modules {
-    using namespace zacc;
-    using namespace math;
+namespace cacophony { namespace modules {
+	using namespace zacc;
+	
+	using namespace math;
 
-    MODULE(mod_displace)
-    {
-    public:
-        mod_displace() :
-                BASE(mod_displace)::cloneable(4)
-        {}
+	MODULE(mod_buffer)
+	{
+	public:
+		MODULE_PROPERTY(source, 0)
 
-        MODULE_PROPERTY(source, 0)
-        MODULE_PROPERTY(x, 1)
-        MODULE_PROPERTY(y, 2)
-        MODULE_PROPERTY(z, 3)
+		mod_buffer(const Module<branch> &source)
+			: BASE(mod_buffer)::cloneable(1), _is_cached(false)
+		{}
 
+		mod_buffer(const mod_buffer<branch> &source)
+			: BASE(mod_buffer)::cloneable(source), _is_cached(source._is_cached)
+		{}
 
-        // Apply turbulence to the source input
-        vreal operator()(const vec3<vreal> &coords) const override
-        {
-            vec3<vreal> distortion( get_x()(coords), get_y()(coords), get_z()(coords) );
+		zfloat operator()(const vec3<zfloat>& coords) const override
+		{
+			auto eq = coords == _buf_coords;
+			if(!(_is_cached && static_cast<bool>(eq.x) && static_cast<bool>(eq.y) && static_cast<bool>(eq.z)))
+			{
+				_buffered = get_source()(coords);
+				_buf_coords = coords;
+			}
 
-            return get_source()(coords + distortion);
-        }
-    };
-}}}
+			_is_cached = true;
+			return _buffered;			
+		}		
+
+	private:
+		mutable vec3<zfloat> _buf_coords;
+		mutable zfloat _buffered;
+		mutable bool _is_cached;
+	};
+
+}}

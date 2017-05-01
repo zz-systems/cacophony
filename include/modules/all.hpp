@@ -2,7 +2,7 @@
 // Vectorized and parallelized version of libnoise using the zacc SIMD toolkit
 // Copyright (C) 2015-2016 Sergej Zuyev (sergej.zuyev - at - zz-systems.net)
 //
-// Original libnoise:
+// Original libnoise: 
 // Copyright (C) 2003, 2004 Jason Bevins
 // The developer's email is jlbezigvins@gmzigail.com (for great email, take
 // off every 'zig'.)
@@ -24,32 +24,20 @@
 
 #pragma once
 
-#include "../dependencies.h"
-#include "../generators/perlin.h"
 
-namespace zzsystems { namespace solowej { namespace modules {
-    using namespace zacc;
-    using namespace math;
+#include "modules/generators/primitives.hpp"
+#include "modules/generators/billow.hpp"
+#include "modules/generators/voronoi.hpp"
+#include "modules/generators/perlin.hpp"
+#include "modules/generators/ridgedmultifrac.hpp"
 
-    MODULE(mod_displace)
-    {
-    public:
-        mod_displace() :
-                BASE(mod_displace)::cloneable(4)
-        {}
+#include "modules/modifiers/primitives.hpp"
+#include "modules/modifiers/curve.hpp"
+#include "modules/modifiers/rotate.hpp"
+#include "modules/modifiers/select.hpp"
+#include "modules/modifiers/terrace.hpp"
+#include "modules/modifiers/turbulence.hpp"
+#include "modules/modifiers/displace.hpp"
 
-        MODULE_PROPERTY(source, 0)
-        MODULE_PROPERTY(x, 1)
-        MODULE_PROPERTY(y, 2)
-        MODULE_PROPERTY(z, 3)
-
-
-        // Apply turbulence to the source input
-        vreal operator()(const vec3<vreal> &coords) const override
-        {
-            vec3<vreal> distortion( get_x()(coords), get_y()(coords), get_z()(coords) );
-
-            return get_source()(coords + distortion);
-        }
-    };
-}}}
+#include "modules/caching/buffer.hpp"
+#include "modules/caching/cache.hpp"

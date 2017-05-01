@@ -24,10 +24,10 @@
 
 #pragma once
 
-#include "../dependencies.h"
-#include "../generators/perlin.h"
+#include "modules/dependencies.hpp"
+#include "modules/generators/perlin.hpp"
 
-namespace zzsystems { namespace solowej { namespace modules {
+namespace cacophony { namespace modules {
     using namespace zacc;
     using namespace math;
 
@@ -45,11 +45,11 @@ namespace zzsystems { namespace solowej { namespace modules {
 
 
         // Apply turbulence to the source input
-        vreal operator()(const vec3<vreal> &coords) const override
+        zfloat operator()(const vec3<zfloat> &coords) const override
         {
-            vec3<vreal> distortion( get_x()(coords), get_y()(coords), get_z()(coords) );
+            vec3<zfloat> distortion( get_x()(coords), get_y()(coords), get_z()(coords) );
 
             return get_source()(coords + distortion);
         }
     };
-}}}
+}}

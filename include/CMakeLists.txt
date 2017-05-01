@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.3.2)
 project(solowej)
 
-include(../dependencies/gorynych/CMakeCommons)
+include(../dependencies/zacc/CMakeCommons)
 
 set(BRANCHES_TO_COMPILE
         fpu_branch
@@ -22,7 +22,7 @@ set_openmp()
 prepare_branches()
 
 
-list(APPEND SOURCE_FILES ../src/branch_entrypoint.cpp library/dllmain.cpp)
+list(APPEND SOURCE_FILES ../src/libcacophony.cpp library/dllmain.cpp)
 
 add_library(solowej SHARED ${SOURCE_FILES})
 target_compile_definitions(solowej PUBLIC 
