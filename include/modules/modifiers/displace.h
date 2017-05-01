@@ -24,10 +24,9 @@
 
 #pragma once
 
-#include "../dependencies.h"
-#include "../generators/perlin.h"
+#include "modules/generators/perlin.hpp"
 
-namespace zzsystems { namespace solowej { namespace modules {
+namespace cacophony { namespace modules {
     using namespace zacc;
     using namespace math;
 
@@ -52,4 +51,4 @@ namespace zzsystems { namespace solowej { namespace modules {
             return get_source()(coords + distortion);
         }
     };
-}}}
+}}

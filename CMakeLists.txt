@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.3.2)
 project(cacophony)
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/dependencies/zacc)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/dependencies)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/dependencies/zacc/cmake/shared.cmake)
 

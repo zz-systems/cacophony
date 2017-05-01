@@ -55,7 +55,8 @@ namespace cacophony { namespace platform {
         virtual void compile_file(const std::string &path)
         {
             std::ifstream file(path);
-            nlohmann::json source(file);
+            nlohmann::json source;
+            file >> source;
 
             config << source["environment"]["scheduler"];
             compile(source);

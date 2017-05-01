@@ -1,6 +1,15 @@
-[submodule "solowej/json"]
-	path = dependencies/json
-	url = https://github.com/nlohmann/json.git
 [submodule "dependencies/Catch_Patch"]
 	path = dependencies/Catch_Patch
 	url = https://github.com/zz-systems/Catch.git
+[submodule "dependencies/cimg"]
+	path = dependencies/cimg
+	url = https://github.com/dtschump/CImg.git
+[submodule "dependencies/googletest"]
+	path = dependencies/googletest
+	url = https://github.com/google/googletest.git
+[submodule "dependencies/json"]
+	path = dependencies/json
+	url = https://github.com/nlohmann/json.git
+[submodule "dependencies/zacc"]
+	path = dependencies/zacc
+	url = https://github.com/zz-systems/zacc.git

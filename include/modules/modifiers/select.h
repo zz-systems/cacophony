@@ -24,9 +24,9 @@
 
 #pragma once
 
-#include "../dependencies.h"
+#include "modules/dependencies.hpp"
 
-namespace zzsystems { namespace solowej { namespace modules {
+namespace cacophony { namespace modules {
 	using namespace zacc;
 	
 	using namespace math;
@@ -145,4 +145,4 @@ namespace zzsystems { namespace solowej { namespace modules {
 			return vsel(mask, r0, r1);
 		}
 	}
-}}}
+}}
