@@ -5,6 +5,8 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/dependencies)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/dependencies/zacc/cmake/shared.cmake)
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/include
         ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/zacc/include
