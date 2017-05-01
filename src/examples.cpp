@@ -24,8 +24,8 @@
 
 #include <iostream>
 
-#include "run.h"
-#include "../solowej/library/solowejlib.h"
+#include "../solowej-examples/run.h"
+#include "../include/branch_entrypoint.h"
 
 namespace zzsystems { namespace solowej { namespace examples {
 	using namespace gorynych;

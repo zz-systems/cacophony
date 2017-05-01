@@ -24,8 +24,13 @@
 
 #pragma once
 
-#include "../../dependencies/gorynych/gorynych/gorynych.h"
-#include "../../dependencies/json/src/json.hpp"
+#define COMPAT_OLD_LINAL
 
-#include "../util/serializable.h"
-#include "../util/cloneable.h"
+#include <vector>
+#include "../../dependencies/gorynych/gorynych/gorynych.h"
+
+#include "../../solowej/util/cloneable.h"
+#include "../../solowej/util/serializable.h"
+
+#include "../../solowej/noise/noisegenerators.h"
+#include "module_base.h"

@@ -22,29 +22,10 @@
 // Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
-#if defined(WIN32)
+#pragma once
 
-#include <SDKDDKVer.h>
+#include "../../dependencies/gorynych/gorynych/gorynych.h"
+#include "../../dependencies/json/src/json.hpp"
 
-#define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
-// Windows Header Files:
-#include <windows.h>
-
-
-BOOL APIENTRY DllMain(HMODULE hModule,
-	DWORD  ul_reason_for_call,
-	LPVOID lpReserved
-)
-{
-	switch (ul_reason_for_call)
-	{
-	case DLL_PROCESS_ATTACH:
-	case DLL_THREAD_ATTACH:
-	case DLL_THREAD_DETACH:
-	case DLL_PROCESS_DETACH:
-		break;
-	}
-	return TRUE;
-}
-
-#endif
+#include "../../solowej/util/serializable.h"
+#include "../../solowej/util/cloneable.h"

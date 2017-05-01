@@ -28,8 +28,8 @@
 #include <memory>
 
 #include "../../../dependencies/gorynych/gorynych/gorynych.h"
-#include "../../util/serializable.h"
-#include "../../modules/module_base.h"
+#include "../../../solowej/util/serializable.h"
+#include "../../../solowej/modules/module_base.h"
 
 
 namespace zzsystems { namespace solowej { namespace platform {

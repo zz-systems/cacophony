@@ -22,7 +22,7 @@ set_openmp()
 prepare_branches()
 
 
-list(APPEND SOURCE_FILES library/solowejlib.cpp library/dllmain.cpp)
+list(APPEND SOURCE_FILES ../src/branch_entrypoint.cpp library/dllmain.cpp)
 
 add_library(solowej SHARED ${SOURCE_FILES})
 target_compile_definitions(solowej PUBLIC 
