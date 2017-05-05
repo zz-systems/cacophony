@@ -9,7 +9,7 @@
       "make_seam": true,
       "scale": [ 3, 3, 3 ],
       "offset": [ 0, 0, 0 ],
-      "use_threads": true
+      "num_threads": -1
     }
   },
   "modules": [

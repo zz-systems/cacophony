@@ -13,7 +13,7 @@
       "offset": [ 0, 0, 0 ],
 
       "seamless": true,
-      "use_threads": true
+      "num_threads": -1
     }
   },
 

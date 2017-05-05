@@ -30,7 +30,7 @@
 
 #include "math/linear/generic_matrix.hpp"
 #include "math/linear/specialized_matrix.hpp"
-
+#include "zacc.hpp"
 #include "vectortable.hpp"
 
 namespace cacophony {
@@ -269,9 +269,9 @@ namespace cacophony {
 		static vec3<zfloat> gather_randoms(const zint &index)
 		{
 			return vec3<zfloat>(
-				vgather(static_cast<const float*>(random_vectors.data()),		index),
-				vgather(static_cast<const float*>(random_vectors.data() + 1),	index),
-				vgather(static_cast<const float*>(random_vectors.data() + 2),	index)
+				zfloat::gather(zacc::make_raw(random_vectors.data()),		index),
+				zfloat::gather(zacc::make_raw(random_vectors.data() + 1),	index),
+				zfloat::gather(zacc::make_raw(random_vectors.data() + 2),	index)
 				);
 		}
 #endif
