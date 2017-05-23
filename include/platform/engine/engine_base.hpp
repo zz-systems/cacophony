@@ -58,16 +58,15 @@ namespace cacophony { namespace platform {
             nlohmann::json source;
             file >> source;
 
-            config << source["environment"]["scheduler"];
-            compile(source);
+            deserialize(source);
         }
+
         // Compile from immediate string
         virtual void compile_imm_str(const std::string &content)
         {
             auto source = nlohmann::json::parse(content);
 
-            config << source["environment"]["scheduler"];
-            compile(source);
+            deserialize(source);
         }
 
         // COmpile from json object
