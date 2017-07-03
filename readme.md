@@ -1,84 +1,83 @@
-[![Build Status](https://travis-ci.org/zz-systems/solowej.svg?branch=dev)](https://travis-ci.org/zz-systems/solowej)
-[![Build status](https://ci.appveyor.com/api/projects/status/7qs0uu3nbjwprt19?svg=true)](https://ci.appveyor.com/project/zz-systems/solowej)
+[![Build Status](https://travis-ci.org/zz-systems/cacophony.svg?branch=dev)](https://travis-ci.org/zz-systems/cacophony)
+[![Build status](https://ci.appveyor.com/api/projects/status/7qs0uu3nbjwprt19/branch/dev?svg=true)](https://ci.appveyor.com/project/zz-systems/solowej/branch/dev)
 [![License: LGPL v3](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](http://www.gnu.org/licenses/lgpl-3.0)
 
-# LibSolowej
-Parallelized and vectorized port of LibNoise using the [Gorynych SIMD toolkit](https://github.com/zz-systems/gorynych)
+# Cacophony
+Parallelized and vectorized port of LibNoise using the [ZACC SIMD toolkit](https://github.com/zz-systems/zacc)
 
 
 ## License
 
-LibSolowej is released under the
-[LGPL license](https://www.gnu.org/licenses/lgpl.html). See COPYING.txt and
-COPYING.LESSER.txt for details.
+Cacophony is released under the
+[LGPL license](https://www.gnu.org/licenses/lgpl.html). See COPYING.txt for details.
 
 ## About
 
 [LibNoise](http://libnoise.sourceforge.net/) was originally created by
 Jason Bevins
 
-LibSolowej is a config-driven, parallelized, vectorized, partially extended, partially incomplete (still in development!) port of LibNoise.
+Cacophony is a config-driven, parallelized, vectorized and extended port of LibNoise.
 
-If you develop with Unity, please take a look at [LibSolowej.Unity](https://github.com/zz-systems/LibSolowej.Unity) as it is basically an efficient .NET wrapper around libsolowej.
+If you develop with Unity, please take a look at [Cacophony.Unity](https://github.com/zz-systems/Cacophony.Unity) as it is basically an efficient .NET wrapper around Cacophony.
 
-Please keep in mind, that this release is a **Preview/Alpha Release** and feel free to report issues and bugs to the [Issue tracker on GitHub](https://github.com/zz-systems/solowej/issues)
+Please keep in mind, that this release is a **Preview/Alpha Release** and feel free to report issues and bugs to the [Issue tracker on GitHub](https://github.com/zz-systems/cacophony/issues)
 
 ## Features
 
 * Config driven (*.json file)
-* Vectorized    (configurable @ runtime)
+* Vectorized and dispatched at runtime
 * Multithreaded (configurable)
-* Dispatched    (the appropriate code is executed. If your CPU only supports SSE2, then the SSE2 branch will be selected)
-* Theoretically platform-independent. The MSVC builds seem not to be that good.
+* Platform-independent. For Windows refer to Cygwin for now.
 * Extensible
 
 ## Current state
 
-* In development! The API should not break that much anymore, but there's still a lot to do! 
+* In development!
 * Cache module not exposed
 * Ridged multifractal unit test fails, FPU and FMA ( + AVX) value difference is larger than Epsilon (But still a good value to be visually indistinguishable)
 
 ### Compiles & runs on:
 * Linux 64 bit, CLANG 3.8 (preferred, the built binary is faster than with GCC!)
 * Linux 64 bit, GCC 6.1.1
+* Mac OS X Sierra, Apple LLVM version 8.1.0 (clang-802.0.42)
 * Windows 10 64bit, MSVC 2015 Update 2, x64 build
 
 ### Compiles, but does not work:
 * Windows 10, 64bit, MSVC 2015 Update 2, x86 build
 
 ### Does not compile:
-* Mac OS X @ Travis CI, CLANG
-  * Missing intrinsic headers...
+* Windows 10, 64bit, MSVC 2017
   
 ### Tested CPU's:
   * AMD FX-8350,         Max. Feature: AVX1
   * Intel Core i7 6500U, Max. Feature: AVX2
+  * Intel Core i7 7700K, Max. Feature: SSE4.1
   
 ### Supported CPU Features
-  * Usually the same as those of [Gorynych SIMD toolkit](https://github.com/zz-systems/gorynych)
+  * Usually the same as those of [ZACC SIMD toolkit](https://github.com/zz-systems/zacc)
   * SSE2
   * SSE3
   * SSE3 + SSSE3
   * SSE4
   * SSE4, FMA(3/4) (more tests necessary!)
   * AVX1 is disabled. The emulated int8 vector is still not correct.
-  * AVX2
+  * AVX2 
   
 
 ## External API
 ```C++
 // returns the last error
-const char* solowej_get_error         ();
+const char* cacophony_get_error         ();
 // creates and / or returns the corresponding engine instance
-engine*     solowej_get_engine        (const std::string& instance_key);
+engine*     cacophony_get_engine        (const std::string& instance_key);
 // compiles an immediate string
-int         solowej_compile_immediate (const char* instance_key, const char* content);
+int         cacophony_compile_immediate (const char* instance_key, const char* content);
 // compiles the contents of a file
-int         solowej_compile_file      (const char* instance_key, const char* path);
+int         cacophony_compile_file      (const char* instance_key, const char* path);
 // invokes the scheduler with the given origin coordinates, fills a float array
-int         solowej_run		          (const char*instance_key, float* target, float origin_x, float origin_y, float origin_z);
-// invokes the scheduler with the given origin coordinates, fills an int array (same principle as solowej_run, but with round + cast to int)
-int         solowej_run_cvti	      (const char*instance_key, int* target,   float origin_x, float origin_y, float origin_z);
+int         cacophony_run		        (const char*instance_key, float* target, float origin_x, float origin_y, float origin_z);
+// invokes the scheduler with the given origin coordinates, fills an int array (same principle as cacophony_run, but with round + cast to int)
+int         cacophony_run_cvti	        (const char*instance_key, int* target,   float origin_x, float origin_y, float origin_z);
 ```
 That's it! (Of course you can use the raw C++ implementation instead of configuring with json and the API, I'll provide the documentation a bit later.)
 ___
@@ -95,7 +94,7 @@ ___
       "make_seam": true,               // <- makes tiles overlap a bit to hide the seam
       "scale": [ 1, 5, 1 ],            // <- scale the scheduler input
       "offset": [ 0, 0, 0 ],           // <- scheduler input offset
-      "use_threads": false             // <- multithreading
+      "num_threads": -1                // <- multithreading, -1 = auto
     }
   },
   "modules": [

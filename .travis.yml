@@ -85,6 +85,12 @@ before_script:
   - cd ${TRAVIS_BUILD_DIR}
   - cmake -H../cacophony -BBuild -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
   - cd Build
+  - cmake --build . --config %CONFIGURATION% --target zacc.system.detect
+  - cmake --build . --config %CONFIGURATION% --target cacophony.tests.all
+#  - cmake --build . --config %CONFIGURATION% --target cacophony.examples.headless
 
 script:
-  - make -j 2
+- zacc.system.detect.exe
+# TODO
+#- ps: gci -Filter cacophony.tests.*.exe | foreach { ".\$($_.Name)"} | iex
+#- ctest

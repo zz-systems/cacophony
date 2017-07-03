@@ -84,6 +84,7 @@ build_script:
   - cmake .. -G%BUILD_ENV% -DPYTHON_EXECUTABLE:FILEPATH="%PYTHON%"/python.exe
   - cmake --build . --config %CONFIGURATION% --target zacc.system.detect
   - cmake --build . --config %CONFIGURATION% --target cacophony.tests.all
+#  - cmake --build . --config %CONFIGURATION% --target cacophony.examples.headless
 
 test_script:
 - zacc.system.detect.exe

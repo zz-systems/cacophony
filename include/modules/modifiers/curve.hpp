@@ -33,7 +33,7 @@ namespace cacophony { namespace modules {
 	MODULE(mod_curve)
 	{
 	public:
-		std::vector<std::pair<const zfloat, zfloat>, aligned_allocator<zfloat, 32>> points;
+		std::vector<std::pair<const zfloat, zfloat>, aligned_allocator<std::pair<const zfloat, zfloat>, 32>> points;
 
 		MODULE_PROPERTY(source, 0)
 

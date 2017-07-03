@@ -50,13 +50,17 @@ endforeach()
 configure_file(examples/granite.json ${CMAKE_CURRENT_BINARY_DIR}/config/granite.json)
 configure_file(examples/planet.json ${CMAKE_CURRENT_BINARY_DIR}/config/planet.json)
 
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin") # requires XQuartz
+    include_directories(AFTER "/usr/X11/include")
+    link_directories("/usr/X11/lib" "/usr/X11R6/lib")
+endif()
+
 add_executable(cacophony.examples src/cacophony_examples.cpp)
 
 if(WIN32)
     target_link_libraries(cacophony.examples cacophony)
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin") # requires XQuartz
+    target_link_libraries(cacophony.examples X11 cacophony)
 else()
     target_link_libraries(cacophony.examples X11 jpeg png cacophony)
 endif()
-
-
-#add_subdirectory(dependencies/gorynych/gorynych-test)
