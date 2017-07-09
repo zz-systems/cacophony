@@ -12,7 +12,7 @@ zacc_add_dispatched_library(cacophony
         )
 
 if(CLANG_CL)
-    target_compile_options(cacophony PUBLIC -Xclang -fno-delayed-template-parsing)
+    target_compile_options(cacophony PUBLIC -fno-delayed-template-parsing)
 endif()
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin") # requires XQuartz
