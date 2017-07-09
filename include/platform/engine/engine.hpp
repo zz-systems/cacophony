@@ -31,10 +31,13 @@
 #include "simd_engine.hpp"
 
 #include "system/runtime_dispatcher.hpp"
-#include "platform/dependencies.hpp"
+#include "json.hpp"
+
+#include "util/serializable.h"
+#include "util/cloneable.h"
 #include "util/memory.hpp"
 #include "util/collections.hpp"
-#include "system/entrypoint.hpp"
+#include "system/remote_activator.hpp"
 
 namespace cacophony { namespace platform
 {
@@ -46,55 +49,53 @@ namespace cacophony { namespace platform
 	private:
 		struct dispatcher
         {
-			dispatcher(engine* engine) noexcept
-                    : _parent(engine)
-            {}
-
-            DISPATCHED void dispatch_impl()
+			dispatcher() noexcept
             {
-                _parent->_engines[branch::capability::value] = std::static_pointer_cast<simd_engine<branch>>(
-                        zacc::system::resolve_entrypoint<branch>()
-                );
+                _activator = std::make_unique<system::remote_activator>(ZACC_DYLIBNAME, "cacophony_create_instance", "cacophony_delete_instance");
             }
 
-            DISPATCHED void dispatch_impl(const nlohmann::json &source)
+            template<typename capability> void dispatch_impl()
             {
-                _parent->_engines[branch::capability::value]->compile(source);
+                if(_engines.count(capability::value) == 0)
+                    _engines[capability::value] = _activator->create_instance<capability, engine_base>();
             }
 
-            DISPATCHED void dispatch_impl(const vec3<float> &origin, float *target)
+            template<typename capability> void dispatch_impl(const nlohmann::json &source)
             {
-                log_has_engine<branch>();
-                _parent->_engines[branch::capability::value]->run(origin, target);
+                _engines[capability::value]->compile(source);
             }
 
-            DISPATCHED void dispatch_impl(const vec3<float> &origin, int *target)
+            template<typename capability> void dispatch_impl(const vec3<float> &origin, float *target)
             {
-                log_has_engine<branch>();
-                _parent->_engines[branch::capability::value]->run(origin, target);
+                log_has_engine<capability>();
+                _engines[capability::value]->run(origin, target);
+            }
+
+            template<typename capability> void dispatch_impl(const vec3<float> &origin, int *target)
+            {
+                log_has_engine<capability>();
+                _engines[capability::value]->run(origin, target);
             }
 
         private:
-            const std::shared_ptr<engine> _parent;
+            aligned_map<int, std::shared_ptr<engine_base>> _engines;
+			std::shared_ptr<system::remote_activator> _activator;
 
-            DISPATCHED void log_has_engine()
+            template<typename capability> void log_has_engine()
             {
                 std::cout << "Has engine: " << std::boolalpha
-                          << (_parent->_engines.count(branch::capability::value) != 0)
+                          << (_engines.count(capability::value) != 0)
                           << std::endl;
             }
         };
 
-		using engine_dispatcher = runtime_dispatcher<dispatcher>;
+		using engine_dispatcher = system::runtime_dispatcher<dispatcher>;
 
         engine_dispatcher _dispatcher;
 	public:
 		std::string file_name;
 
-		aligned_map<int, std::shared_ptr<engine_base>> _engines;
-
 		engine() noexcept
-            : _dispatcher(this)
 		{
 			// If AVX2 is not available:
 			// Disable avx1. Current emulated int8 works like shit. E.g doesnt work at all. Or at least correctly. And is very slow.

@@ -37,10 +37,13 @@
 namespace cacophony { namespace platform
 {
     DISPATCHED class alignas(branch::alignment) simd_engine :
-            public engine_base,
-            public zacc::entrypoint
+            public engine_base
     {
     public:
+        simd_engine()
+        {
+            std::cout << "creating simd_engine" << std::endl;
+        }
         // COmpile from json object
         virtual void compile(const nlohmann::json &source) override
         {
@@ -49,7 +52,7 @@ namespace cacophony { namespace platform
             _scheduler << source["environment"]["scheduler"];
 
             _scheduler.set_source(_compiler.compile(source));
-            //_scheduler.transform = [](const auto&c) {return c;};
+            _scheduler.transform = [](const auto&c) {return c;};
 
             //return _scheduler.get_config();
         }

@@ -29,16 +29,22 @@
 #include "json.hpp"
 #include "platform/scheduling/scheduler_base.hpp"
 #include "platform/dependencies.hpp"
-#include "backend/all.hpp"
+#include "system/branch_entrypoint.hpp"
 
 namespace cacophony { namespace platform {
     using namespace zacc;
 
-    class engine_base : serializable<nlohmann::json>
+    class engine_base :
+            serializable<nlohmann::json>,
+            public zacc::system::entrypoint
     {
     protected:
         scheduler_config config;
     public:
+        engine_base()
+        {
+            std::cout << "creating engine_base" << std::endl;
+        }
         const scheduler_config &get_config()
         {
             return config;

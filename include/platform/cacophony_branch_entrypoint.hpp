@@ -22,24 +22,10 @@
 // Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
+#pragma once
 
-#include "platform/cacophony_branch_entrypoint.hpp"
+#include "util/zacc_exports.hpp"
+#include "system/branch_entrypoint.hpp"
 
-#include "system/branch.hpp"
-#include "platform/engine/simd_engine.hpp"
-
-zacc::system::entrypoint *cacophony_create_instance()
-{
-    std::cout << "Creating engine for " << zacc::dispatched_branch::types::major_branch_name() << std::endl;
-    auto result =  new cacophony::platform::simd_engine<zacc::dispatched_branch::types>();
-
-    return result;
-}
-
-void cacophony_delete_instance(zacc::system::entrypoint* instance)
-{
-    if(instance != nullptr)
-        delete instance;
-
-    instance = nullptr;
-}
+ZACC_DLL_API zacc::system::entrypoint *cacophony_create_instance();
+ZACC_DLL_API void cacophony_delete_instance(zacc::system::entrypoint* instance);
