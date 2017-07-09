@@ -11,9 +11,6 @@ zacc_add_dispatched_library(cacophony
             ${CMAKE_SOURCE_DIR}/dependencies/zacc/src/dllmain.cpp
         )
 
-configure_file(../examples/granite.json ${CMAKE_CURRENT_BINARY_DIR}/config/granite.json)
-configure_file(../examples/planet.json ${CMAKE_CURRENT_BINARY_DIR}/config/planet.json)
-
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin") # requires XQuartz
     include_directories(AFTER "/usr/X11/include")
     link_directories("/usr/X11/lib" "/usr/X11R6/lib")
@@ -33,3 +30,19 @@ else()
     target_link_libraries(cacophony.examples X11 jpeg png cacophony)
     target_link_libraries(cacophony.examples.headless cacophony)
 endif()
+
+
+add_custom_command(TARGET "cacophony.examples" POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/examples
+        $<TARGET_FILE_DIR:cacophony.examples>/config/
+        )
+
+add_custom_command(TARGET "cacophony.examples.headless" POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/examples
+        $<TARGET_FILE_DIR:cacophony.examples.headless>/config/
+        )
+
+#configure_file(../examples/granite.json $<TARGET_FILE_DIR:cacophony.examples>/config/granite.json)
+#configure_file(../examples/planet.json ${CMAKE_CURRENT_BINARY_DIR}/config/planet.json)

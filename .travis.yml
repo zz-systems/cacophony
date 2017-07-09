@@ -102,8 +102,9 @@ before_script:
   - cd Build
 
 script:
-- make -j 4 zacc.system.detect && make -j 4  cacophony.tests.all && make -j 4  cacophony.examples.headless
-- ls
-- ./zacc.system.detect
-- ./cacophony.examples.headless
+- make -j 4 zacc.system.detect cacophony.tests.all cacophony.examples.headless
+- ls ./bin
+- ls ./lib
+- ./bin/zacc.system.detect
+- ./bin/cacophony.examples.headless
 - ctest --output-on-failure
