@@ -16,6 +16,16 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
+if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+    message(STATUS "ADD libdl, GNU")
+    link_libraries(zacc.system.loader -Wl,--no-as-needed -ldl)
+elseif ((CMAKE_CXX_COMPILER_ID MATCHES "Clang") AND (NOT APPLE) AND (NOT MSVC))
+    message(STATUS "ADD libdl, Clang")
+    link_libraries(zacc.system.loader -Wl,--no-as-needed -ldl)
+else()
+    message(STATUS "SKIP libdl")
+endif()
+
 enable_testing()
 
 # add app targets
