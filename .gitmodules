@@ -1,6 +1,3 @@
-[submodule "dependencies/Catch_Patch"]
-	path = dependencies/Catch_Patch
-	url = https://github.com/zz-systems/Catch.git
 [submodule "dependencies/cimg"]
 	path = dependencies/cimg
 	url = https://github.com/dtschump/CImg.git
