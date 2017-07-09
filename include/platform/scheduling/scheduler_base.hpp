@@ -37,47 +37,6 @@ namespace cacophony { namespace platform {
     using namespace modules;
     using json = nlohmann::json;
 
-    struct scheduler_config : serializable<json>
-    {
-        vec3<int> dimensions, seam_dimensions;
-        vec3<float> scale, offset;
-        size_t num_threads;
-        bool make_seam;
-
-        virtual void deserialize(const json &source) override
-        {
-            auto dimensions = source["dimensions"];
-            auto scale      = source["scale"];
-            auto offset     = source["offset"];
-
-            this->dimensions = this->seam_dimensions = dimensions != nullptr && dimensions.size() >= 3
-                                                       ? vec3<int>(dimensions[0].get<int>(), dimensions[1].get<int>(), dimensions[2].get<int>())
-                                                       : vec3<int>(128, 128, 1);
-
-
-            this->scale		 = scale != nullptr && scale.size() >= 3
-                                  ? vec3<float>(scale[0].get<float>(), scale[1].get<float>(), scale[2].get<float>())
-                                  : vec3<float>(1);
-
-            this->offset = offset != nullptr && offset.size() >= 3
-                           ? vec3<float>(offset[0].get<float>(), offset[1].get<float>(), offset[2].get<float>())
-                           : vec3<float>(0);
-
-
-            num_threads = source.value<size_t>("num_threads", -1);
-            if(num_threads < 1)
-                num_threads = zacc::platform::instance().num_threads();
-
-            this->make_seam     = source.value<bool>("make_seam", true);
-            if(make_seam)
-            {
-                seam_dimensions.x = std::max(seam_dimensions.x - 1, 1);
-                seam_dimensions.y = std::max(seam_dimensions.y - 1, 1);
-                seam_dimensions.z = std::max(seam_dimensions.z - 1, 1);
-            }
-        }
-    };
-
     DISPATCHED class alignas(branch::alignment) scheduler_base :
         public serializable<json>
     {
@@ -154,44 +113,11 @@ namespace cacophony { namespace platform {
             result.y = (idx / _config.dimensions.x) % _config.dimensions.y;
             result.z =  idx / (_config.dimensions.x * _config.dimensions.y);
 
-           // auto result = vec3<zfloat>(x + data, x ,x);
+            // auto result = vec3<zfloat>(x + data, x ,x);
 
             //std::cout << "build_coords(" << index << ") =>" << result << std::endl;
 
             return result;
-        }
-
-        template<typename T>
-        inline void stream_result(typename T::scalar_t* stride, size_t x, const T &r) const
-        {
-            std::copy(r.begin(), r.end(), stride + x);
-        }
-
-        template<typename T>
-        inline void store_result(typename T::scalar_t* stride, size_t x, const T &r) const
-        {
-            std::copy(r.begin(), r.end(), stride + x);
-        }
-
-
-        template<typename T>
-        void write_result(const vec3<int> &dimensions, typename T::scalar_t *stride, size_t remainder, size_t x, const T &result)
-        {
-            if (remainder == 0) // All rows aligned on required boundaries -> stream
-            {
-                stream_result(stride, x, result);
-            }
-            else if (x < (dimensions.x - remainder)) // Not aligned - but still in the "good" range
-            {
-                store_result(stride, x, result);
-            }
-            else // Fill remaining columns
-            {
-                auto extracted = result.data();
-
-                for (size_t i = 0; i < remainder; i++)
-                    stride[x + i] = extracted[i];
-            }
         }
 
         Transformer<branch> build_transform(Transformer<branch> transformer)

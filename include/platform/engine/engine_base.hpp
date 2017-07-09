@@ -30,7 +30,7 @@
 
 #include "util/serializable.h"
 
-#include "platform/scheduling/scheduler_base.hpp"
+#include "platform/scheduling/scheduler_config.hpp"
 
 #include "system/branch_entrypoint.hpp"
 
@@ -48,6 +48,7 @@ namespace cacophony { namespace platform {
         {
             std::cout << "creating engine_base" << std::endl;
         }
+
         const scheduler_config &get_config()
         {
             return config;
