@@ -105,8 +105,8 @@ script:
 - make -j 4 zacc.system.detect cacophony.tests.all cacophony.examples.headless
 - ls ./bin
 - ls ./lib
-- cd bin
+- if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$TRAVIS_BUILD_DIR/lib ; fi
+- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then export DYLD_LIBRARY_PATH=DYLD_LIBRARY_PATH:$TRAVIS_BUILD_DIR/lib ; fi
 - ./zacc.system.detect
 - ./cacophony.examples.headless
-- cd ..
 - ctest --output-on-failure
