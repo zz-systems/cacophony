@@ -28,16 +28,20 @@
 
 #include <fstream>
 
-#include "simd_engine.hpp"
 
-#include "system/runtime_dispatcher.hpp"
 #include "json.hpp"
 
+
+#include "util/macros.hpp"
 #include "util/serializable.h"
 #include "util/cloneable.h"
 #include "util/memory.hpp"
 #include "util/collections.hpp"
+
 #include "system/remote_activator.hpp"
+#include "system/runtime_dispatcher.hpp"
+
+#include "platform/engine/engine_base.hpp"
 
 namespace cacophony { namespace platform
 {

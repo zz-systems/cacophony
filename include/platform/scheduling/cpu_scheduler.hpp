@@ -45,7 +45,7 @@ namespace cacophony { namespace platform {
             auto start      = this->transform(static_cast<vec3<zfloat>>(origin));
             auto real_size  = d.x * d.y * d.z;
 
-            std::fill(target, target + real_size, -10);
+            adjust_rounding_mode();
 
             zacc::generate<zfloat>(target, target + real_size, [this, &start](auto i)
             {
@@ -63,7 +63,7 @@ namespace cacophony { namespace platform {
             auto start      = this->transform(static_cast<vec3<zfloat>>(origin));
             auto real_size  = d.x * d.y * d.z;
 
-            std::fill(target, target + real_size, -10);
+            adjust_rounding_mode();
 
             zacc::generate<zint>(target, target + real_size, [this, &start](auto i)
             {

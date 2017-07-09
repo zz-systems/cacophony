@@ -23,6 +23,7 @@
 //
 
 #include "libcacophony.hpp"
+#include "platform/compilers/compiler.hpp"
 
 static zacc::aligned_map<std::string, cacophony::platform::engine> _engines;
 static std::string _error;

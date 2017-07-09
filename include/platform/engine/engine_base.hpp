@@ -25,10 +25,13 @@
 #pragma once
 
 #include <fstream>
-#include "util/serializable.h"
+
 #include "json.hpp"
+
+#include "util/serializable.h"
+
 #include "platform/scheduling/scheduler_base.hpp"
-#include "platform/dependencies.hpp"
+
 #include "system/branch_entrypoint.hpp"
 
 namespace cacophony { namespace platform {
