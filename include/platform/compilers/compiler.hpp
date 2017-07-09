@@ -100,7 +100,7 @@ namespace cacophony { namespace platform {
                     std::string type = module["type"];
                     std::string name = module["module"];
 
-                    node->instance_name 	= module["name"];
+                    node->instance_name 	= module["name"].get<std::string>();
                     node->module_path 		= type + "/" + name;
                     node->module_config 	= module["settings"];
                     node->sources_config 	= module["source"];

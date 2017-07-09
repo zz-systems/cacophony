@@ -55,7 +55,7 @@ namespace cacophony { namespace  test {
                 auto expected = scalar({x / d, y / d, 0});
                 auto actual = vectorized({x / d, y / d, 0});
 
-                VASSERT_EQ(actual, 0);
+                VASSERT_EQ(actual, expected.value());
             }
         }
 
@@ -77,7 +77,7 @@ namespace cacophony { namespace  test {
                 auto expected = scalar({x / d, y / d, 0});
                 auto actual = vectorized({x / d, y / d, 0});
 
-                VASSERT_EQ(actual, 0);
+                VASSERT_EQ(actual, expected.value());
             }
         }
     }
@@ -98,7 +98,7 @@ namespace cacophony { namespace  test {
                 auto expected = scalar({x / d, y / d, 0});
                 auto actual = vectorized({x / d, y / d, 0});
 
-                VASSERT_EQ(actual, 0);
+                VASSERT_EQ(actual, expected.value());
             }
         }
     }
@@ -119,7 +119,7 @@ namespace cacophony { namespace  test {
                 auto expected = scalar({x / d, y / d, 0});
                 auto actual = vectorized({x / d, y / d, 0});
 
-                VASSERT_EQ(actual, 0);
+                VASSERT_EQ(actual, expected.value());
             }
         }
     }
@@ -137,7 +137,7 @@ namespace cacophony { namespace  test {
                 auto expected = scalar({x / d, y / d, 0});
                 auto actual = vectorized({x / d, y / d, 0});
 
-                VASSERT_EQ(actual, 0);
+                VASSERT_EQ(actual, expected.value());
             }
         }
     }
@@ -156,7 +156,7 @@ namespace cacophony { namespace  test {
                 auto expected = scalar({x / d, y / d, 0});
                 auto actual = vectorized({x / d, y / d, 0});
 
-                VASSERT_EQ(actual, 0);
+                VASSERT_EQ(actual, expected.value());
             }
         }
     }
@@ -212,7 +212,7 @@ namespace cacophony { namespace  test {
                 auto expected = scalar({x / d, y / d, 0});
                 auto actual = vectorized({x / d, y / d, 0});
 
-                VASSERT_EQ(actual, 0);
+                VASSERT_EQ(actual, expected.value());
             }
         }
     }
@@ -235,7 +235,7 @@ namespace cacophony { namespace  test {
                 auto expected = scalar({x / d, y / d, 0});
                 auto actual = vectorized({x / d, y / d, 0});
 
-                VASSERT_EQ(actual, 0);
+                VASSERT_EQ(actual, expected.value());
             }
         }
     }
@@ -283,7 +283,7 @@ namespace cacophony { namespace  test {
                 auto expected = scalar({x / d, y / d, 0});
                 auto actual = vectorized({x / d, y / d, 0});
 
-                VASSERT_EQ(actual, 0);
+                VASSERT_EQ(actual, expected.value());
             }
         }
     }
@@ -306,7 +306,7 @@ namespace cacophony { namespace  test {
                 auto expected = scalar({x / d, y / d, 0});
                 auto actual = vectorized({x / d, y / d, 0});
 
-                VASSERT_EQ(actual, 0);
+                VASSERT_EQ(actual, expected.value());
             }
         }
     }
@@ -334,7 +334,7 @@ namespace cacophony { namespace  test {
                 auto expected = scalar({x / d, y / d, 0});
                 auto actual = vectorized({x / d, y / d, 0});
 
-                VASSERT_EQ(actual, 0);
+                VASSERT_EQ(actual, expected.value());
             }
         }
     }
@@ -359,7 +359,7 @@ namespace cacophony { namespace  test {
                 auto expected = scalar({x / d, y / d, 0});
                 auto actual = vectorized({x / d, y / d, 0});
 
-                VASSERT_EQ(actual, 0);
+                VASSERT_EQ(actual, expected.value());
             }
         }
     }
@@ -384,7 +384,7 @@ namespace cacophony { namespace  test {
                 auto expected = scalar({x / d, y / d, 0});
                 auto actual = vectorized({x / d, y / d, 0});
 
-                VASSERT_EQ(actual, 0);
+                VASSERT_EQ(actual, expected.value());
             }
         }
     }
@@ -408,7 +408,7 @@ namespace cacophony { namespace  test {
                 auto expected = scalar({x / d, y / d, 0});
                 auto actual = vectorized({x / d, y / d, 0});
 
-                VASSERT_EQ(actual, 0);
+                VASSERT_EQ(actual, expected.value());
             }
         }
     }
@@ -432,7 +432,7 @@ namespace cacophony { namespace  test {
                 auto expected = scalar({x / d, y / d, 0});
                 auto actual = vectorized({x / d, y / d, 0});
 
-                VASSERT_EQ(actual, 0);
+                VASSERT_EQ(actual, expected.value());
             }
         }
     }

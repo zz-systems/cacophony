@@ -82,8 +82,8 @@ namespace zzsystems { namespace solowej { namespace modules {
 				auto select_new = set_value && !already_set;
 
 				// Set values if not set yet
-				out1 = vsel(set_value && !already_set, points[i1], out1);
-				out0 = vsel(set_value && !already_set, points[i0], out0);
+				out1 = vsel(select_new, points[i1], out1);
+				out0 = vsel(select_new, points[i0], out0);
 
 				// Fill accumulating mask
 				already_set = already_set || set_value;

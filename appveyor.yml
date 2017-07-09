@@ -84,6 +84,7 @@ build_script:
   - cmake --build . --config %CONFIGURATION% --target cacophony.examples.headless
 
 test_script:
+- ls
 - zacc.system.detect.exe
 - cacophony.examples.headless.exe
 - ctest --output-on-failure

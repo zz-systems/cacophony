@@ -69,13 +69,13 @@ namespace cacophony { namespace modules
 		const size_t required_module_count;
 
 		module_base(const size_t n_modules = 0) 
-			: _modules(zacc::make_shared<std::vector<Module<branch>>>(n_modules)),
-			  required_module_count(n_modules)
+			: required_module_count(n_modules),
+			  _modules(zacc::make_shared<std::vector<Module<branch>>>(n_modules))
 		{}
 
 		module_base(const module_base& other)
-			: _modules(zacc::make_shared<std::vector<Module<branch>>>( other._modules->begin(), other._modules->end())),
-			  required_module_count(other.required_module_count)
+			: required_module_count(other.required_module_count),
+			  _modules(zacc::make_shared<std::vector<Module<branch>>>( other._modules->begin(), other._modules->end()))
 		{}
 
 		virtual ~module_base()

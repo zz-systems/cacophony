@@ -44,7 +44,7 @@ namespace cacophony { namespace modules {
 
 
 		mod_perlin(float frequency = 1.0, float lacunarity = 2.0, float persistence = 0.5, int octaves = 6, int seed = 0, Quality quality = Quality::Standard)
-			: BASE(mod_perlin)::cloneable(0), frequency(frequency), lacunarity(lacunarity), persistence(persistence), seed(seed), octaves(octaves), quality(quality)
+			: BASE(mod_perlin)::cloneable(0), frequency(frequency), lacunarity(lacunarity), persistence(persistence), octaves(octaves), seed(seed), quality(quality)
 		{}
 
 
