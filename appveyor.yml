@@ -86,4 +86,4 @@ build_script:
 test_script:
 - zacc.system.detect.exe
 - cacophony.examples.headless.exe
---output-on-failure
+- ctest --output-on-failure
