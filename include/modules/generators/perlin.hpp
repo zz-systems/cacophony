@@ -49,7 +49,7 @@ namespace cacophony { namespace modules {
 
 
 		mod_perlin(const mod_perlin<branch>& rhs)
-			: frequency(rhs.frequency), lacunarity(rhs.lacunarity), persistence(rhs.persistence), seed(rhs.seed), octaves(rhs.octaves), quality(rhs.quality)
+			: frequency(rhs.frequency), lacunarity(rhs.lacunarity), persistence(rhs.persistence), octaves(rhs.octaves), seed(rhs.seed), quality(rhs.quality)
 		{}
 				
 		void deserialize(const json &source) override

@@ -105,6 +105,8 @@ script:
 - make -j 4 zacc.system.detect cacophony.tests.all cacophony.examples.headless
 - ls ./bin
 - ls ./lib
-- ./bin/zacc.system.detect
-- ./bin/cacophony.examples.headless
+- cd bin
+- ./zacc.system.detect
+- ./cacophony.examples.headless
+- cd ..
 - ctest --output-on-failure
