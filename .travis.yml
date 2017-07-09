@@ -107,6 +107,8 @@ script:
 - ls ./lib
 - if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$TRAVIS_BUILD_DIR/lib ; fi
 - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then export DYLD_LIBRARY_PATH=DYLD_LIBRARY_PATH:$TRAVIS_BUILD_DIR/lib ; fi
-- ./bin/zacc.system.detect
-- ./bin/cacophony.examples.headless
+- cd bin
+- ./zacc.system.detect
+- ./cacophony.examples.headless
+- cd ..
 - ctest --output-on-failure

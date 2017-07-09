@@ -86,6 +86,8 @@ build_script:
 test_script:
 - ls .\bin
 - ls .\lib
-- .\bin/zacc.system.detect.exe
-- .\bin/cacophony.examples.headless.exe
+- cd .\bin
+- zacc.system.detect.exe
+- cacophony.examples.headless.exe
+- cd ..
 - ctest --output-on-failure
