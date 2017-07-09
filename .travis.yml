@@ -2,6 +2,9 @@ language: cpp
 sudo: false
 dist: trusty
 
+python:
+ - "3.3"
+
 cache:
   ccache: true
   apt: true
@@ -22,7 +25,20 @@ branches:
 matrix:
   include:
 
-    # 1/ Linux Clang Builds
+    # OSX Clang Builds
+    - os: osx
+      osx_image: xcode8.3
+      compiler: clang
+      language: generic
+      env: COMPILER=c++ BUILD_TYPE='Release' CXX=c++ CC=cc
+
+    - os: osx
+      osx_image: xcode9
+      compiler: clang
+      language: generic
+      env: COMPILER=c++ BUILD_TYPE='Release' CXX=c++ CC=cc
+
+    # Linux Clang Builds
     - os: linux
       compiler: clang
       addons: &addons
@@ -44,7 +60,7 @@ matrix:
       addons: *addons
       env: COMPILER=clang++-4.0 BUILD_TYPE='Release' CXX=clang++-4.0 CC=clang-4.0
 
-    # 2/ Linux GCC Builds
+    # Linux GCC Builds
     - os: linux
       compiler: gcc
       addons: *addons
@@ -60,12 +76,12 @@ matrix:
     #  addons: *addons
     #  env: COMPILER=g++-7 BUILD_TYPE='Release' CXX=g++-7 CC=gcc-7
 
-    # 3/ OSX Clang Builds
-    #- os: osx
-    #  osx_image: xcode8.3
-    #  compiler: clang
-    #  env: COMPILER='clang++' BUILD_TYPE='Release' CXX=clang++-4.0 CC=clang-4.0
-
+# Perform the manual steps on osx to install python3 and activate venv
+before_install:
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update          ; fi
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install python3; fi
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then virtualenv venv -p python3; fi
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then source venv/bin/activate; fi
 
 install:
   - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
@@ -78,19 +94,16 @@ install:
     fi
   - travis_retry pip install pyopenssl ndg-httpsclient pyasn1
   - travis_retry pip install yasha
-before_script:
 
 before_script:
-  - export CXX=${COMPILER}
   - cd ${TRAVIS_BUILD_DIR}
-  - cmake -H../cacophony -BBuild -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
+  - export CXX=${COMPILER}
+  - cmake -H../zacc -BBuild -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
   - cd Build
-  - cmake --build . --config %CONFIGURATION% --target zacc.system.detect
-  - cmake --build . --config %CONFIGURATION% --target cacophony.tests.all
-#  - cmake --build . --config %CONFIGURATION% --target cacophony.examples.headless
 
 script:
-- zacc.system.detect.exe
-# TODO
-#- ps: gci -Filter cacophony.tests.*.exe | foreach { ".\$($_.Name)"} | iex
-#- ctest
+- make -j 2 && make zacc.system.detect && make cacophony.tests.all && make cacophony.examples.headless
+- ls
+- ./zacc.system.detect
+- ./cacophony.examples.headless
+- ctest --output-on-failure

@@ -150,8 +150,6 @@ namespace cacophony { namespace platform {
 
             vec3<zfloat> result;
 
-
-
             result.x =  idx % _config.dimensions.x;
             result.y = (idx / _config.dimensions.x) % _config.dimensions.y;
             result.z =  idx / (_config.dimensions.x * _config.dimensions.y);

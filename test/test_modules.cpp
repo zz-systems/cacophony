@@ -22,26 +22,28 @@
 // Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
-#include "../dependencies/gorynych/gorynych/gorynych.h"
-#include "../dependencies/gorynych/gorynych-test/test_extensions.h"
+#include "gtest/gtest.h"
+#include "util/testing/gtest_ext.hpp"
+#include "system/branch.hpp"
+#include "backend/scalar/types.hpp"
+#include "modules/all.hpp"
 
 
-#include "../solowej/modules/all.h"
+namespace cacophony { namespace  test {
+    using namespace zacc;
+    using namespace zacc::test;
+    using namespace cacophony::modules;
+        
+    using scalar_branch = zacc::scalar::types<branches::scalar>;
+    using vector_branch = dispatched_branch::types;
 
-
-namespace zzsystems { namespace solowej { namespace  test {
-            using namespace gorynych;
-            using namespace gorynych::test;
-            using namespace zzsystems::solowej::modules;
-
-#define TYPE_PREFIX TEST_PREFIX("modules")
-
-
-    TEST_CASE(TYPE_PREFIX"perlin", "[modules][generators]")
+    TEST(modules_generators, perlin)
     {
-        mod_perlin<sreal, sint> scalar;
+        REQUIRES(ZACC_CAPABILITIES);
+
+        mod_perlin<scalar_branch> scalar;
         scalar.seed = 111;
-        mod_perlin<vreal, vint> vectorized;
+        mod_perlin<vector_branch> vectorized;
         vectorized.seed = 111;
 
         auto d = 128.0f;
@@ -50,23 +52,20 @@ namespace zzsystems { namespace solowej { namespace  test {
         {
             for( int x = 0; x < d; x++)
             {
-                auto s = scalar({x / d, y / d, 0});
-                auto v = vectorized({x / d, y / d, 0});
-                ALIGNED float e[dim<vreal>()];
-                extract(v, e);
-                gorynych::test::test<vreal, sreal>([&]() { return s; }, [&]() { return v; });
+                auto expected = scalar({x / d, y / d, 0});
+                auto actual = vectorized({x / d, y / d, 0});
 
-                //cout << "scalar: " << s << " vectorized: " << e[0] << endl;
+                VASSERT_EQ(actual, 0);
             }
         }
 
     }
 
-    TEST_CASE(TYPE_PREFIX"voronoi", "[modules][generators]")
+    TEST(modules_generators, voronoi)
     {
-        mod_voronoi<sreal, sint> scalar;
+        mod_voronoi<scalar_branch> scalar;
         scalar.seed = 111;
-        mod_voronoi<vreal, vint> vectorized;
+        mod_voronoi<vector_branch> vectorized;
         vectorized.seed = 111;
 
         auto d = 128.0f;
@@ -75,22 +74,19 @@ namespace zzsystems { namespace solowej { namespace  test {
         {
             for( int x = 0; x < d; x++)
             {
-                auto s = scalar({x / d, y / d, 0});
-                auto v = vectorized({x / d, y / d, 0});
-                ALIGNED float e[dim<vreal>()];
-                extract(v, e);
-                gorynych::test::test<vreal, sreal>([&]() { return s; }, [&]() { return v; });
+                auto expected = scalar({x / d, y / d, 0});
+                auto actual = vectorized({x / d, y / d, 0});
 
-                //cout << "scalar: " << s << " vectorized: " << e[0] << endl;
+                VASSERT_EQ(actual, 0);
             }
         }
     }
 
-    TEST_CASE(TYPE_PREFIX"billow", "[modules][generators]")
+    TEST(modules_generators, billow)
     {
-        mod_billow<sreal, sint> scalar;
+        mod_billow<scalar_branch> scalar;
         scalar.seed = 111;
-        mod_billow<vreal, vint> vectorized;
+        mod_billow<vector_branch> vectorized;
         vectorized.seed = 111;
 
         auto d = 128.0f;
@@ -99,22 +95,19 @@ namespace zzsystems { namespace solowej { namespace  test {
         {
             for( int x = 0; x < d; x++)
             {
-                auto s = scalar({x / d, y / d, 0});
-                auto v = vectorized({x / d, y / d, 0});
-                ALIGNED float e[dim<vreal>()];
-                extract(v, e);
-                gorynych::test::test<vreal, sreal>([&]() { return s; }, [&]() { return v; });
+                auto expected = scalar({x / d, y / d, 0});
+                auto actual = vectorized({x / d, y / d, 0});
 
-                //cout << "scalar: " << s << " vectorized: " << e[0] << endl;
+                VASSERT_EQ(actual, 0);
             }
         }
     }
 
-    TEST_CASE(TYPE_PREFIX"ridgedmultifrac", "[modules][generators]")
+    TEST(modules_generators, ridgedmultifrac)
     {
-        mod_ridged_multifractal<sreal, sint> scalar;
+        mod_ridged_multifractal<scalar_branch> scalar;
         scalar.seed = 111;
-        mod_ridged_multifractal<vreal, vint> vectorized;
+        mod_ridged_multifractal<vector_branch> vectorized;
         vectorized.seed = 111;
 
         auto d = 128.0f;
@@ -123,42 +116,36 @@ namespace zzsystems { namespace solowej { namespace  test {
         {
             for( int x = 0; x < d; x++)
             {
-                auto s = scalar({x / d, y / d, 0});
-                auto v = vectorized({x / d, y / d, 0});
-                ALIGNED float e[dim<vreal>()];
-                extract(v, e);
-                gorynych::test::test<vreal, sreal>([&]() { return s; }, [&]() { return v; });
+                auto expected = scalar({x / d, y / d, 0});
+                auto actual = vectorized({x / d, y / d, 0});
 
-                //cout << "scalar: " << s << " vectorized: " << e[0] << endl;
+                VASSERT_EQ(actual, 0);
             }
         }
     }
 
-    TEST_CASE(TYPE_PREFIX"cylinders", "[modules][generators]")
+    TEST(modules_generators, cylinders)
     {
-        mod_cylinders<sreal, sint> scalar;
-        mod_cylinders<vreal, vint> vectorized;
+        mod_cylinders<scalar_branch> scalar;
+        mod_cylinders<vector_branch> vectorized;
         auto d = 128.0f;
 
         for( int y = 0; y < d; y++)
         {
             for( int x = 0; x < d; x++)
             {
-                auto s = scalar({x / d, y / d, 0});
-                auto v = vectorized({x / d, y / d, 0});
-                ALIGNED float e[dim<vreal>()];
-                extract(v, e);
-                gorynych::test::test<vreal, sreal>([&]() { return s; }, [&]() { return v; });
+                auto expected = scalar({x / d, y / d, 0});
+                auto actual = vectorized({x / d, y / d, 0});
 
-                //cout << "scalar: " << s << " vectorized: " << e[0] << endl;
+                VASSERT_EQ(actual, 0);
             }
         }
     }
 
-    TEST_CASE(TYPE_PREFIX"spheres", "[modules][generators]")
+    TEST(modules_generators, spheres)
     {
-        mod_spheres<sreal, sint> scalar;
-        mod_spheres<vreal, vint> vectorized;
+        mod_spheres<scalar_branch> scalar;
+        mod_spheres<vector_branch> vectorized;
 
         auto d = 128.0f;
 
@@ -166,29 +153,26 @@ namespace zzsystems { namespace solowej { namespace  test {
         {
             for( int x = 0; x < d; x++)
             {
-                auto s = scalar({x / d, y / d, 0});
-                auto v = vectorized({x / d, y / d, 0});
-                ALIGNED float e[dim<vreal>()];
-                extract(v, e);
-                gorynych::test::test<vreal, sreal>([&]() { return s; }, [&]() { return v; });
+                auto expected = scalar({x / d, y / d, 0});
+                auto actual = vectorized({x / d, y / d, 0});
 
-                //cout << "scalar: " << s << " vectorized: " << e[0] << endl;
+                VASSERT_EQ(actual, 0);
             }
         }
     }
 
-    static mod_perlin<sreal, sint> src_s_a(2.0, 2.0, 0.625, 6, 111);
-    static mod_perlin<vreal, vint> src_v_a(2.0, 2.0, 0.625, 6, 111);
+    static mod_perlin<scalar_branch> src_s_a(2.0, 2.0, 0.625, 6, 111);
+    static mod_perlin<vector_branch> src_v_a(2.0, 2.0, 0.625, 6, 111);
 
-    static mod_billow<sreal, sint> src_s_b(2.0, 2.0, 0.625, 6, 111);
-    static mod_billow<vreal, vint> src_v_b(2.0, 2.0, 0.625, 6, 111);
+    static mod_billow<scalar_branch> src_s_b(2.0, 2.0, 0.625, 6, 111);
+    static mod_billow<vector_branch> src_v_b(2.0, 2.0, 0.625, 6, 111);
 
-    static mod_ridged_multifractal<sreal, sint> src_s_c(3.0, 2.0, 111, 8);
-    static mod_ridged_multifractal<vreal, vint> src_v_c(3.0, 2.0, 111, 8);
+    static mod_ridged_multifractal<scalar_branch> src_s_c(3.0, 2.0, 111, 8);
+    static mod_ridged_multifractal<vector_branch> src_v_c(3.0, 2.0, 111, 8);
 
-    TEST_CASE(TYPE_PREFIX"curve", "[modules][modifiers]")
+    TEST(modules_modifiers, curve)
     {
-        mod_curve<sreal, sint> scalar(
+        mod_curve<scalar_branch> scalar(
         {
                 {-2,     -1.625},
                 {-1,     -1.375},
@@ -201,7 +185,7 @@ namespace zzsystems { namespace solowej { namespace  test {
                 {1,      0.5},
                 {2,      0.5}
         });
-        mod_curve<vreal, vint> vectorized(
+        mod_curve<vector_branch> vectorized(
         {
                 {-2,     -1.625},
                 {-1,     -1.375},
@@ -217,31 +201,26 @@ namespace zzsystems { namespace solowej { namespace  test {
 
         scalar.set_source(src_s_a);
         vectorized.set_source(src_v_a);
-        
-        
+
+
         auto d = 128.0f;
 
         for( int y = 0; y < d; y++)
         {
             for( int x = 0; x < d; x++)
             {
-                auto s = scalar({x / d, y / d, 0});
-                auto v = vectorized({x / d, y / d, 0});
-                ALIGNED float e[dim<vreal>()];
-                extract(v, e);
+                auto expected = scalar({x / d, y / d, 0});
+                auto actual = vectorized({x / d, y / d, 0});
 
-                //cerr << "for [" << x << ", " << y << "] scalar: " << s << " vector: " << e[0] << " " << e[1] << " " << e[2] << " " << e[3] << endl;
-                gorynych::test::test<vreal, sreal>([&]() { return s; }, [&]() { return v; });
-
-                //cout << "scalar: " << s << " vectorized: " << e[0] << endl;
+                VASSERT_EQ(actual, 0);
             }
         }
     }
 
-    TEST_CASE(TYPE_PREFIX"rotate", "[modules][modifiers]")
+    TEST(modules_modifiers, rotate)
     {
-        mod_rotate<sreal, sint> scalar(vec3<float>(90, 45, 30));
-        mod_rotate<vreal, vint> vectorized(vec3<float>(90, 45, 30));
+        mod_rotate<scalar_branch> scalar(vec3<float>(90, 45, 30));
+        mod_rotate<vector_branch> vectorized(vec3<float>(90, 45, 30));
 
         scalar.set_source(src_s_a);
         vectorized.set_source(src_v_a);
@@ -253,23 +232,18 @@ namespace zzsystems { namespace solowej { namespace  test {
         {
             for( int x = 0; x < d; x++)
             {
-                auto s = scalar({x / d, y / d, 0});
-                auto v = vectorized({x / d, y / d, 0});
-                ALIGNED float e[dim<vreal>()];
-                extract(v, e);
+                auto expected = scalar({x / d, y / d, 0});
+                auto actual = vectorized({x / d, y / d, 0});
 
-
-                gorynych::test::test<vreal, sreal>([&]() { return s; }, [&]() { return v; });
-
-                //cout << "scalar: " << s << " vectorized: " << e[0] << endl;
+                VASSERT_EQ(actual, 0);
             }
         }
     }
 
 
-    TEST_CASE(TYPE_PREFIX"terrace", "[modules][modifiers]")
+    TEST(modules_modifiers, terrace)
     {
-        mod_terrace<sreal, sint> scalar(
+        mod_terrace<scalar_branch> scalar(
         {
             -1.625,
             -1.375,
@@ -282,7 +256,7 @@ namespace zzsystems { namespace solowej { namespace  test {
              0.5,
              0.5
         });
-        mod_terrace<vreal, vint> vectorized(
+        mod_terrace<vector_branch> vectorized(
         {
             -1.625,
             -1.375,
@@ -306,23 +280,18 @@ namespace zzsystems { namespace solowej { namespace  test {
         {
             for( int x = 0; x < d; x++)
             {
-                auto s = scalar({x / d, y / d, 0});
-                auto v = vectorized({x / d, y / d, 0});
-                ALIGNED float e[dim<vreal>()];
-                extract(v, e);
+                auto expected = scalar({x / d, y / d, 0});
+                auto actual = vectorized({x / d, y / d, 0});
 
-
-                gorynych::test::test<vreal, sreal>([&]() { return s; }, [&]() { return v; });
-
-                //cout << "scalar: " << s << " vectorized: " << e[0] << endl;
+                VASSERT_EQ(actual, 0);
             }
         }
     }
 
-    TEST_CASE(TYPE_PREFIX"turbulence", "[modules][modifiers]")
+    TEST(modules_modifiers, turbulence)
     {
-        mod_turbulence<sreal, sint> scalar;
-        mod_turbulence<vreal, vint> vectorized;
+        mod_turbulence<scalar_branch> scalar;
+        mod_turbulence<vector_branch> vectorized;
 
         scalar.set_source(src_s_a);
         vectorized.set_source(src_v_a);
@@ -334,23 +303,18 @@ namespace zzsystems { namespace solowej { namespace  test {
         {
             for( int x = 0; x < d; x++)
             {
-                auto s = scalar({x / d, y / d, 0});
-                auto v = vectorized({x / d, y / d, 0});
-                ALIGNED float e[dim<vreal>()];
-                extract(v, e);
+                auto expected = scalar({x / d, y / d, 0});
+                auto actual = vectorized({x / d, y / d, 0});
 
-
-                gorynych::test::test<vreal, sreal>([&]() { return s; }, [&]() { return v; });
-
-                //cout << "scalar: " << s << " vectorized: " << e[0] << endl;
+                VASSERT_EQ(actual, 0);
             }
         }
     }
 
-    TEST_CASE(TYPE_PREFIX"select", "[modules][modifiers]")
+    TEST(modules_modifiers, select)
     {
-        mod_select<sreal, sint> scalar;
-        mod_select<vreal, vint> vectorized;
+        mod_select<scalar_branch> scalar;
+        mod_select<vector_branch> vectorized;
 
         scalar.set_a(src_s_a);
         scalar.set_b(src_s_b);
@@ -367,23 +331,18 @@ namespace zzsystems { namespace solowej { namespace  test {
         {
             for( int x = 0; x < d; x++)
             {
-                auto s = scalar({x / d, y / d, 0});
-                auto v = vectorized({x / d, y / d, 0});
-                ALIGNED float e[dim<vreal>()];
-                extract(v, e);
+                auto expected = scalar({x / d, y / d, 0});
+                auto actual = vectorized({x / d, y / d, 0});
 
-
-                gorynych::test::test<vreal, sreal>([&]() { return s; }, [&]() { return v; });
-
-                //cout << "scalar: " << s << " vectorized: " << e[0] << endl;
+                VASSERT_EQ(actual, 0);
             }
         }
     }
 
-    TEST_CASE(TYPE_PREFIX" add", "[modules][modifiers][primitives]")
+    TEST(modules_modifiers_primitives, add)
     {
-        mod_add<sreal, sint> scalar;
-        mod_add<vreal, vint> vectorized;
+        mod_add<scalar_branch> scalar;
+        mod_add<vector_branch> vectorized;
 
         scalar.set_a(src_s_a);
         scalar.set_b(src_s_b);
@@ -397,23 +356,18 @@ namespace zzsystems { namespace solowej { namespace  test {
         {
             for( int x = 0; x < d; x++)
             {
-                auto s = scalar({x / d, y / d, 0});
-                auto v = vectorized({x / d, y / d, 0});
-                float e[dim<vreal>()];
-                extract(v, e);
+                auto expected = scalar({x / d, y / d, 0});
+                auto actual = vectorized({x / d, y / d, 0});
 
-
-                gorynych::test::test<vreal, sreal>([&]() { return s; }, [&]() { return v; });
-
-                //cout << "scalar: " << s << " vectorized: " << e[0] << endl;
+                VASSERT_EQ(actual, 0);
             }
         }
     }
 
-    TEST_CASE(TYPE_PREFIX" sub", "[modules][modifiers][primitives]")
+    TEST(modules_modifiers_primitives, sub)
     {
-        mod_sub<sreal, sint> scalar;
-        mod_sub<vreal, vint> vectorized;
+        mod_sub<scalar_branch> scalar;
+        mod_sub<vector_branch> vectorized;
 
         scalar.set_a(src_s_a);
         scalar.set_b(src_s_b);
@@ -427,22 +381,17 @@ namespace zzsystems { namespace solowej { namespace  test {
         {
             for( int x = 0; x < d; x++)
             {
-                auto s = scalar({x / d, y / d, 0});
-                auto v = vectorized({x / d, y / d, 0});
-                ALIGNED float e[dim<vreal>()];
-                extract(v, e);
+                auto expected = scalar({x / d, y / d, 0});
+                auto actual = vectorized({x / d, y / d, 0});
 
-
-                gorynych::test::test<vreal, sreal>([&]() { return s; }, [&]() { return v; });
-
-                //cout << "scalar: " << s << " vectorized: " << e[0] << endl;
+                VASSERT_EQ(actual, 0);
             }
         }
     }
-    TEST_CASE(TYPE_PREFIX" mul", "[modules][modifiers][primitives]")
+    TEST(modules_modifiers_primitives, mul)
     {
-        mod_mul<sreal, sint> scalar;
-        mod_mul<vreal, vint> vectorized;
+        mod_mul<scalar_branch> scalar;
+        mod_mul<vector_branch> vectorized;
 
         scalar.set_a(src_s_a);
         scalar.set_b(src_s_b);
@@ -456,22 +405,17 @@ namespace zzsystems { namespace solowej { namespace  test {
         {
             for( int x = 0; x < d; x++)
             {
-                auto s = scalar({x / d, y / d, 0});
-                auto v = vectorized({x / d, y / d, 0});
-                ALIGNED float e[dim<vreal>()];
-                extract(v, e);
+                auto expected = scalar({x / d, y / d, 0});
+                auto actual = vectorized({x / d, y / d, 0});
 
-
-                gorynych::test::test<vreal, sreal>([&]() { return s; }, [&]() { return v; });
-
-                //cout << "scalar: " << s << " vectorized: " << e[0] << endl;
+                VASSERT_EQ(actual, 0);
             }
         }
     }
-    TEST_CASE(TYPE_PREFIX" div", "[modules][modifiers][primitives]")
+    TEST(modules_modifiers_primitives, div)
     {
-        mod_div<sreal, sint> scalar;
-        mod_div<vreal, vint> vectorized;
+        mod_div<scalar_branch> scalar;
+        mod_div<vector_branch> vectorized;
 
         scalar.set_a(src_s_a);
         scalar.set_b(src_s_b);
@@ -485,17 +429,12 @@ namespace zzsystems { namespace solowej { namespace  test {
         {
             for( int x = 0; x < d; x++)
             {
-                auto s = scalar({x / d, y / d, 0});
-                auto v = vectorized({x / d, y / d, 0});
-                ALIGNED float e[dim<vreal>()];
-                extract(v, e);
+                auto expected = scalar({x / d, y / d, 0});
+                auto actual = vectorized({x / d, y / d, 0});
 
-
-                gorynych::test::test<vreal, sreal>([&]() { return s; }, [&]() { return v; });
-
-                //cout << "scalar: " << s << " vectorized: " << e[0] << endl;
+                VASSERT_EQ(actual, 0);
             }
         }
     }
 
-}}}
+}}

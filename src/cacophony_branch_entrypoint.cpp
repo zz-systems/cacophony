@@ -28,10 +28,10 @@
 
 
 template<>
-std::shared_ptr<zacc::entrypoint> zacc::system::resolve_entrypoint<zacc::branch::types>()
+std::shared_ptr<zacc::entrypoint> zacc::system::resolve_entrypoint<zacc::dispatched_branch::types>()
 {
-    std::cout << "Creating engine for " << zacc::branch::types::major_branch_name() << std::endl;
+    std::cout << "Creating engine for " << zacc::dispatched_branch::types::major_branch_name() << std::endl;
     return std::static_pointer_cast<zacc::entrypoint>(
-            zacc::make_shared<cacophony::platform::simd_engine<zacc::branch::types>>()
+            zacc::make_shared<cacophony::platform::simd_engine<zacc::dispatched_branch::types>>()
     );
 }

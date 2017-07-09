@@ -25,19 +25,23 @@
 #include "json.hpp"
 #include "zacc.hpp"
 
+#include "gtest/gtest.h"
+#include "util/testing/gtest_ext.hpp"
 #include "noise/noisegenerators.hpp"
 #include "platform/compilers/compiler.hpp"
 
 
-namespace zzsystems { namespace solowej { namespace  test {
-    using namespace gorynych;
-    using namespace gorynych::test;
-    using namespace solowej::platform;
+namespace cacophony { namespace test {
+    using namespace zacc;
+    using namespace zacc::test;
+    using namespace cacophony::platform;
 
-#define TYPE_PREFIX TEST_PREFIX("compiler")
+    using vector_branch = dispatched_branch::types;
 
-        TEST_CASE(TYPE_PREFIX"compile simple", "[compiler]")
+        TEST(compiler, compile_simple)
         {
+            REQUIRES(ZACC_CAPABILITIES);
+
             nlohmann::json source =
             {
                 { "version", "0.9" },
@@ -75,19 +79,19 @@ namespace zzsystems { namespace solowej { namespace  test {
                 }
             };
 
-            INFO("Compiling: " << source.dump(4));
+            //SCOPED_TRACE("Compiling: ") << source.dump(4);
 
-            compiler<capability> cc(false);
+            compiler<vector_branch> cc(false);
 
-            REQUIRE_NOTHROW(cc.compile(source));
+            ASSERT_NO_THROW(cc.compile(source));
         }
 
-        TEST_CASE(TYPE_PREFIX"check transformer build", "[compiler]")
+        TEST(compiler, transformer_build)
         {
 
         }
 
-        TEST_CASE(TYPE_PREFIX"invalid enty point", "[compiler]")
+        TEST(compiler, invalid_entry_point)
         {
             nlohmann::json source =
             {
@@ -125,14 +129,14 @@ namespace zzsystems { namespace solowej { namespace  test {
                 }
             };
 
-            INFO("Compiling: " << source.dump(4));
+            //INFO("Compiling: " << source.dump(4));
 
-            compiler<capability> cc(false);
+            compiler<vector_branch> cc(false);
 
-            REQUIRE_THROWS_AS(cc.compile(source), unresolved_node_reference_error);
+            ASSERT_THROW(cc.compile(source), unresolved_node_reference_error);
         }
 
-        TEST_CASE(TYPE_PREFIX"missing enty point", "[compiler]")
+        TEST(compiler, missing_entry_point)
         {
             nlohmann::json source =
             {
@@ -170,14 +174,14 @@ namespace zzsystems { namespace solowej { namespace  test {
                 }
             };
 
-            INFO("Compiling: " << source.dump(4));
+            //INFO("Compiling: " << source.dump(4));
 
-            compiler<capability> cc(false);
+            compiler<vector_branch> cc(false);
 
-            REQUIRE_THROWS_AS(cc.compile(source), invalid_entry_point_error);
+            ASSERT_THROW(cc.compile(source), invalid_entry_point_error);
         }
 
-        TEST_CASE(TYPE_PREFIX"invalid scheduler data", "[compiler]")
+        TEST(compiler, invalid_scheduler_data)
         {
             nlohmann::json source =
             {
@@ -215,13 +219,13 @@ namespace zzsystems { namespace solowej { namespace  test {
                 }
             };
 
-            compiler<capability> cc(false);
+            compiler<vector_branch> cc(false);
 
             // TODO
-            //REQUIRE_THROWS_AS(cc.compile(source), invalid_entry_point_error);
+            //ASSERT_THROW(cc.compile(source), invalid_entry_point_error);
         }
 
-        TEST_CASE(TYPE_PREFIX"duplicates", "[compiler]")
+        TEST(compiler, duplicates)
         {
             nlohmann::json source =
             {
@@ -274,14 +278,14 @@ namespace zzsystems { namespace solowej { namespace  test {
                 }
             };
 
-            INFO("Compiling: " << source.dump(4));
+            //INFO("Compiling: " << source.dump(4));
 
-            compiler<capability> cc(false);
+            compiler<vector_branch> cc(false);
 
-            REQUIRE_THROWS_AS(cc.compile(source), duplicate_module_error);
+            ASSERT_THROW(cc.compile(source), duplicate_module_error);
         }
 
-        TEST_CASE(TYPE_PREFIX"unresolved reference", "[compiler]")
+        TEST(compiler, unresolved_reference)
         {
             nlohmann::json source =
             {
@@ -320,16 +324,16 @@ namespace zzsystems { namespace solowej { namespace  test {
             };
 
 
-            INFO("Compiling: " << source.dump(4));
+            //INFO("Compiling: " << source.dump(4));
 
-            compiler<capability> cc(false);
+            compiler<vector_branch> cc(false);
 
-            REQUIRE_THROWS_AS(cc.compile(source), unresolved_module_reference_error);
+            ASSERT_THROW(cc.compile(source), unresolved_module_reference_error);
         }
 
 
 
-        TEST_CASE(TYPE_PREFIX"missing sources", "[compiler]")
+        TEST(compiler, missing_sources)
         {
             nlohmann::json source =
             {
@@ -382,14 +386,14 @@ namespace zzsystems { namespace solowej { namespace  test {
                 }
             };
 
-            INFO("Compiling: " << source.dump(4));
+            //INFO("Compiling: " << source.dump(4));
 
-            compiler<capability> cc(false);
+            compiler<vector_branch> cc(false);
 
-            REQUIRE_THROWS_AS(cc.compile(source), invalid_module_error);
+            ASSERT_THROW(cc.compile(source), invalid_module_error);
         }
 
-        TEST_CASE(TYPE_PREFIX"wrong module data", "[compiler]")
+        TEST(compiler, wrong_module_data)
         {
             nlohmann::json source =
             {
@@ -438,14 +442,14 @@ namespace zzsystems { namespace solowej { namespace  test {
                 }
             };
 
-            INFO("Compiling: " << source.dump(4));
+            //INFO("Compiling: " << source.dump(4));
 
-            compiler<capability> cc(false);
+            compiler<vector_branch> cc(false);
 
-            REQUIRE_THROWS_AS(cc.compile(source), invalid_module_error);
+            ASSERT_THROW(cc.compile(source), invalid_module_error);
         }
 
-        TEST_CASE(TYPE_PREFIX"cycles", "[compiler]")
+        TEST(compiler, cycles)
         {
             nlohmann::json source =
             {
@@ -489,10 +493,10 @@ namespace zzsystems { namespace solowej { namespace  test {
                 }
             };
 
-            INFO("Compiling: " << source.dump(4));
+            //INFO("Compiling: " << source.dump(4));
 
-            compiler<capability> cc(false);
+            compiler<vector_branch> cc(false);
 
-            REQUIRE_THROWS_AS(cc.compile(source), cyclic_module_ref_error);
+            ASSERT_THROW(cc.compile(source), cyclic_module_ref_error);
         }
-}}}
+}}

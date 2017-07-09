@@ -26,7 +26,10 @@
 
 #include "libcacophony.hpp"
 #include "util/color.hpp"
+
+#ifndef CACOPHONY_EXAMPLES_HEADLESS
 #include "CImg.h"
+#endif
 
 namespace cacophony { namespace examples {
         using namespace zacc;
@@ -68,6 +71,7 @@ namespace cacophony { namespace examples {
         cout << "Minval SISD: " << *min_element(begin(result2), end(result2)) << endl << endl;
         cout << "Maxval SISD: " << *max_element(begin(result2), end(result2)) << endl << endl;
 
+#ifndef CACOPHONY_EXAMPLES_HEADLESS
         cimg_library::CImg<uint8_t> img1(w, h, 1, 3), img2(w, h, 1, 3);
 
         //async::parallel_for(async::irange(0, w * h), [&](const auto i)
@@ -96,6 +100,8 @@ namespace cacophony { namespace examples {
     img2.display("sisd", true);
 #endif
 
+#endif
+
 }
 
 void run()
@@ -115,8 +121,8 @@ void run()
 
     // Restrict with extracted bitmask
     auto flags = sysinfo->raw();
-    sysinfo->set(capabilities::AVX2, false);
-    sysinfo->set(capabilities::AVX1, false);
+    //sysinfo->set(capabilities::AVX2, false);
+    //sysinfo->set(capabilities::AVX1, false);
     //sysinfo->set(capabilities::SCALAR, false);
 
 
@@ -135,8 +141,8 @@ void run()
         auto t = zacc::make_shared<std::vector<float>>(d.x * d.y * d.z);
 
         sysinfo->reload();
-        sysinfo->set(capabilities::AVX2, false);
-        sysinfo->set(capabilities::AVX1, false);
+        //sysinfo->set(capabilities::AVX2, false);
+        //sysinfo->set(capabilities::AVX1, false);
 
         //::cacophony_get_engine("examples")->info.feature_flags = flags;
         ::cacophony_run("examples", &t->at(0), 0, 0, 0);

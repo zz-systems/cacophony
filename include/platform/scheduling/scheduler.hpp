@@ -50,11 +50,13 @@ namespace cacophony { namespace platform {
 
         virtual void schedule(float *target, const vec3<float> &origin) /*const*/ override
         {
+            std::cout << ">>scheduling " << branch::major_branch_name() << " branch" << std::endl;
             _scheduler->schedule(target, origin);
         }
 
         virtual void schedule(int *target, const vec3<float> &origin) /*const*/ override
         {
+            std::cout << ">>scheduling " << branch::major_branch_name() << " branch" << std::endl;
             _scheduler->schedule(target, origin);
         }
 

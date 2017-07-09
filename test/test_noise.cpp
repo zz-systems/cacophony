@@ -22,37 +22,37 @@
 // Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
-#include "../dependencies/gorynych/gorynych/gorynych.h"
-#include "../dependencies/gorynych/gorynych-test/test_extensions.h"
+#include "gtest/gtest.h"
+#include "util/testing/gtest_ext.hpp"
 
-#include "../solowej/noise/noisegenerators.h"
+#include "system/branch.hpp"
+#include "backend/scalar/types.hpp"
 
-namespace zzsystems { namespace solowej { namespace  test {
-            using namespace gorynych;
-            using namespace gorynych::test;
+#include "noise/noisegenerators.hpp"
 
-#define TYPE_PREFIX TEST_PREFIX("noise")
+namespace cacophony { namespace  test {
+    using namespace zacc;
+    using namespace zacc::test;
+    using namespace zacc::math;
 
-    VECTORIZED class noisegen_wrapper : public noisegen<SIMD_T>
-    {
-        //friend class TestNoise;
-    };
+    using scalar_branch = zacc::scalar::types<branches::scalar>;
+    using vector_branch = dispatched_branch::types;
 
-    TEST_CASE(TYPE_PREFIX" gradient coherent 3d", "[noise]")
+    TEST(noise, gradient_coherent_3d)
     {
             for (auto q = 0; q <= 2; q++)
             for (float z = -1; z <= 1; z += 0.25)
             for (float y = -1; y <= 1; y += 0.25)
             for (float x = -1; x <= 1; x += 0.25)
             {
-                gorynych::test::test<vreal, sreal>(
-                        [=]() { return noisegen_wrapper<sreal, sint>::gradient_coherent_3d({ x, y, z }, 1010, Quality(q)); },
-                        [=]() { return noisegen_wrapper<vreal, vint>::gradient_coherent_3d({ x, y, z }, 1010, Quality(q)); }
-                );
+                auto expected = noisegen<scalar_branch>::gradient_coherent_3d({ x, y, z }, 1010, Quality(q));
+                auto actual = noisegen<vector_branch>::gradient_coherent_3d({ x, y, z }, 1010, Quality(q));
+
+                VASSERT_EQ(actual, expected.value());
             }
     }
 
-    TEST_CASE(TYPE_PREFIX" gradient 3d", "[noise]")
+    TEST(noise, gradient_3d)
     {
             for (int zi = -2; zi <= 2; zi += 1)
             for (int yi = -2; yi <= 2; yi += 1)
@@ -61,192 +61,57 @@ namespace zzsystems { namespace solowej { namespace  test {
             for (float y = -1; y <= 1; y += 0.25)
             for (float x = -1; x <= 1; x += 0.25)
             {
-                gorynych::test::test<vreal, sreal>(
-                        [=]() { return noisegen_wrapper<sreal, sint>::gradient_3d({ x, y, z }, { xi, zi, yi }, 1010);},
-                        [=]() { return noisegen_wrapper<vreal, vint>::gradient_3d({ x, y, z }, { xi, zi, yi }, 1010);}
-                );
+                auto expected = noisegen<scalar_branch>::gradient_3d({ x, y, z }, { xi, zi, yi }, 1010);
+                auto actual = noisegen<vector_branch>::gradient_3d({ x, y, z }, { xi, zi, yi }, 1010);
+
+                VASSERT_EQ(actual, expected.value());
             }
     }
 
-    TEST_CASE(TYPE_PREFIX" value coherent 3d", "[noise]")
+    TEST(noise, value_coherent_3d)
     {
         for (auto q = 0; q <= 2; q++)
         for (float z = -1; z <= 1; z += 0.25)
         for (float y = -1; y <= 1; y += 0.25)
         for (float x = -1; x <= 1; x += 0.25)
         {
-            gorynych::test::test<vreal, sreal>(
-                    [=]() { return noisegen_wrapper<sreal, sint>::value_coherent_3d({ x, y, z }, 1010, Quality(q));},
-                    [=]() { return noisegen_wrapper<vreal, vint>::value_coherent_3d({ x, y, z }, 1010, Quality(q));}
-            );
+            auto expected = noisegen<scalar_branch>::value_coherent_3d({ x, y, z }, 1010, Quality(q));
+            auto actual = noisegen<vector_branch>::value_coherent_3d({ x, y, z }, 1010, Quality(q));
+
+            VASSERT_EQ(actual, expected.value());
         }
     }
 
-    TEST_CASE(TYPE_PREFIX" real value 3d", "[noise]")
+    TEST(noise, realvalue_3d)
     {
         for (int zi = -2; zi <= 2; zi += 1)
         for (int yi = -2; yi <= 2; yi += 1)
         for (int xi = -2; xi <= 2; xi += 1)
         {
-            gorynych::test::test<vreal, sreal>(
-                    [=]() { return noisegen_wrapper<sreal, sint>::realvalue_3d({ xi, yi, zi }, 1010); },
-                    [=]() { return noisegen_wrapper<vreal, vint>::realvalue_3d({ xi, yi, zi }, 1010); }
-            );
+            auto expected = noisegen<scalar_branch>::realvalue_3d({ xi, yi, zi }, 1010);
+            auto actual = noisegen<vector_branch>::realvalue_3d({ xi, yi, zi }, 1010);
+
+            VASSERT_EQ(actual, expected.value());
         }
     }
-//
-//    TEST_CASE(TYPE_PREFIX" noise seeder", "[noise]")
-//    {
-//        sint seed = 1010;
-//
-//        for (int zi = -2; zi <= 2; zi += 1)
-//        for (int yi = -2; yi <= 2; yi += 1)
-//        for (int xi = -2; xi <= 2; xi += 1)
-//        {
-//            gorynych::test::test<vint, sint>(
-//                    [=]() { return  (SEED_NOISE_GEN<sint>() * seed + dot(NOISE_GEN<sint>(), { xi, yi, zi })) & 0x7FFFFFFF; },
-//                    [=]() { return  (SEED_NOISE_GEN<vint>() * seed + dot(NOISE_GEN<vint>(), { xi, yi, zi })) & 0x7FFFFFFF; }
-//            );
-//        }
-//    }
-//
-//    TEST_CASE(TYPE_PREFIX" shifted noise seeder", "[noise]")
-//    {
-//        sint seed = 1010;
-//
-//        for (int zi = -2; zi <= 2; zi += 1)
-//        for (int yi = -2; yi <= 2; yi += 1)
-//        for (int xi = -2; xi <= 2; xi += 1)
-//        {
-//            gorynych::test::test<vint, sint>(
-//                    [=]() { auto n = (SEED_NOISE_GEN<sint>() * seed + dot(NOISE_GEN<sint>(), { xi, yi, zi })) & 0x7FFFFFFF; return n ^= (n >> 13);},
-//                    [=]() { auto n = (SEED_NOISE_GEN<vint>() * seed + dot(NOISE_GEN<vint>(), { xi, yi, zi })) & 0x7FFFFFFF; return n ^= (n >> 13);}
-//            );
-//        }
-//    }
 
-//    TEST_CASE(TYPE_PREFIX" 0x7FFFFFFF", "[constants]")
-//    {
-//        gorynych::test::test<vint, sint>(
-//                [=]() { return numeric_limits<sint>::max(); },// 2147483647;}, // 0x7FFFFFFF
-//                [=]() { return ccl<vint>::ones() >> 1;}
-//        );
-//    }
-//
-//    TEST_CASE(TYPE_PREFIX" 0x80000000", "[constants]")
-//    {
-//        gorynych::test::test<vint, sint>(
-//                [=]() { return numeric_limits<sint>::min();},//-2147483648;},
-//                [=]() { return ccl<vint>::ones() << 31;}
-//        );
-//    }
-/*
-    TEST_CASE(TYPE_PREFIX" intnoise3d impl", "[noise]")
-    {
-        sint seed = 111;
-
-        //cout << " imax: " <<  numeric_limits<int>::max() << endl;
-        //int xi = 1, yi = -1, zi = -1;
-        for (int zi = -2; zi <= 2; zi += 1)
-        for (int yi = -2; yi <= 2; yi += 1)
-        for (int xi = -2; xi <= 2; xi += 1)
-        {
-            gorynych::test::test<vint, sint>(
-                    [=]() {
-                        long long n = (SEED_NOISE_GEN<sint>() * seed + dot(NOISE_GEN<sint>(), { xi, yi, zi }));
-                        n &= static_cast<int>(0x7FFFFFFF);// & numeric_limits<sint>::max();
-                        n ^= (n >> 13);
-                        long long r = (n * (n * n * 1087 + 2749) + 3433);
-                        sint r2 = r & static_cast<int>(0x7FFFFFFF);//0x7FFFFFFF);// & numeric_limits<sint>::max();
-
-//                        auto ng = NOISE_GEN<unsigned>();
-//                        unsigned dnc = ng.x * xi + ng.y * yi + ng.z * zi;
-//
-//                        unsigned n = (SEED_NOISE_GEN<unsigned>() * seed + dnc) & numeric_limits<int>::max();//& static_cast<vint>(0x7fffffff);// ccl<vint>::max();
-//
-//                        n ^= (n >> 13);
-//
-//                        //return (n * (n * n * 60493 + 19990303) + 1376312589) & 0x7fffffff;
-//                        n = (n * (n * n * 1087 + 2749) + 3433);// & static_cast<vint>(0x7FFFFFFF); // & ccl<vint>::max();
-//
-//                        auto r =  *reinterpret_cast<int*>(&n);
-//
-//                        auto r2 = r & numeric_limits<int>::max();
-                        cout << "sisd: " << r <<  " | " << r2 << endl;
-                        return r;
-                    },
-                    [=]()
-                    {
-                        auto n = (SEED_NOISE_GEN<vint>() * seed + dot(NOISE_GEN<vint>(), { xi, yi, zi }));
-                        n &= (ccl<vint>::ones() >> 1);// & (ccl<vint>::ones() >> 1);//numeric_limits<sint>::max();
-                        n ^= (n >> 13);
-                        auto r = (n * (n * n * 1087 + 2749) + 3433);// & (ccl<vint>::ones() >> 1);;
-                        sint e[dim<vint>()];
-                        extract(r, e);
-
-                        auto r2 = r & (ccl<vint>::ones() >> 1);
-
-                        sint e2[dim<vint>()];
-                        extract(r2, e2);
-
-                        cout << "simd: " << e[0] << " | "<< e2[0] << endl;
-                        return r;}// & numeric_limits<sint>::max();}
-            );
-        }
-    }*/
-    TEST_CASE(TYPE_PREFIX" intvalue 3d", "[noise]")
-    {
-//        for (int zi = -2; zi <= 2; zi += 1)
-//        for (int yi = -2; yi <= 2; yi += 1)
-//        for (int xi = -2; xi <= 2; xi += 1)
-//        {
-//            gorynych::test::test<vint, sint>(
-//                    [=]() { return noisegen_wrapper<sreal, sint>::intvalue_3d({ xi, yi, zi }, 1010); },
-//                    [=]() { return noisegen_wrapper<vreal, vint>::intvalue_3d({ xi, yi, zi }, 1010); }
-//            );
-//        }
-    }
-
-    TEST_CASE(TYPE_PREFIX" construct cube", "[noise]")
+    TEST(noise, construct_cube)
     {
         for (float z = -1; z <= 1; z += 0.25f)
         for (float y = -1; y <= 1; y += 0.25f)
         for (float x = -1; x <= 1; x += 0.25f)
         {
-            auto expected   = noisegen_wrapper<sreal, sint>::construct_cube({ x, y, z });
-            auto tested     = noisegen_wrapper<vreal, vint>::construct_cube({ x, y, z });
-
-            gorynych::test::test<vreal, sreal>(
-                    [&]() { return expected(0, 0); },
-                    [&]() { return tested(0, 0); }
-            );
-
-            gorynych::test::test<vreal, sreal>(
-                    [&]() { return expected(0, 1); },
-                    [&]() { return tested(0, 1); }
-            );
-
-            gorynych::test::test<vreal, sreal>(
-                    [&]() { return expected(0, 2); },
-                    [&]() { return tested(0, 2); }
-            );
+            auto expected   =  noisegen<scalar_branch>::construct_cube({ x, y, z });
+            auto actual     =  noisegen<vector_branch>::construct_cube({ x, y, z });
 
 
-            gorynych::test::test<vreal, sreal>(
-                    [&]() { return expected(1, 0); },
-                    [&]() { return tested(1, 0); }
-            );
-
-            gorynych::test::test<vreal, sreal>(
-                    [&]() { return expected(1, 2); },
-                    [&]() { return tested(1, 2); }
-            );
-
-            gorynych::test::test<vreal, sreal>(
-                    [&]() { return expected(1, 2); },
-                    [&]() { return tested(1, 2); }
-            );
+            VASSERT_EQ(actual(0, 0), expected(0, 0).value());
+            VASSERT_EQ(actual(0, 1), expected(0, 1).value());
+            VASSERT_EQ(actual(0, 2), expected(0, 2).value());
+            VASSERT_EQ(actual(1, 0), expected(1, 0).value());
+            VASSERT_EQ(actual(1, 1), expected(1, 1).value());
+            VASSERT_EQ(actual(1, 2), expected(1, 2).value());
         }
     }
 
-}}}
+}}

@@ -44,11 +44,12 @@ namespace cacophony { namespace platform
 		public engine_base
 	{
 	private:
-		struct engine_branch_impl
+		struct dispatcher
         {
-            engine_branch_impl(engine* engine) noexcept
+			dispatcher(engine* engine) noexcept
                     : _parent(engine)
             {}
+
             DISPATCHED void dispatch_impl()
             {
                 _parent->_engines[branch::capability::value] = std::static_pointer_cast<simd_engine<branch>>(
@@ -84,23 +85,23 @@ namespace cacophony { namespace platform
             }
         };
 
-		using engine_branch = runtime_dispatcher<engine_branch_impl>;
+		using engine_dispatcher = runtime_dispatcher<dispatcher>;
 
-        engine_branch _branch;
+        engine_dispatcher _dispatcher;
 	public:
 		std::string file_name;
 
 		aligned_map<int, std::shared_ptr<engine_base>> _engines;
 
 		engine() noexcept
-            : _branch(this)
+            : _dispatcher(this)
 		{
 			// If AVX2 is not available:
 			// Disable avx1. Current emulated int8 works like shit. E.g doesnt work at all. Or at least correctly. And is very slow.
 			//if(!info.hasAVX2())
 			//	info.setFlag(CAPABILITY_AVX1, false);
 
-            _branch.dispatch_some();
+			_dispatcher.dispatch_some();
 		}
 
 		// Compile from json object
@@ -118,7 +119,7 @@ namespace cacophony { namespace platform
 
 			// For each valid branch
 			// TODO: downgrade when an unsupported feature is selected
-            _branch.dispatch_some(source);
+			_dispatcher.dispatch_some(source);
 		}
 
 		float* run(const vec3<float> &origin)
@@ -136,13 +137,13 @@ namespace cacophony { namespace platform
 		void run(const vec3<float> &origin, float *target)
 		{
 			// TODO: downgrade
-            _branch.dispatch_one(origin, target);
+			_dispatcher.dispatch_one(origin, target);
 		}
 
 		void run(const vec3<float> &origin, int *target)
 		{
 			// TODO: downgrade
-            _branch.dispatch_one(origin, target);
+			_dispatcher.dispatch_one(origin, target);
 		}
 	private:
 	};

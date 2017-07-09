@@ -31,6 +31,7 @@
 #include "math/linear/generic_matrix.hpp"
 #include "math/linear/specialized_matrix.hpp"
 #include "zacc.hpp"
+//#include "random_vector_repository.hpp"
 #include "vectortable.hpp"
 
 namespace cacophony {
@@ -64,7 +65,7 @@ namespace cacophony {
 
 			auto result = gather_randoms(vi).dot(diff) * 2.12f;
 
-			ZTRACE("gradient_3d(" << input << ", " << nearby << ", " << seed << ") => " << result);
+			ZTRACE("noise generator", "gradient_3d(" << input << ", " << nearby << ", " << seed << ") => " << result);
 
 			return result;
 		}
@@ -106,7 +107,7 @@ namespace cacophony {
 
 			auto result = lerp(iy0, iy1, diff.z);
 
-            ZTRACE("gradient_coherent_3d(" << c << ", " << seed << ", " << quality << ") => " << result);
+            ZTRACE("noise generator", "gradient_coherent_3d(" << c << ", " << seed << ", " << quality << ") => " << result);
 
             return result;
 		}
@@ -161,7 +162,7 @@ namespace cacophony {
 
 			auto result = lerp(iy0, iy1, diff.z);
 
-			ZTRACE("value_coherent_3d(" << c << ", " << seed << ", " << quality << ") => " << result);
+			ZTRACE("noise generator", "value_coherent_3d(" << c << ", " << seed << ", " << quality << ") => " << result);
 
 			return result;
 		}
@@ -214,66 +215,25 @@ namespace cacophony {
 				break;
 			}
 
-			ZTRACE("map_coord_diff(" << c << ", " << cube << ", " << quality << ") => " << s);
+			ZTRACE("noise generator", "map_coord_diff(" << c << ", " << cube << ", " << quality << ") => " << s);
 
 			return s;
 		}
 
-
-#if defined(ZACC_SCALAR)
-        // Generic case: use zacc gather functions.
         static vec3<zfloat> gather_randoms(const zint &index)
         {
-            return {
-                random_vectors[index.get_value()],
-                random_vectors[index.get_value() + 1],
-                random_vectors[index.get_value() + 2]
-            };
+            ZTRACE("noise generator", "gather randoms generic");
+            return vec3<zfloat>(
+                    zfloat::gather(zacc::make_raw(random_vectors.data()),		index),
+                    zfloat::gather(zacc::make_raw(random_vectors.data() + 1),	index),
+                    zfloat::gather(zacc::make_raw(random_vectors.data() + 2),	index)
+            );
         }
 
-#elif defined(ZACC_SSE)
-		// For SSE case: No need to gather. Load 4 vectors and transpose them - omitting the last (0 0 0 0) row
-		static vec3<zfloat> gather_randoms(const zint &index)
-		{
-            auto extracted = index.data();
-			//_mm_prefetch
-			auto a0 = random_vectors.data() + extracted[0];//_mm_extract_epi32(index.val, 0);
-			auto a1 = random_vectors.data() + extracted[1];//_mm_extract_epi32(index.val, 1);
-			auto a2 = random_vectors.data() + extracted[2];//_mm_extract_epi32(index.val, 2);
-			auto a3 = random_vectors.data() + extracted[3];//_mm_extract_epi32(index.val, 3);
-
-			//auto vvi = extract(index);
-			//_mm_prefetch()
-			auto rv0 = _mm_load_ps(a0);
-			auto rv1 = _mm_load_ps(a1);
-			auto rv2 = _mm_load_ps(a2);
-			auto rv3 = _mm_load_ps(a3);
-
-			//_MM_TRANSPOSE4_PS(rv0, rv1, rv2, rv3)
-
-			__m128 _Tmp3, _Tmp2, _Tmp1, _Tmp0;
-
-			_Tmp0 = _mm_shuffle_ps((rv0), (rv1), 0x44);
-			_Tmp2 = _mm_shuffle_ps((rv0), (rv1), 0xEE);
-			_Tmp1 = _mm_shuffle_ps((rv2), (rv3), 0x44);
-			_Tmp3 = _mm_shuffle_ps((rv2), (rv3), 0xEE);
-
-			return {
-				_mm_shuffle_ps(_Tmp0, _Tmp1, 0x88), //rv0,
-				_mm_shuffle_ps(_Tmp0, _Tmp1, 0xDD), //rv1,
-				_mm_shuffle_ps(_Tmp2, _Tmp3, 0x88) //rv2,
-			};			
-		}
-#else
-        // Generic case: use zacc gather functions.
-		static vec3<zfloat> gather_randoms(const zint &index)
-		{
-			return vec3<zfloat>(
-				zfloat::gather(zacc::make_raw(random_vectors.data()),		index),
-				zfloat::gather(zacc::make_raw(random_vectors.data() + 1),	index),
-				zfloat::gather(zacc::make_raw(random_vectors.data() + 2),	index)
-				);
-		}
-#endif
+//        DISPATCHED
+//        static vec3<zfloat> gather_randoms(const zint &index)
+//        {
+//            return random_vector_repository<branch>::template impl<generic_gather>::at(index);
+//        }
 	};
 }

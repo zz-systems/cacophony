@@ -22,63 +22,63 @@
 // Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
-#include "../dependencies/gorynych/gorynych/gorynych.h"
-#include "../dependencies/gorynych/gorynych-test/test_extensions.h"
+#include "gtest/gtest.h"
+#include "util/testing/gtest_ext.hpp"
+#include "noise/noisegenerators.hpp"
 
-#include "../solowej/noise/noisegenerators.h"
+#include "system/branch.hpp"
+#include "backend/scalar/types.hpp"
+#include "noise/vectortable.hpp"
 
-namespace zzsystems { namespace solowej { namespace  test {
-            using namespace gorynych;
-            using namespace gorynych::test;
+namespace cacophony { namespace  test {
+        using namespace zacc;
+        using namespace zacc::test;
 
-#define TYPE_PREFIX TEST_PREFIX("gather randoms")
+        //using scalar_branch = zacc::scalar::types<branches::scalar>;
+        using vector_branch = dispatched_branch::types;
 
-
-            TEST_CASE(TYPE_PREFIX" gather", "[gather]")
+        TEST(gather, gather)
+        {
+            for(int i = 0; i < random_vectors.size() / zfloat::dim; i++)
             {
-                for(int i = 0; i < random_vectors<float>::size / dim<vreal>(); i++)
+                std::array<int, zint::dim> indices;
+                for(size_t d = 0; d < zfloat::dim; d++)
                 {
-                    int indices[dim<vreal>()];
-                    for(size_t d = 0; d < dim<vreal>(); d++)
-                    {
-                        indices[d] = i + d;
-                    }
+                    indices[d] = i + d;
+                }
 
-                    auto gathered = vgather(random_vectors<float>::values, vint(indices));
-                    float tested[dim<vreal>()];
-                    extract(gathered, tested);
+                auto actual = zfloat::gather(random_vectors.data(), zint(indices)).data();
 
-                    for(int d = 0; d < dim<vreal>(); d++)
-                    {
-                        REQUIRE(random_vectors<float>::values[i + d] == tested[d]);
-                    }
+                for(int d = 0; d < zfloat::dim; d++)
+                {
+                    ASSERT_EQ(random_vectors[i + d], actual[d]);
                 }
             }
+        }
 
-            TEST_CASE(TYPE_PREFIX" gather randoms", "[gather]")
+        TEST(gather, gather_randoms)
+        {
+            for(int i = 0; i < random_vectors.size() / zfloat::dim; i++)
             {
-                for(int i = 0; i < random_vectors<float>::size / dim<vreal>(); i++)
+                std::array<int, zint::dim> indices;
+                for(size_t d = 0; d < zfloat::dim; d++)
                 {
-                    int indices[dim<vreal>()];
-                    for(size_t d = 0; d < dim<vreal>(); d++)
-                    {
-                        indices[d] = i + d;
-                    }
+                    indices[d] = i + d;
+                }
 
-                    auto ii = vint(indices);
-                    auto gathered = noisegen<SIMD_T>::gather_randoms(ii);
+                auto ii = zint(indices);
+                auto gathered = noisegen<vector_branch>::gather_randoms(ii);
 
-                    float testedx[dim<vreal>()], testedy[dim<vreal>()], testedz[dim<vreal>()];
-                    extract(gathered.x, testedx);
-                    extract(gathered.y, testedy);
-                    extract(gathered.z, testedz);
+                auto actualx = gathered.x.data();
+                auto actualy = gathered.y.data();
+                auto actualz = gathered.z.data();
 
-                    for(int d = 0; d < dim<vreal>(); d++)
-                    {
-                        REQUIRE(random_vectors<float>::values[i + d] == testedx[d]);
-                        REQUIRE(random_vectors<float>::values[i + d + 1] == testedy[d]);
-                        REQUIRE(random_vectors<float>::values[i + d + 2] == testedz[d]);
-                    }
+                for(int d = 0; d < zfloat::dim; d++)
+                {
+                    ASSERT_EQ(random_vectors[i + d], actualx[d]);
+                    ASSERT_EQ(random_vectors[i + d + 1], actualy[d]);
+                    ASSERT_EQ(random_vectors[i + d + 2], actualz[d]);
                 }
             }
-        }}}
+        }
+}}
