@@ -11,6 +11,10 @@ zacc_add_dispatched_library(cacophony
             ${CMAKE_SOURCE_DIR}/dependencies/zacc/src/dllmain.cpp
         )
 
+if(CLANG_CL)
+    target_compile_options(cacophony -Xclang -fno-delayed-template-parsing)
+endif()
+
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin") # requires XQuartz
     include_directories(AFTER "/usr/X11/include")
     link_directories("/usr/X11/lib" "/usr/X11R6/lib")
