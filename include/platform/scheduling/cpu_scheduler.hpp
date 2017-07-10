@@ -49,7 +49,9 @@ namespace cacophony { namespace platform {
 
             zacc::generate<zfloat>(target, target + real_size, [this, &start](auto i)
             {
-                auto point = this->transform(this->build_coords(i));
+                // Somehow the result is shift by one pixel. Compensate by adding 1 to start.
+                auto point = this->transform(this->build_coords(i - 1));
+
                 return this->source(point + start);
             });
         }
@@ -67,7 +69,8 @@ namespace cacophony { namespace platform {
 
             zacc::generate<zint>(target, target + real_size, [this, &start](auto i)
             {
-                auto point = this->transform(this->build_coords(i));
+                // Somehow each strobe is shifted by one pixel. Compensate by building coordinates fpor previous index.
+                auto point = this->transform(this->build_coords(i - 1));
 
                 return static_cast<zint>(this->source(point + start).floor());
             });

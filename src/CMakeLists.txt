@@ -1,5 +1,8 @@
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+#add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
+#link_libraries(-fsanitize=address)
+
 zacc_add_dispatched_library(cacophony
         BRANCHES "${branches}"
         INCLUDES

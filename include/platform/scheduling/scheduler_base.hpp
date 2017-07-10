@@ -102,7 +102,7 @@ namespace cacophony { namespace platform {
 
         inline vec3<zfloat> build_coords(const int index)
         {
-            std::array<int, zfloat::dim> offset;
+            alignas(zfloat::alignment) std::array<int, zfloat::dim> offset;
             std::iota(offset.begin(), offset.end(), 1);
 
             auto idx = static_cast<zint>(offset) + index;

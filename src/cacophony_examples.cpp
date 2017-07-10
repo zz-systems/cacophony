@@ -143,6 +143,7 @@ void run()
         sysinfo->reload();
         //sysinfo->set(capabilities::AVX2, false);
         //sysinfo->set(capabilities::AVX1, false);
+        //sysinfo->set(capabilities::FMA3, false);
 
         //::cacophony_get_engine("examples")->info.feature_flags = flags;
         ::cacophony_run("examples", &t->at(0), 0, 0, 0);
